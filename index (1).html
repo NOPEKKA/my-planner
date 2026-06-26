@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ตารางของฉัน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #FBFAF6;
+    --card: #FFFFFF;
+    --ink: #1B1C2A;
+    --ink-soft: #5A5C6E;
+    --line: #ECE9E1;
+    --line-strong: #DEDAD0;
+    --primary: #0E9488;       /* teal — การกระทำหลัก */
+    --primary-deep: #0B756C;
+    --soon: #F2A024;          /* amber — ใกล้ถึงกำหนด */
+    --over: #DC4646;          /* แดง — เลยกำหนด */
+    --routine: #7C6FE0;       /* ม่วง — กิจวัตร */
+    --routine-soft: #EFEDFB;
+    --teal-soft: #E2F2F0;
+    --amber-soft: #FCEFD6;
+    --over-soft: #FAE3E3;
+    --radius: 16px;
+    --shadow: 0 1px 2px rgba(27,28,42,.04), 0 8px 24px rgba(27,28,42,.05);
+    --font: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --invert-bg: #1B1C2A; --invert-fg: #FFFFFF; --invert-fg-soft: rgba(255,255,255,.7);
+    --nav-bg: rgba(251,250,246,.92);
+    --exam: #E0466E; --exam-soft: #FBE0E8;
+  }
+  [data-theme="dark"] {
+    --paper: #14151B; --card: #1E2029; --ink: #E9E9F0; --ink-soft: #9A9CAD;
+    --line: #2A2C38; --line-strong: #3A3D4C;
+    --primary: #2DD4BF; --primary-deep: #5EEAD4;
+    --soon: #FBBF4D; --over: #F87171; --routine: #A99CF5; --routine-soft: #2A2740;
+    --teal-soft: #15393A; --amber-soft: #3A2E16; --over-soft: #3A1E1E;
+    --exam: #F4789A; --exam-soft: #3A1E28;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.4);
+    --invert-bg: #E9E9F0; --invert-fg: #14151B; --invert-fg-soft: rgba(20,21,27,.6);
+    --nav-bg: rgba(20,21,27,.92);
+  }
+  [data-theme="dark"] .pill.soon { color: var(--soon); }
+  [data-theme="dark"] .pill.online { background: #1E2A45; color: #93B4F5; }
+  [data-theme="dark"] .hint { background: var(--teal-soft); border-color: #1F5552; color: var(--primary-deep); }
+  html { background: var(--paper); transition: background .2s; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--paper); color: var(--ink); font-family: var(--font); }
+  body { -webkit-font-smoothing: antialiased; line-height: 1.45; }
+  button, input, select, textarea { font-family: inherit; font-size: 1rem; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2.5px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  /* ---------- โครงหน้า ---------- */
+  .app { max-width: 720px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column;
+         padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
+  header.top { padding: 22px 20px 8px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+  header.top .when { font-size: .82rem; color: var(--ink-soft); font-weight: 500; letter-spacing: .02em; }
+  header.top h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.01em; }
+  .bell { border: 1px solid var(--line-strong); background: var(--card); width: 44px; height: 44px;
+          border-radius: 12px; display: grid; place-items: center; flex: none; transition: background .15s; }
+  .bell.on { background: var(--teal-soft); border-color: var(--primary); color: var(--primary-deep); }
+  .bell svg { width: 20px; height: 20px; }
+  .hdr-actions { display: flex; gap: 8px; flex: none; }
+  .bell.synced { background: var(--teal-soft); border-color: var(--primary); color: var(--primary-deep); }
+  .sync-note { font-size: .88rem; color: var(--ink-soft); margin: 8px 0 4px; line-height: 1.5; }
+  .sync-ok { background: var(--teal-soft); color: var(--primary-deep); border-radius: 12px; padding: 11px 14px;
+             font-size: .88rem; font-weight: 600; margin: 8px 0; }
+
+  main { flex: 1; padding: 8px 16px 24px; }
+  .view { display: none; animation: fade .25s ease; }
+  .view.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- ส่วนหัวกลุ่ม ---------- */
+  .eyebrow { font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+             color: var(--ink-soft); margin: 22px 4px 10px; display: flex; align-items: center; gap: 8px; }
+  .eyebrow:first-child { margin-top: 6px; }
+  .eyebrow .count { background: var(--line); color: var(--ink-soft); font-size: .7rem; padding: 1px 7px;
+                    border-radius: 20px; letter-spacing: 0; }
+
+  /* ---------- การ์ด ---------- */
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+          box-shadow: var(--shadow); padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start; }
+  .card .accent { width: 4px; align-self: stretch; border-radius: 4px; flex: none; background: var(--line-strong); }
+  .card .body { flex: 1; min-width: 0; }
+  .card .title { font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+  .card .meta { font-size: .85rem; color: var(--ink-soft); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .card .meta b { color: var(--ink); font-weight: 600; }
+  .card.done .title { text-decoration: line-through; color: var(--ink-soft); }
+
+  /* นาฬิกานับถอยหลัง = signature */
+  .pill { font-size: .76rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+          background: var(--teal-soft); color: var(--primary-deep); }
+  .pill.soon { background: var(--amber-soft); color: #9A6206; }
+  .pill.over { background: var(--over-soft); color: var(--over); }
+  .pill.online { background: #E5EDFB; color: #2A5BD7; }
+  .card .meta a.link { color: var(--primary-deep); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--teal-soft); }
+  .card .meta a.link:hover { border-color: var(--primary); }
+
+  /* สวิตช์ออนไลน์ */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+  .toggle-row > span { margin-bottom: 0; }
+  .switch { width: 48px; height: 28px; border-radius: 20px; border: none; background: var(--line-strong);
+            position: relative; transition: background .18s; flex: none; padding: 0; }
+  .switch .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+                  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .18s; }
+  .switch.on { background: var(--primary); } .switch.on .knob { transform: translateX(20px); }
+  .hidden { display: none; }
+
+  /* ปฏิทินรายเดือน */
+  .cal-head { display: flex; align-items: center; gap: 8px; padding: 4px 2px 14px; }
+  .cal-head .mo { font-size: 1.15rem; font-weight: 700; flex: 1; }
+  .cal-head button { border: 1px solid var(--line-strong); background: var(--card); border-radius: 10px;
+                     width: 38px; height: 38px; display: grid; place-items: center; }
+  .cal-head .today-btn { width: auto; padding: 0 14px; font-size: .85rem; font-weight: 600; color: var(--primary-deep); }
+  .cal-head svg { width: 18px; height: 18px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-dow { text-align: center; font-size: .72rem; font-weight: 600; color: var(--ink-soft); padding: 2px 0 6px; }
+  .cal-cell { aspect-ratio: 1; border-radius: 11px; border: 1px solid transparent; display: flex; flex-direction: column;
+              align-items: center; justify-content: flex-start; padding-top: 6px; gap: 3px; background: var(--card);
+              position: relative; transition: .12s; }
+  .cal-cell .dn { font-size: .85rem; font-weight: 600; }
+  .cal-cell.dim { background: transparent; } .cal-cell.dim .dn { color: var(--line-strong); }
+  .cal-cell.today { border-color: var(--primary); } .cal-cell.today .dn { color: var(--primary-deep); }
+  .cal-cell.sel { background: var(--invert-bg); } .cal-cell.sel .dn { color: var(--invert-fg); }
+  .cal-dots { display: flex; gap: 3px; }
+  .cal-dots i { width: 6px; height: 6px; border-radius: 50%; }
+  .cal-dots i.hw { background: var(--soon); } .cal-dots i.ap { background: var(--primary); }
+  .cal-cell.sel .cal-dots i { box-shadow: 0 0 0 1px rgba(255,255,255,.5); }
+  .cal-day-head { font-size: .95rem; font-weight: 700; margin: 20px 4px 8px; display: flex; align-items: center; gap: 10px; }
+  .cal-add { display: flex; gap: 8px; margin: 4px 0 14px; }
+  .cal-add button { flex: 1; border: 1px dashed var(--line-strong); background: var(--card); border-radius: 12px;
+                    padding: 11px; font-size: .85rem; font-weight: 600; color: var(--ink-soft); }
+  .cal-add button:hover { border-color: var(--primary); color: var(--primary-deep); }
+
+  .check { width: 26px; height: 26px; border-radius: 8px; border: 2px solid var(--line-strong);
+           background: var(--card); flex: none; display: grid; place-items: center; transition: .15s; }
+  .check.tick { background: var(--primary); border-color: var(--primary); }
+  .check svg { width: 15px; height: 15px; color: #fff; opacity: 0; transition: .15s; }
+  .check.tick svg { opacity: 1; }
+
+  .row-actions { display: flex; gap: 4px; flex: none; }
+  .icon-btn { width: 32px; height: 32px; border-radius: 9px; border: none; background: transparent;
+              color: var(--ink-soft); display: grid; place-items: center; }
+  .icon-btn:hover { background: var(--line); color: var(--ink); }
+  .icon-btn svg { width: 17px; height: 17px; }
+
+  .empty { text-align: center; color: var(--ink-soft); padding: 38px 20px; }
+  .empty .em { font-size: 1.7rem; margin-bottom: 8px; }
+  .empty p { font-size: .92rem; }
+
+  /* ตารางเรียน — แถบวัน */
+  .daybar { display: flex; gap: 6px; overflow-x: auto; padding: 4px 4px 12px; -webkit-overflow-scrolling: touch; }
+  .daybar button { border: 1px solid var(--line-strong); background: var(--card); border-radius: 11px;
+                   padding: 8px 6px; min-width: 52px; flex: none; text-align: center; transition: .15s; }
+  .daybar button .d { font-size: .7rem; color: var(--ink-soft); }
+  .daybar button .n { font-weight: 700; font-size: 1.05rem; margin-top: 1px; }
+  .daybar button.sel { background: var(--invert-bg); border-color: var(--invert-bg); color: var(--invert-fg); }
+  .daybar button.sel .d { color: var(--invert-fg-soft); }
+  .daybar button.today:not(.sel) { border-color: var(--primary); }
+  .daybar button.today:not(.sel) .n { color: var(--primary-deep); }
+
+  /* ---------- แถบล่าง ---------- */
+  nav.tabs { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg);
+             backdrop-filter: blur(12px); border-top: 1px solid var(--line); display: flex;
+             padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); z-index: 20; }
+  nav.tabs .inner { max-width: 720px; margin: 0 auto; width: 100%; display: flex; }
+  nav.tabs button { flex: 1; background: none; border: none; padding: 8px 4px; display: flex; flex-direction: column;
+                    align-items: center; gap: 3px; color: var(--ink-soft); border-radius: 12px; }
+  nav.tabs button svg { width: 22px; height: 22px; }
+  nav.tabs button span { font-size: .58rem; font-weight: 500; white-space: nowrap; }
+  nav.tabs button { padding: 8px 1px; }
+  nav.tabs button svg { width: 19px; height: 19px; }
+
+  /* วันสอบ */
+  .exam-hero { background: linear-gradient(135deg, var(--exam), #C03460); color: #fff; border-radius: var(--radius);
+               padding: 16px 18px; margin-bottom: 10px; box-shadow: 0 6px 20px rgba(224,70,110,.3); }
+  .exam-hero .lbl { font-size: .74rem; font-weight: 600; opacity: .85; letter-spacing: .08em; text-transform: uppercase; }
+  .exam-hero .sub { font-size: 1.2rem; font-weight: 700; margin-top: 3px; }
+  .exam-hero .cd { font-size: .9rem; font-weight: 600; margin-top: 6px; opacity: .95; }
+  .pill.exam { background: var(--exam-soft); color: var(--exam); }
+  .cal-dots i.ex { background: var(--exam); }
+
+  /* ตารางทั้งสัปดาห์ (กริด) */
+  .view-seg { display: flex; gap: 6px; background: var(--line); padding: 4px; border-radius: 12px; margin: 0 2px 12px; }
+  .view-seg button { flex: 1; border: none; background: none; padding: 9px; border-radius: 9px; font-size: .85rem;
+                     font-weight: 600; color: var(--ink-soft); }
+  .view-seg button.on { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+  .week-wrap { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; margin: 0 -16px; padding: 0 16px; }
+  .weekT, .weekV { display: grid; position: relative; height: 100%; }
+  /* บล็อก + legend ใช้ร่วมกันทั้งสอง orientation */
+  .wkgrid .blk { position: absolute; border-radius: 6px; padding: 2px 5px; overflow: hidden; color: #fff;
+                 font-size: .64rem; line-height: 1.15; box-shadow: 0 1px 2px rgba(0,0,0,.15); display: flex; flex-direction: column; justify-content: center; }
+  .wkgrid .blk b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wkgrid .blk small { opacity: .9; font-size: .58rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wkgrid .blk.has-exam { box-shadow: inset 0 0 0 2px var(--exam), 0 1px 3px rgba(0,0,0,.25); }
+  .wkgrid .blk .exam-tag { background: var(--exam); color: #fff; font-size: .54rem; font-weight: 700;
+                           padding: 0 4px; border-radius: 4px; align-self: flex-start; margin-top: 1px; }
+  /* แบบ A: วันแนวตั้งซ้าย / เวลาแนวนอนบน */
+  .weekT .th { position: relative; }
+  .weekT .th span { position: absolute; transform: translateX(-50%); top: 3px; font-size: .62rem; color: var(--ink-soft); white-space: nowrap; }
+  .weekT .dh { display: flex; align-items: center; justify-content: center; gap: 5px;
+               font-size: .72rem; color: var(--ink-soft); border-top: 1px solid var(--line); }
+  .weekT .dh b { font-size: .92rem; color: var(--ink); font-weight: 700; }
+  .weekT .dh.todayrow, .weekT .dh.todayrow b { color: var(--primary-deep); }
+  .weekT .lane { position: relative; border-top: 1px solid var(--line); border-left: 1px solid var(--line); overflow: hidden; }
+  .weekT .vline { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--line); }
+  /* แบบ B: เวลาแนวตั้งซ้าย / วันแนวนอนบน */
+  .weekV .wh { text-align: center; font-size: .7rem; font-weight: 600; color: var(--ink-soft); line-height: 1.25; padding: 2px 0; }
+  .weekV .wh b { font-size: .9rem; color: var(--ink); font-weight: 700; }
+  .weekV .wh.todaycol, .weekV .wh.todaycol b { color: var(--primary-deep); }
+  .weekV .tc { position: relative; font-size: .62rem; color: var(--ink-soft); }
+  .weekV .tc span { position: absolute; right: 5px; transform: translateY(-50%); white-space: nowrap; }
+  .weekV .col { position: relative; border-left: 1px solid var(--line); overflow: hidden; }
+  .weekV .hline { position: absolute; left: 0; right: 0; border-top: 1px solid var(--line); }
+  .wk-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0 4px 12px; font-size: .76rem; color: var(--ink-soft); }
+  .wk-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .wk-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+  /* โปรเจกต์ */
+  .proj-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+               box-shadow: var(--shadow); padding: 15px 16px; margin-bottom: 10px; cursor: pointer; transition: transform .1s; }
+  .proj-card:active { transform: scale(.99); }
+  .proj-card .ph { display: flex; align-items: center; gap: 10px; }
+  .proj-card .pt { font-weight: 600; font-size: 1.05rem; flex: 1; }
+  .pstat { font-size: .74rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .pstat.idea { background: var(--routine-soft); color: var(--routine); }
+  .pstat.doing { background: var(--amber-soft); color: var(--soon); }
+  .pstat.done { background: var(--teal-soft); color: var(--primary-deep); }
+  .proj-card .pnote { font-size: .88rem; color: var(--ink-soft); margin-top: 6px; }
+  .proj-card .plast { font-size: .82rem; color: var(--ink-soft); margin-top: 10px; padding-top: 10px;
+                      border-top: 1px dashed var(--line-strong); display: flex; gap: 7px; }
+  .proj-card .plast b { color: var(--primary-deep); font-weight: 600; flex: none; }
+  /* ไทม์ไลน์อัปเดตในแผ่นโปรเจกต์ */
+  .log { margin-top: 4px; }
+  .log-item { display: flex; gap: 12px; padding-bottom: 16px; position: relative; }
+  .log-item::before { content: ''; position: absolute; left: 5px; top: 16px; bottom: -2px; width: 2px; background: var(--line); }
+  .log-item:last-child::before { display: none; }
+  .log-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--primary); flex: none; margin-top: 3px; z-index: 1; }
+  .log-body { flex: 1; }
+  .log-date { font-size: .74rem; color: var(--ink-soft); font-weight: 500; }
+  .log-text { font-size: .92rem; margin-top: 2px; white-space: pre-wrap; }
+  .log-del { background: none; border: none; color: var(--ink-soft); font-size: .74rem; padding: 2px; }
+  .add-log { display: flex; gap: 8px; margin: 8px 0 18px; }
+  .add-log input { flex: 1; border: 1px solid var(--line-strong); background: var(--card); border-radius: 12px; padding: 12px 14px; }
+  .add-log button { background: var(--primary); color: #fff; border: none; border-radius: 12px; padding: 0 18px; font-weight: 600; }
+  nav.tabs button.active { color: var(--primary-deep); }
+  nav.tabs button.active span { font-weight: 600; }
+
+  /* ---------- ปุ่มเพิ่ม ---------- */
+  .fab { position: fixed; right: 18px; bottom: calc(86px + env(safe-area-inset-bottom)); z-index: 25;
+         width: 56px; height: 56px; border-radius: 18px; background: var(--primary); color: #fff; border: none;
+         box-shadow: 0 6px 20px rgba(14,148,136,.4); display: grid; place-items: center; transition: transform .12s; }
+  .fab:active { transform: scale(.92); }
+  .fab svg { width: 26px; height: 26px; }
+  @media (min-width: 721px) { .fab { right: calc(50% - 360px + 18px); } }
+
+  /* ---------- แผ่นกรอกข้อมูล ---------- */
+  .scrim { position: fixed; inset: 0; background: rgba(27,28,42,.4); z-index: 40; opacity: 0;
+           pointer-events: none; transition: opacity .2s; }
+  .scrim.show { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--paper);
+           border-radius: 22px 22px 0 0; max-width: 720px; margin: 0 auto; transform: translateY(102%);
+           transition: transform .26s cubic-bezier(.32,.72,0,1); max-height: 92dvh; overflow-y: auto;
+           padding: 8px 20px calc(24px + env(safe-area-inset-bottom)); }
+  .sheet.show { transform: none; }
+  .grab { width: 40px; height: 4px; background: var(--line-strong); border-radius: 4px; margin: 8px auto 14px; }
+  .sheet h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+  .seg { display: flex; gap: 6px; background: var(--line); padding: 4px; border-radius: 13px; margin: 14px 0 4px; }
+  .seg button { flex: 1; border: none; background: none; padding: 9px 3px; border-radius: 10px; font-size: .76rem;
+                font-weight: 500; color: var(--ink-soft); white-space: nowrap; }
+  .seg button.on { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: var(--shadow); }
+  label.fld { display: block; margin-top: 14px; }
+  label.fld > span { font-size: .8rem; font-weight: 600; color: var(--ink-soft); display: block; margin-bottom: 6px; }
+  .inp { width: 100%; border: 1px solid var(--line-strong); background: var(--card); border-radius: 12px;
+         padding: 12px 14px; font-size: 1rem; transition: border-color .15s; }
+  .inp:focus { border-color: var(--primary); outline: none; }
+  textarea.inp { resize: vertical; min-height: 64px; }
+  .two { display: flex; gap: 10px; } .two > * { flex: 1; }
+  .daypick { display: flex; flex-wrap: wrap; gap: 6px; }
+  .daypick button { border: 1px solid var(--line-strong); background: var(--card); border-radius: 10px;
+                    width: 42px; height: 40px; font-weight: 600; font-size: .82rem; color: var(--ink-soft); }
+  .daypick button.on { background: var(--routine); border-color: var(--routine); color: #fff; }
+  .swatch { display: flex; gap: 8px; margin-top: 6px; }
+  .swatch button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--card);
+                   box-shadow: 0 0 0 1px var(--line-strong); }
+  .swatch button.on { box-shadow: 0 0 0 2px var(--ink); }
+  .save { width: 100%; margin-top: 22px; background: var(--primary); color: #fff; border: none;
+          padding: 15px; border-radius: 14px; font-weight: 600; font-size: 1rem; transition: background .15s; }
+  .save:hover { background: var(--primary-deep); }
+  .del-btn { width: 100%; margin-top: 10px; background: none; border: none; color: var(--over);
+             font-weight: 500; font-size: .9rem; padding: 8px; }
+
+  /* แจ้งเตือนในแอป (toast) */
+  .toast-wrap { position: fixed; top: env(safe-area-inset-top); left: 0; right: 0; z-index: 60;
+                display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px; pointer-events: none; }
+  .toast { background: var(--invert-bg); color: var(--invert-fg); padding: 12px 18px; border-radius: 14px; font-size: .9rem;
+           box-shadow: 0 8px 30px rgba(0,0,0,.25); max-width: 420px; width: 100%; display: flex; gap: 10px;
+           align-items: center; animation: drop .3s cubic-bezier(.32,.72,0,1); }
+  .toast .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--soon); flex: none; }
+  @keyframes drop { from { transform: translateY(-120%); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .hint { background: var(--teal-soft); border: 1px solid #BEE3DF; color: var(--primary-deep);
+          border-radius: 14px; padding: 13px 15px; font-size: .85rem; margin: 6px 4px 4px;
+          display: flex; gap: 10px; align-items: center; }
+  .hint button { margin-left: auto; background: var(--primary); color: #fff; border: none; padding: 7px 14px;
+                 border-radius: 10px; font-weight: 600; font-size: .82rem; flex: none; }
+  .hint.dismissed { display: none; }
+
+  /* กล่องยืนยัน */
+  #dlgScrim { z-index: 70; }
+  .dialog { position: fixed; z-index: 80; left: 50%; top: 50%; transform: translate(-50%, -46%) scale(.96);
+            width: calc(100% - 56px); max-width: 340px; background: var(--card); border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(27,28,42,.3); padding: 22px 20px 16px; opacity: 0; pointer-events: none;
+            transition: opacity .18s, transform .18s; }
+  .dialog.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+  .dialog p { font-size: 1rem; font-weight: 500; text-align: center; margin-bottom: 18px; line-height: 1.5; }
+  .dlg-actions { display: flex; gap: 10px; }
+  .dlg-actions button { flex: 1; padding: 13px; border-radius: 12px; font-weight: 600; font-size: .95rem; border: none; }
+  .dlg-cancel { background: var(--line); color: var(--ink); }
+  .dlg-ok { background: var(--over); color: #fff; }
+</style>
+<script>try{if(localStorage.getItem('planner.theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="when" id="todayLabel"></div>
+      <h1 id="viewTitle">วันนี้</h1>
+    </div>
+    <div class="hdr-actions">
+      <button class="bell" id="themeBtn" title="สลับโหมดมืด" aria-label="สลับโหมดมืด">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button class="bell" id="syncBtn" title="ซิงค์ข้ามเครื่อง" aria-label="ซิงค์ข้ามเครื่อง">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 .5-9 6 6 0 0 0-11.6-1.5A4 4 0 0 0 6 19"/><path d="M12 12v6m0 0-2.2-2.2M12 18l2.2-2.2"/></svg>
+      </button>
+      <button class="bell" id="bellBtn" title="เปิดการแจ้งเตือน" aria-label="เปิดการแจ้งเตือน">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- วันนี้ -->
+    <section class="view active" id="view-today">
+      <div class="hint" id="notifHint">
+        <span>เปิดการแจ้งเตือน เพื่อให้เด้งเตือนก่อนถึงกำหนด</span>
+        <button id="enableNotif">เปิด</button>
+      </div>
+      <div id="todayContent"></div>
+    </section>
+
+    <!-- ปฏิทิน -->
+    <section class="view" id="view-cal"><div id="calContent"></div></section>
+
+    <!-- สัปดาห์นี้ (ตารางรวม) -->
+    <section class="view" id="view-week"><div id="weekContent"></div></section>
+
+    <!-- ตารางเรียน -->
+    <section class="view" id="view-class">
+      <div id="classContent"></div>
+    </section>
+
+    <!-- การบ้าน -->
+    <section class="view" id="view-hw"><div id="hwContent"></div></section>
+
+    <!-- นัดหมาย -->
+    <section class="view" id="view-appt"><div id="apptContent"></div></section>
+
+    <!-- โปรเจกต์ -->
+    <section class="view" id="view-proj"><div id="projContent"></div></section>
+  </main>
+</div>
+
+<button class="fab" id="fab" aria-label="เพิ่มรายการ">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<nav class="tabs"><div class="inner" id="tabBar"></div></nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+
+<div class="scrim" id="dlgScrim"></div>
+<div class="dialog" id="dialog" role="alertdialog" aria-modal="true">
+  <p id="dlgMsg"></p>
+  <div class="dlg-actions">
+    <button id="dlgNo" class="dlg-cancel">ยกเลิก</button>
+    <button id="dlgYes" class="dlg-ok">ลบ</button>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Firebase (สำหรับซิงค์ข้ามเครื่อง) -->
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* =====================================================================
+   ชั้นเก็บข้อมูล (STORE)
+   ---------------------------------------------------------------------
+   ตอนนี้เก็บใน localStorage. เวลาจะต่อ cloud sync (Firebase/Supabase/
+   backend ของ Weber) ให้แก้แค่ 4 ฟังก์ชันในบล็อกนี้ ส่วน UI ไม่ต้องแตะ
+   ===================================================================== */
+/* ===== ① ตั้งค่า Firebase: วาง config ของโปรเจกต์คุณตรงนี้ (null = ใช้แบบเครื่องเดียว) ===== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCBelgwSgNH6GCNTWcexbzIj9M1l5DvUxY",
+  authDomain: "weber-schedule.firebaseapp.com",
+  projectId: "weber-schedule",
+  storageBucket: "weber-schedule.firebasestorage.app",
+  messagingSenderId: "790411034540",
+  appId: "1:790411034540:web:a6b46e2a2b968ae78c4409"
+};
+/* ตัวอย่างเมื่อใส่แล้ว:
+const FIREBASE_CONFIG = {
+  apiKey: "AIza...", authDomain: "xxx.firebaseapp.com", projectId: "xxx",
+  storageBucket: "xxx.appspot.com", messagingSenderId: "123", appId: "1:123:web:abc"
+};
+*/
+
+const COLLS = ['classes','routines','homework','appts','exams','projects'];
+const SYNC_CODE_KEY = 'planner.syncCode';
+const getSyncCode = () => localStorage.getItem(SYNC_CODE_KEY) || '';
+const setSyncCode = (c) => localStorage.setItem(SYNC_CODE_KEY, c);
+
+/* ---------- เก็บในเครื่อง (ค่าเริ่มต้น / ใช้ออฟไลน์) ---------- */
+const LocalStore = (() => {
+  const KEY = 'planner.v1';
+  const listeners = new Set();
+  let data = load();
+  function load() { try { return { ...base(), ...(JSON.parse(localStorage.getItem(KEY)) || {}) }; } catch { return base(); } }
+  function base() { return { classes: [], routines: [], homework: [], appts: [], exams: [], projects: [] }; }
+  function persist() { localStorage.setItem(KEY, JSON.stringify(data)); emit(); }
+  function emit() { listeners.forEach(fn => fn(data)); }
+  return {
+    all: (c) => data[c] || [],
+    subscribe(fn) { listeners.add(fn); fn(data); return () => listeners.delete(fn); },
+    add(c, item) { if (!data[c]) data[c] = []; item.id = item.id || crypto.randomUUID(); data[c].push(item); persist(); return item.id; },
+    update(c, id, patch) { const i = data[c].find(x => x.id === id); if (i) Object.assign(i, patch); persist(); },
+    remove(c, id) { data[c] = data[c].filter(x => x.id !== id); persist(); },
+  };
+})();
+
+/* ---------- เริ่ม Firebase (ถ้ามี config) ---------- */
+let fbReady = false, _db = null;
+if (FIREBASE_CONFIG && window.firebase) {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    _db = firebase.firestore();
+    _db.enablePersistence({ synchronizeTabs: true }).catch(()=>{}); // ใช้งานต่อได้ตอนออฟไลน์ แล้วค่อยซิงค์
+    fbReady = true;
+  } catch (e) { console.error('เริ่ม Firebase ไม่ได้:', e); }
+}
+
+/* ---------- เก็บบนคลาวด์ (Firestore) — แมป API เดียวกับ LocalStore ---------- */
+function makeCloudStore(code) {
+  const space = _db.collection('spaces').doc(code);
+  const cache = { classes:[], routines:[], homework:[], appts:[], exams:[], projects:[] };
+  const listeners = new Set();
+  const emit = () => listeners.forEach(fn => fn(cache));
+  COLLS.forEach(c => space.collection(c).onSnapshot(
+    snap => { cache[c] = snap.docs.map(d => ({ id:d.id, ...d.data() })); emit(); },
+    err => console.warn('ซิงค์ผิดพลาด', c, err)
+  ));
+  return {
+    all: c => cache[c] || [],
+    subscribe(fn){ listeners.add(fn); fn(cache); return () => listeners.delete(fn); },
+    add(c, item){ item.id = item.id || crypto.randomUUID(); space.collection(c).doc(item.id).set(item); return item.id; },
+    update(c, id, patch){ space.collection(c).doc(id).set(patch, { merge:true }); },
+    remove(c, id){ space.collection(c).doc(id).delete(); },
+    __cloud: true, __code: code,
+  };
+}
+
+/* ---------- สร้าง/เข้าร่วมพื้นที่ซิงค์ ---------- */
+async function createSpace() {
+  if (!fbReady) return;
+  const code = crypto.randomUUID();
+  const space = _db.collection('spaces').doc(code);
+  for (const c of COLLS) for (const item of LocalStore.all(c)) await space.collection(c).doc(item.id).set(item);
+  setSyncCode(code); location.reload();
+}
+function joinSpace(code) {
+  code = (code||'').trim();
+  if (code.length < 8) return warn('รหัสไม่ถูกต้อง ลองคัดลอกใหม่จากเครื่องหลัก');
+  setSyncCode(code); location.reload();
+}
+
+/* ---------- เลือกว่าจะใช้ที่เก็บไหน ---------- */
+let Store;
+if (fbReady && getSyncCode()) { try { Store = makeCloudStore(getSyncCode()); } catch(e){ console.error(e); Store = LocalStore; } }
+else Store = LocalStore;
+
+/* ===================== ตัวช่วยเรื่องเวลา ===================== */
+const TH_DAY = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const TH_DAY_S = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const TH_MON_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const ORDER = [1,2,3,4,5,6,0]; // แสดงจันทร์ก่อน
+
+function fmtDate(d) { return `${TH_DAY[d.getDay()]} ${d.getDate()} ${TH_MON[d.getMonth()]}`; }
+function fmtTime(d) { return d.toTimeString().slice(0,5); }
+function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
+
+function countdown(target) {
+  const ms = new Date(target) - Date.now();
+  const past = ms < 0, a = Math.abs(ms);
+  const min = Math.floor(a/60000), hr = Math.floor(min/60), day = Math.floor(hr/24);
+  let txt;
+  if (day >= 1) txt = `${day} วัน`;
+  else if (hr >= 1) txt = `${hr} ชม. ${min%60} น.`;
+  else txt = `${min} นาที`;
+  let cls = 'pill';
+  if (past) cls = 'pill over';
+  else if (ms < 24*3600000) cls = 'pill soon';
+  return { txt: past ? `เลย ${txt}` : `อีก ${txt}`, cls, ms };
+}
+
+/* ===================== เรนเดอร์รายการ ===================== */
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+
+const ICON = {
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>',
+  del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  tick: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+};
+
+function empty(emoji, msg) {
+  const e = el('div','empty'); e.innerHTML = `<div class="em">${emoji}</div><p>${msg}</p>`; return e;
+}
+
+function actions(coll, item) {
+  const w = el('div','row-actions');
+  const e = el('button','icon-btn', ICON.edit); e.onclick = () => openSheet(coll, item);
+  const d = el('button','icon-btn', ICON.del); d.onclick = () => askConfirm('ลบรายการนี้?', 'ลบ', () => Store.remove(coll, item.id));
+  w.append(e, d); return w;
+}
+
+/* ---------- วันนี้ (แดชบอร์ด) ---------- */
+function renderToday() {
+  const box = $('#todayContent'); box.innerHTML = '';
+  const now = new Date(), dow = now.getDay();
+
+  if (fbReady && !getSyncCode()) {
+    const b = el('div','hint');
+    b.innerHTML = `<span>ตั้งค่าซิงค์ให้ข้อมูลเด้งครบทุกเครื่อง</span>`;
+    const btn = el('button', '', 'ตั้งค่า'); btn.onclick = openSyncSheet; b.appendChild(btn);
+    box.appendChild(b);
+  }
+
+  // วันสอบที่ใกล้ถึง (เด่นบนสุด)
+  const exNow = Date.now();
+  Store.all('exams').filter(e => new Date(e.at) - exNow > -6*3600000)
+    .sort((a,b)=>new Date(a.at)-new Date(b.at)).slice(0,2)
+    .forEach(e => box.appendChild(examHero(e)));
+
+  // คาบเรียนวันนี้
+  const classes = Store.all('classes').filter(c => c.day === dow).sort((a,b)=>a.start.localeCompare(b.start));
+  if (classes.length) {
+    box.appendChild(eyebrow('คาบเรียนวันนี้', classes.length));
+    classes.forEach(c => box.appendChild(classCard(c, true)));
+  }
+
+  // กิจวัตรวันนี้
+  const routines = Store.all('routines').filter(r => r.days.includes(dow)).sort((a,b)=>a.time.localeCompare(b.time));
+  if (routines.length) {
+    box.appendChild(eyebrow('กิจวัตรวันนี้', routines.length));
+    routines.forEach(r => box.appendChild(routineCard(r)));
+  }
+
+  // ใกล้ถึงกำหนด: การบ้าน + นัด รวมกัน เรียงตามเวลา
+  const up = [];
+  Store.all('homework').filter(h=>!h.done).forEach(h => up.push({t:'hw', at:h.dueAt, item:h}));
+  Store.all('appts').forEach(a => up.push({t:'appt', at:a.at, item:a}));
+  up.sort((x,y)=> new Date(x.at) - new Date(y.at));
+  const future = up.filter(u => new Date(u.at) - now > -12*3600000); // เก็บที่เพิ่งเลยภายใน 12 ชม.ด้วย
+
+  box.appendChild(eyebrow('ใกล้ถึงกำหนด', future.length));
+  if (!future.length) box.appendChild(empty('🌤️','ตอนนี้ยังไม่มีอะไรใกล้ถึงกำหนด สบายๆ'));
+  future.slice(0,12).forEach(u => box.appendChild(u.t==='hw' ? hwCard(u.item) : apptCard(u.item)));
+}
+
+function eyebrow(text, count) {
+  const e = el('div','eyebrow', text);
+  if (count != null) e.appendChild(el('span','count', String(count)));
+  return e;
+}
+
+/* ---------- การ์ดแต่ละชนิด ---------- */
+function classCard(c, compact) {
+  const card = el('div','card');
+  card.append(accent(c.color || 'var(--primary)'));
+  const b = el('div','body');
+  const t = el('div','title', esc(c.subject));
+  if (c.online) t.appendChild(el('span','pill online','ออนไลน์'));
+  b.appendChild(t);
+  const m = el('div','meta');
+  m.innerHTML = `<span><b>${c.start}–${c.end}</b></span>` +
+                (c.online ? onlineMeta(c, 'เข้าเรียน') : (c.room ? `<span>📍 ${esc(c.room)}</span>` : '')) +
+                (compact ? '' : `<span>${TH_DAY[c.day]}</span>`);
+  b.appendChild(m); card.appendChild(b);
+  if (!compact) card.appendChild(actions('classes', c));
+  return card;
+}
+
+function routineCard(r) {
+  const card = el('div','card');
+  card.append(accent('var(--routine)'));
+  const b = el('div','body');
+  b.appendChild(el('div','title', esc(r.title)));
+  const days = r.days.length === 7 ? 'ทุกวัน' : r.days.slice().sort((a,b)=>ORDER.indexOf(a)-ORDER.indexOf(b)).map(d=>TH_DAY_S[d]).join(' ');
+  b.appendChild(el('div','meta', `<span><b>${r.time}</b></span><span>${days}</span>`));
+  card.appendChild(b); card.appendChild(actions('routines', r));
+  return card;
+}
+
+function hwCard(h) {
+  const card = el('div','card' + (h.done ? ' done' : ''));
+  const chk = el('button','check' + (h.done ? ' tick' : ''), ICON.tick);
+  chk.onclick = () => Store.update('homework', h.id, { done: !h.done });
+  card.appendChild(chk);
+  const b = el('div','body');
+  const t = el('div','title', esc(h.title));
+  b.appendChild(t);
+  const m = el('div','meta');
+  const d = new Date(h.dueAt);
+  m.innerHTML = (h.subject ? `<span><b>${esc(h.subject)}</b></span>` : '') +
+                `<span>ส่ง ${fmtDate(d)} ${fmtTime(d)}</span>` + (h.note ? `<span>📝 ${esc(h.note)}</span>` : '');
+  b.appendChild(m); card.appendChild(b);
+  if (!h.done) { const cd = countdown(h.dueAt); t.appendChild(el('span', cd.cls, cd.txt)); }
+  card.appendChild(actions('homework', h));
+  return card;
+}
+
+function apptCard(a) {
+  const card = el('div','card');
+  card.append(accent('var(--soon)'));
+  const b = el('div','body');
+  const t = el('div','title', esc(a.title));
+  if (a.online) t.appendChild(el('span','pill online','ออนไลน์'));
+  b.appendChild(t);
+  const d = new Date(a.at);
+  const m = el('div','meta');
+  m.innerHTML = `<span><b>${fmtDate(d)} ${fmtTime(d)}</b></span>` +
+                (a.online ? onlineMeta(a, 'เข้าห้อง') : (a.place ? `<span>📍 ${esc(a.place)}</span>` : '')) +
+                (a.note ? `<span>📝 ${esc(a.note)}</span>` : '');
+  b.appendChild(m); card.appendChild(b);
+  const cd = countdown(a.at); t.appendChild(el('span', cd.cls, cd.txt));
+  card.appendChild(actions('appts', a));
+  return card;
+}
+
+function accent(color){ const a = el('div','accent'); a.style.background = color; return a; }
+function esc(s){ return (s||'').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+function examHero(e){
+  const d = new Date(e.at), cd = countdown(e.at);
+  const w = el('div','exam-hero'); w.style.cursor = 'pointer';
+  w.innerHTML = `<div class="lbl">📝 ${cd.ms<0?'สอบไปแล้ว':'สอบที่ใกล้ถึง'}</div>
+                 <div class="sub">${esc(e.subject)}</div>
+                 <div class="cd">${fmtDate(d)} ${fmtTime(d)} · ${cd.txt}${e.room?' · '+esc(e.room):''}</div>`;
+  w.onclick = () => openSheet('exams', e);
+  return w;
+}
+function examCard(e){
+  const card = el('div','card'); card.append(accent('var(--exam)'));
+  const b = el('div','body'); const t = el('div','title', esc(e.subject));
+  t.appendChild(el('span','pill exam','สอบ')); b.appendChild(t);
+  const d = new Date(e.at); const m = el('div','meta');
+  m.innerHTML = `<span><b>${fmtDate(d)} ${fmtTime(d)}</b></span>` + (e.room?`<span>📍 ${esc(e.room)}</span>`:'') + (e.note?`<span>📝 ${esc(e.note)}</span>`:'');
+  b.appendChild(m); card.appendChild(b);
+  const cd = countdown(e.at); t.appendChild(el('span', cd.cls, cd.txt));
+  card.appendChild(actions('exams', e));
+  return card;
+}
+function safeUrl(u){ u=(u||'').trim(); if(!u||/^javascript:/i.test(u)) return ''; return /^https?:\/\//i.test(u)?u:'https://'+u; }
+function onlineMeta(item, label){
+  const url = safeUrl(item.link);
+  if (url) return `<span><a class="link" href="${esc(url)}" target="_blank" rel="noopener">🔗 ${label}</a></span>`;
+  return `<span>🔗 ออนไลน์</span>`;
+}
+
+/* ---------- ตารางเรียน (เลือกวัน / ทั้งสัปดาห์) ---------- */
+let selDay = new Date().getDay();
+let classView = 'day'; // 'day' | 'week'
+function renderDayBar() {
+  const bar = $('#dayBar'); bar.innerHTML = ''; const today = new Date().getDay();
+  ORDER.forEach(d => {
+    const btn = el('button', (d===selDay?'sel ':'') + (d===today?'today':''));
+    btn.innerHTML = `<div class="d">${TH_DAY_S[d]}</div><div class="n">${Store.all('classes').filter(c=>c.day===d).length||''}</div>`;
+    btn.onclick = () => { selDay = d; renderDayBar(); renderClassList(); };
+    bar.appendChild(btn);
+  });
+}
+function renderClass() {
+  const box = $('#classContent'); box.innerHTML = '';
+  const seg = el('div','view-seg');
+  ['day','week'].forEach(v => {
+    const b = el('button', v===classView?'on':'', v==='day'?'รายวัน':'ทั้งสัปดาห์');
+    b.onclick = () => { classView = v; renderClass(); };
+    seg.appendChild(b);
+  });
+  box.appendChild(seg);
+  if (classView === 'day') {
+    const db = el('div','daybar'); db.id = 'dayBar'; box.appendChild(db);
+    const list = el('div'); list.id = 'classListBox'; box.appendChild(list);
+    renderDayBar(); renderClassList();
+  } else {
+    box.appendChild(buildWeekGrid(['classes'], 285, false, renderClass));
+  }
+}
+function renderClassList() {
+  const box = $('#classListBox'); if (!box) return; box.innerHTML = '';
+  const list = Store.all('classes').filter(c=>c.day===selDay).sort((a,b)=>a.start.localeCompare(b.start));
+  if (!list.length) { box.appendChild(empty('📚', `ยังไม่มีคาบเรียนวัน${TH_DAY[selDay]} — กดปุ่ม + เพื่อเพิ่ม`)); return; }
+  list.forEach(c => box.appendChild(classCard(c, false)));
+}
+function mondayOf(d){ const x = startOfDay(d); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return x; }
+let weekStart = mondayOf(new Date());
+let weekOrient = 'dayRows'; // 'dayRows' = วันซ้าย/เวลาบน | 'timeRows' = เวลาซ้าย/วันบน
+const SWAP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4"/><path d="M20 7H4"/><path d="M8 21l-4-4 4-4"/><path d="M4 17h16"/></svg>';
+
+function weekItemsFor(date, types){
+  const dow = date.getDay();
+  const classes = types.includes('classes') ? Store.all('classes').filter(c=>c.day===dow).map(c => ({
+    s:toH(c.start), e:toH(c.end), title:esc(c.subject),
+    sub:c.start + (c.online?' • ออนไลน์':(c.room?' • '+esc(c.room):'')), color:c.color||'var(--primary)', data:['classes',c] })) : [];
+  const routines = types.includes('routines') ? Store.all('routines').filter(r=>r.days.includes(dow)).map(r => {
+    const s = toH(r.time); return { s, e:s+0.75, title:'🔁 '+esc(r.title), sub:r.time, color:'var(--routine)', data:['routines',r] }; }) : [];
+  const appts = types.includes('appts') ? Store.all('appts').filter(a=>sameYMD(new Date(a.at),date)).map(a => {
+    const d=new Date(a.at), s=d.getHours()+d.getMinutes()/60;
+    return { s, e:s+1, title:'📌 '+esc(a.title), sub:fmtTime(d), color:'var(--soon)', data:['appts',a] }; }) : [];
+  let exams = types.includes('exams') ? Store.all('exams').filter(e=>sameYMD(new Date(e.at),date)).map(e => {
+    const d=new Date(e.at), s=d.getHours()+d.getMinutes()/60;
+    return { s, e:s+1.5, title:'📝 '+esc(e.subject), sub:fmtTime(d), color:'var(--exam)', data:['exams',e] }; }) : [];
+
+  // ถ้าสอบชนเวลากับคาบเรียน → มาร์กคาบเรียนว่ามีสอบ แล้วซ่อนบล็อกสอบ (ไม่ให้ทับซ้ำ)
+  if (classes.length && exams.length) {
+    exams = exams.filter(ex => {
+      const hit = classes.filter(c => ex.s < c.e && ex.e > c.s);
+      if (hit.length) { hit.forEach(c => { c.exam = true; c.examData = ex.data; }); return false; }
+      return true;
+    });
+  }
+  return [...classes, ...routines, ...appts, ...exams];
+}
+const WK_LEG = { classes:['var(--primary)','เรียน'], routines:['var(--routine)','กิจวัตร'], appts:['var(--soon)','นัด'], exams:['var(--exam)','สอบ'] };
+// จัดเลนกันบล็อกที่เวลาทับกัน (แยกตามกลุ่มที่ทับกันจริง)
+function layoutDay(items){
+  const sorted = items.slice().sort((a,b)=>a.s-b.s||a.e-b.e);
+  let cluster=[], clusterEnd=-1;
+  const flush=()=>{ const lanes=[]; cluster.forEach(it=>{ let i=0; for(;i<lanes.length;i++){ if(it.s>=lanes[i]-1e-6){lanes[i]=it.e;it.lane=i;break;} } if(i===lanes.length){lanes.push(it.e);it.lane=i;} }); const n=lanes.length; cluster.forEach(it=>it.lanes=n); cluster=[]; };
+  sorted.forEach(it=>{ if(cluster.length && it.s>=clusterEnd-1e-6){ flush(); clusterEnd=-1; } cluster.push(it); clusterEnd=Math.max(clusterEnd,it.e); });
+  flush(); return sorted;
+}
+
+function buildWeekGrid(types, extraChrome, showLegend, rerender) {
+  const container = el('div');
+  const days = []; for (let i=0;i<7;i++){ const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); days.push(d); }
+  const perDay = days.map(d => layoutDay(weekItemsFor(d, types)));
+
+  // ช่วงเวลา: อิงจากรายการจริง (ตัดช่องว่างหัวท้าย)
+  let minH=24, maxH=0;
+  perDay.forEach(items => items.forEach(it => { minH=Math.min(minH,Math.floor(it.s)); maxH=Math.max(maxH,Math.ceil(it.e)); }));
+  if (minH>=maxH){ minH=8; maxH=16; }
+  const span = maxH-minH; // ช่วงชั่วโมงทั้งหมด (ตัวหารสำหรับคำนวณ %)
+
+  // หัว: นำทางสัปดาห์ + ปุ่มสลับแกน
+  const head = el('div','cal-head');
+  const prev=el('button','',ARROW_L), next=el('button','',ARROW_R);
+  prev.onclick=()=>{ weekStart=new Date(weekStart); weekStart.setDate(weekStart.getDate()-7); rerender(); };
+  next.onclick=()=>{ weekStart=new Date(weekStart); weekStart.setDate(weekStart.getDate()+7); rerender(); };
+  const a=days[0], b=days[6];
+  const range = a.getMonth()===b.getMonth() ? `${a.getDate()}–${b.getDate()} ${TH_MON[b.getMonth()]}`
+                : `${a.getDate()} ${TH_MON[a.getMonth()]} – ${b.getDate()} ${TH_MON[b.getMonth()]}`;
+  const swap=el('button','', SWAP_ICON); swap.title='สลับแกน เวลา/วัน';
+  swap.onclick=()=>{ weekOrient = weekOrient==='dayRows' ? 'timeRows' : 'dayRows'; rerender(); };
+  const tb=el('button','','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/></svg>'); tb.title='สัปดาห์นี้'; tb.onclick=()=>{ weekStart=mondayOf(new Date()); rerender(); };
+  head.append(prev, el('div','mo', range), next, swap, tb);
+  container.appendChild(head);
+
+  if (showLegend) {
+    const legend = el('div','wk-legend');
+    legend.innerHTML = types.map(t=>{ const [c,l]=WK_LEG[t]; return `<span><i style="background:${c}"></i>${l}</span>`; }).join('');
+    container.appendChild(legend);
+  }
+
+  const wrap = el('div','week-wrap');
+  wrap.style.height = `calc(100dvh - ${extraChrome}px)`;
+  wrap.style.minHeight = '280px';
+  const today = new Date();
+  let any=false;
+
+  const blockHTML = (it) => `<b>${it.title}</b><small>${it.sub}</small>` + (it.exam ? `<span class="exam-tag">📝 มีสอบ</span>` : '');
+  const wireBlock = (blk, it) => {
+    blk.style.background = it.color;
+    blk.innerHTML = blockHTML(it);
+    if (it.exam) { blk.classList.add('has-exam'); blk.onclick=()=>openSheet('exams', it.examData[1]); }
+    else blk.onclick=()=>openSheet(it.data[0], it.data[1]);
+  };
+
+  let grid;
+  if (weekOrient === 'dayRows') {
+    // วันแนวตั้งซ้าย / เวลาแนวนอนบน
+    wrap.style.overflowX = 'hidden';
+    grid = el('div','weekT wkgrid');
+    grid.style.gridTemplateColumns = `52px 1fr`;
+    grid.style.gridTemplateRows = `20px repeat(7, 1fr)`;
+    const corner=el('div'); corner.style.gridArea='1 / 1'; grid.appendChild(corner);
+    const th=el('div','th'); th.style.gridArea='1 / 2';
+    for (let h=minH; h<=maxH; h++){ const s=el('span','',`${h}:00`); s.style.left=((h-minH)/span*100)+'%'; th.appendChild(s); }
+    grid.appendChild(th);
+    days.forEach((d,i) => {
+      const dh=el('div','dh' + (sameYMD(d,today)?' todayrow':'')); dh.style.gridArea=`${i+2} / 1`;
+      dh.innerHTML=`${TH_DAY_S[d.getDay()]}<b>${d.getDate()}</b>`; grid.appendChild(dh);
+      const lane=el('div','lane'); lane.style.gridArea=`${i+2} / 2`;
+      for (let h=0; h<=span; h++){ const ln=el('div','vline'); ln.style.left=(h/span*100)+'%'; lane.appendChild(ln); }
+      perDay[i].forEach(it => { any=true; const hgt=100/it.lanes; const blk=el('div','blk');
+        blk.style.left=`calc(${(it.s-minH)/span*100}% + 2px)`;
+        blk.style.width=`calc(${(Math.max(.25,it.e-it.s))/span*100}% - 3px)`;
+        blk.style.top=`calc(${it.lane*hgt}% + 2px)`;
+        blk.style.height=`calc(${hgt}% - 4px)`;
+        wireBlock(blk, it); lane.appendChild(blk); });
+      grid.appendChild(lane);
+    });
+  } else {
+    // เวลาแนวตั้งซ้าย / วันแนวนอนบน
+    wrap.style.overflowX = 'auto';
+    grid = el('div','weekV wkgrid');
+    grid.style.gridTemplateColumns = `38px repeat(7, minmax(74px,1fr))`;
+    grid.style.gridTemplateRows = `auto 1fr`;
+    const corner=el('div'); corner.style.gridArea='1 / 1'; grid.appendChild(corner);
+    days.forEach((d,i) => {
+      const wh=el('div','wh' + (sameYMD(d,today)?' todaycol':'')); wh.style.gridArea=`1 / ${i+2}`;
+      wh.innerHTML=`${TH_DAY_S[d.getDay()]}<br><b>${d.getDate()}</b>`; grid.appendChild(wh);
+    });
+    const tc=el('div','tc'); tc.style.gridArea='2 / 1';
+    for (let h=minH; h<=maxH; h++){ const s=el('span','',`${h}:00`); s.style.top=((h-minH)/span*100)+'%'; tc.appendChild(s); }
+    grid.appendChild(tc);
+    days.forEach((d,i) => {
+      const col=el('div','col'); col.style.gridArea=`2 / ${i+2}`;
+      for (let h=0; h<=span; h++){ const ln=el('div','hline'); ln.style.top=(h/span*100)+'%'; col.appendChild(ln); }
+      perDay[i].forEach(it => { any=true; const w=100/it.lanes; const blk=el('div','blk');
+        blk.style.top=`calc(${(it.s-minH)/span*100}% + 2px)`;
+        blk.style.height=`calc(${(Math.max(.25,it.e-it.s))/span*100}% - 3px)`;
+        blk.style.left=`calc(${it.lane*w}% + 2px)`;
+        blk.style.width=`calc(${w}% - 4px)`;
+        wireBlock(blk, it); col.appendChild(blk); });
+      grid.appendChild(col);
+    });
+  }
+  wrap.appendChild(grid);
+  container.appendChild(wrap);
+  if (!any) container.appendChild(empty('🗓️', types.length>1
+    ? 'สัปดาห์นี้ยังว่าง — เพิ่มคาบเรียน/นัด/กิจวัตรได้เลย'
+    : 'ยังไม่มีคาบเรียน — กดปุ่ม + เพิ่มได้เลย'));
+  return container;
+}
+function toH(t){ const [h,m]=t.split(':').map(Number); return h + m/60; }
+
+function renderWeekTab(){
+  const box = $('#weekContent'); box.innerHTML = '';
+  box.appendChild(buildWeekGrid(['classes','routines','appts','exams'], 262, true, renderWeekTab));
+}
+
+/* ---------- การบ้าน ---------- */
+function renderHw() {
+  const box = $('#hwContent'); box.innerHTML = '';
+  const all = Store.all('homework');
+  const pending = all.filter(h=>!h.done).sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt));
+  const done = all.filter(h=>h.done).sort((a,b)=>new Date(b.dueAt)-new Date(a.dueAt));
+  if (!all.length) { box.appendChild(empty('✏️','ยังไม่มีการบ้าน — กดปุ่ม + เพื่อเพิ่มงานชิ้นแรก')); return; }
+  box.appendChild(eyebrow('ยังไม่เสร็จ', pending.length));
+  if (!pending.length) box.appendChild(empty('🎉','เคลียร์หมดแล้ว!'));
+  pending.forEach(h => box.appendChild(hwCard(h)));
+  if (done.length) { box.appendChild(eyebrow('เสร็จแล้ว', done.length)); done.forEach(h => box.appendChild(hwCard(h))); }
+}
+
+/* ---------- นัดหมาย ---------- */
+function renderAppt() {
+  const box = $('#apptContent'); box.innerHTML = '';
+  const now = Date.now();
+  const list = Store.all('appts').sort((a,b)=>new Date(a.at)-new Date(b.at));
+  const upcoming = list.filter(a=>new Date(a.at)>=now), past = list.filter(a=>new Date(a.at)<now).reverse();
+  if (!list.length) { box.appendChild(empty('📌','ยังไม่มีนัด — กดปุ่ม + เพื่อเพิ่มนัดหมาย')); return; }
+  box.appendChild(eyebrow('กำลังจะถึง', upcoming.length));
+  if (!upcoming.length) box.appendChild(empty('✨','ไม่มีนัดที่กำลังจะถึง'));
+  upcoming.forEach(a => box.appendChild(apptCard(a)));
+  if (past.length) { box.appendChild(eyebrow('ผ่านไปแล้ว', past.length)); past.slice(0,10).forEach(a => box.appendChild(apptCard(a))); }
+}
+
+/* ---------- โปรเจกต์ ---------- */
+const PSTAT = { idea:['idea','💡 ไอเดีย'], doing:['doing','🔨 กำลังทำ'], done:['done','✅ เสร็จ'] };
+function renderProj() {
+  const box = $('#projContent'); box.innerHTML = '';
+  const all = Store.all('projects');
+  if (!all.length) { box.appendChild(empty('🚀','ยังไม่มีโปรเจกต์ — กดปุ่ม + จดไอเดียที่อยากทำ เช่น ทำแอป แต่งเพลง')); return; }
+  const order = { doing:0, idea:1, done:2 };
+  const sorted = all.slice().sort((a,b)=> (order[a.status]??1)-(order[b.status]??1));
+  const active = sorted.filter(p=>p.status!=='done'), done = sorted.filter(p=>p.status==='done');
+  if (active.length){ box.appendChild(eyebrow('กำลังทำ / ไอเดีย', active.length)); active.forEach(p=>box.appendChild(projCard(p))); }
+  if (done.length){ box.appendChild(eyebrow('เสร็จแล้ว', done.length)); done.forEach(p=>box.appendChild(projCard(p))); }
+}
+function projCard(p) {
+  const card = el('div','proj-card');
+  const [k,l] = PSTAT[p.status] || PSTAT.idea;
+  const ups = p.updates || [];
+  const head = el('div','ph');
+  head.appendChild(el('div','pt', esc(p.title)));
+  head.appendChild(el('span','pstat '+k, l));
+  card.appendChild(head);
+  if (p.note) card.appendChild(el('div','pnote', esc(p.note)));
+  if (ups.length){
+    const last = ups[ups.length-1], d = new Date(last.at);
+    card.appendChild(el('div','plast', `<b>${d.getDate()} ${TH_MON[d.getMonth()]}:</b> <span>${esc(last.text)}</span>`));
+  } else {
+    card.appendChild(el('div','plast', `<span style="color:var(--ink-soft)">ยังไม่มีบันทึก — แตะเพื่อเพิ่มความคืบหน้า</span>`));
+  }
+  card.onclick = () => openProjectSheet(p.id);
+  return card;
+}
+function openProjectSheet(id) {
+  const p = Store.all('projects').find(x=>x.id===id);
+  if (p) renderProjectSheet(p);
+}
+function renderProjectSheet(p) {
+  const id = p.id;
+  const [k,l] = PSTAT[p.status] || PSTAT.idea;
+  const updArr = p.updates || [];
+  const ups = updArr.slice().reverse();
+  let h = `<h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${esc(p.title)} <span class="pstat ${k}">${l}</span></h2>`;
+  if (p.note) h += `<p class="sync-note">${esc(p.note)}</p>`;
+  h += `<div class="add-log"><input id="logInput" placeholder="วันนี้ทำอะไรไป..." maxlength="300"><button id="logAdd">เพิ่ม</button></div>`;
+  h += `<div class="log" id="logList">`;
+  if (!ups.length) h += `<p class="sync-note">ยังไม่มีบันทึก เริ่มจดความคืบหน้าได้เลย</p>`;
+  ups.forEach((u, i) => {
+    const realIdx = (updArr.length-1) - i, d = new Date(u.at);
+    h += `<div class="log-item"><div class="log-dot"></div><div class="log-body">
+            <div class="log-date">${fmtDate(d)} ${fmtTime(d)} · <button class="log-del" data-i="${realIdx}">ลบ</button></div>
+            <div class="log-text">${esc(u.text)}</div></div></div>`;
+  });
+  h += `</div>`;
+  h += `<button class="save" id="projEdit" style="background:var(--ink-soft)">แก้ไขชื่อ/สถานะ</button>`;
+  h += `<button class="del-btn" id="projDel">ลบโปรเจกต์นี้</button>`;
+  showRawSheet(h);
+  const add = () => {
+    const t = $('#logInput').value.trim(); if (!t) return;
+    const updates = [...updArr, { at:new Date().toISOString(), text:t }];
+    Store.update('projects', id, { updates });
+    renderProjectSheet({ ...p, updates });   // เรนเดอร์ทันทีจากข้อมูลใหม่ ไม่รอ cache
+  };
+  $('#logAdd').onclick = add;
+  $('#logInput').addEventListener('keydown', e => { if (e.key==='Enter') add(); });
+  $('#logList').querySelectorAll('.log-del').forEach(b => b.onclick = () => {
+    const idx = +b.dataset.i;
+    const updates = updArr.filter((_,j)=>j!==idx);
+    Store.update('projects', id, { updates });
+    renderProjectSheet({ ...p, updates });
+  });
+  $('#projEdit').onclick = () => openSheet('projects', p);
+  $('#projDel').onclick = () => askConfirm('ลบโปรเจกต์นี้?', 'ลบ', () => { Store.remove('projects', id); closeSheet(); });
+}
+
+/* ===================== ปฏิทินรายเดือน ===================== */
+let calY = new Date().getFullYear(), calM = new Date().getMonth();
+let calSel = startOfDay(new Date()).toISOString();
+const ARROW_L = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+const ARROW_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+
+function sameYMD(a, b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+function itemsOn(date){
+  return { hw: Store.all('homework').filter(h => sameYMD(new Date(h.dueAt), date)),
+           ap: Store.all('appts').filter(a => sameYMD(new Date(a.at), date)),
+           ex: Store.all('exams').filter(e => sameYMD(new Date(e.at), date)) };
+}
+function dayISO(d, time){ const [hh,mm]=time.split(':'); const x=new Date(d); x.setHours(+hh,+mm,0,0); return x.toISOString(); }
+
+function renderCal(){
+  const box = $('#calContent'); box.innerHTML = '';
+  const today = new Date(), selDate = new Date(calSel);
+
+  const head = el('div','cal-head');
+  const prev = el('button','', ARROW_L), next = el('button','', ARROW_R);
+  prev.onclick = ()=>{ if(--calM<0){calM=11;calY--;} renderCal(); };
+  next.onclick = ()=>{ if(++calM>11){calM=0;calY++;} renderCal(); };
+  const tb = el('button','today-btn','วันนี้');
+  tb.onclick = ()=>{ calY=today.getFullYear(); calM=today.getMonth(); calSel=startOfDay(today).toISOString(); renderCal(); };
+  head.append(prev, el('div','mo', `${TH_MON_FULL[calM]} ${calY+543}`), next, tb);
+  box.appendChild(head);
+
+  const grid = el('div','cal-grid');
+  ['จ','อ','พ','พฤ','ศ','ส','อา'].forEach(d => grid.appendChild(el('div','cal-dow', d)));
+  const first = new Date(calY, calM, 1);
+  const start = new Date(calY, calM, 1 - ((first.getDay()+6)%7)); // เริ่มจากวันจันทร์
+  for (let i=0;i<42;i++){
+    const d = new Date(start); d.setDate(start.getDate()+i);
+    const inMonth = d.getMonth()===calM && d.getFullYear()===calY;
+    const cell = el('div','cal-cell' + (inMonth?'':' dim') + (sameYMD(d,today)?' today':'') + (sameYMD(d,selDate)?' sel':''));
+    cell.appendChild(el('div','dn', String(d.getDate())));
+    const {hw, ap, ex} = itemsOn(d);
+    if (hw.length || ap.length || ex.length){
+      const dots = el('div','cal-dots');
+      if (ex.length) dots.appendChild(el('i','ex'));
+      if (hw.length) dots.appendChild(el('i','hw'));
+      if (ap.length) dots.appendChild(el('i','ap'));
+      cell.appendChild(dots);
+    }
+    const dd = new Date(d);
+    cell.onclick = ()=>{ calSel = startOfDay(dd).toISOString(); calM = dd.getMonth(); calY = dd.getFullYear(); renderCal(); };
+    grid.appendChild(cell);
+  }
+  box.appendChild(grid);
+
+  // รายการของวันที่เลือก
+  const sd = selDate;
+  box.appendChild(el('div','cal-day-head', `${TH_DAY[sd.getDay()]} ${sd.getDate()} ${TH_MON[sd.getMonth()]}`));
+  const add = el('div','cal-add');
+  const aHw = el('button','','+ การบ้าน'); aHw.onclick = ()=>openSheet('homework', { dueAt: dayISO(sd,'23:59') });
+  const aAp = el('button','','+ นัดหมาย'); aAp.onclick = ()=>openSheet('appts', { at: dayISO(sd,'09:00') });
+  const aEx = el('button','','+ สอบ'); aEx.onclick = ()=>openSheet('exams', { at: dayISO(sd,'09:00') });
+  add.append(aHw, aAp, aEx); box.appendChild(add);
+
+  const {hw, ap, ex} = itemsOn(sd);
+  const classes = Store.all('classes').filter(c=>c.day===sd.getDay()).sort((a,b)=>a.start.localeCompare(b.start));
+  if (!hw.length && !ap.length && !ex.length && !classes.length){ box.appendChild(empty('🗓️','วันนี้ยังว่าง — กดปุ่มด้านบนเพื่อเพิ่ม')); return; }
+  if (ex.length){ box.appendChild(eyebrow('สอบ', ex.length)); ex.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(e=>box.appendChild(examCard(e))); }
+  if (classes.length){ box.appendChild(eyebrow('คาบเรียน', classes.length)); classes.forEach(c=>box.appendChild(classCard(c, true))); }
+  if (hw.length){ box.appendChild(eyebrow('การบ้านส่งวันนี้', hw.length)); hw.sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt)).forEach(h=>box.appendChild(hwCard(h))); }
+  if (ap.length){ box.appendChild(eyebrow('นัดหมาย', ap.length)); ap.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(a=>box.appendChild(apptCard(a))); }
+}
+
+/* ===================== แท็บ ===================== */
+const TABS = [
+  { id:'today', label:'วันนี้',   icon:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>' },
+  { id:'week',  label:'สัปดาห์',  icon:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11M15 9v11"/>' },
+  { id:'cal',   label:'ปฏิทิน',   icon:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>' },
+  { id:'class', label:'เรียน',    icon:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>' },
+  { id:'hw',    label:'การบ้าน',  icon:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/>' },
+  { id:'appt',  label:'นัด',      icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' },
+  { id:'proj',  label:'โปรเจกต์', icon:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 13l2 2 4-4"/>' },
+];
+const TITLES = { today:'วันนี้', week:'สัปดาห์นี้', cal:'ปฏิทิน', class:'ตารางเรียน', hw:'การบ้าน', appt:'นัดหมาย', proj:'โปรเจกต์' };
+let curTab = 'today';
+
+function buildTabs() {
+  const bar = $('#tabBar');
+  TABS.forEach(t => {
+    const b = el('button', t.id===curTab?'active':'');
+    b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t.icon}</svg><span>${t.label}</span>`;
+    b.onclick = () => switchTab(t.id);
+    bar.appendChild(b);
+  });
+}
+function switchTab(id) {
+  curTab = id;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $('#view-'+id).classList.add('active');
+  $('#tabBar').querySelectorAll('button').forEach((b,i)=>b.classList.toggle('active', TABS[i].id===id));
+  $('#viewTitle').textContent = TITLES[id];
+  renderAll();
+}
+
+/* ===================== แผ่นกรอกข้อมูล ===================== */
+const COLOR_OPTS = ['#0E9488','#7C6FE0','#F2A024','#DC4646','#3B82F6','#10B981'];
+let sheetState = null;
+
+function openSheet(coll, item) {
+  // coll = ชนิดที่จะเพิ่ม/แก้; item = ข้อมูลเดิม (ถ้าแก้)
+  sheetState = { coll, id: item?.id || null, color: item?.color || COLOR_OPTS[0],
+                 days: item?.days ? [...item.days] : [1,2,3,4,5], online: item?.online || false,
+                 status: item?.status || 'idea' };
+  renderSheet(item);
+  $('#scrim').classList.add('show'); $('#sheet').classList.add('show');
+}
+function closeSheet(){ $('#scrim').classList.remove('show'); $('#sheet').classList.remove('show'); sheetState=null; }
+
+function showRawSheet(html){ sheetState=null; $('#sheetBody').innerHTML = html; $('#scrim').classList.add('show'); $('#sheet').classList.add('show'); }
+
+function askConfirm(msg, okLabel, onYes){
+  $('#dlgMsg').textContent = msg;
+  $('#dlgYes').textContent = okLabel || 'ตกลง';
+  $('#dlgScrim').classList.add('show'); $('#dialog').classList.add('show');
+  const close = () => { $('#dlgScrim').classList.remove('show'); $('#dialog').classList.remove('show'); };
+  $('#dlgNo').onclick = close;
+  $('#dlgScrim').onclick = close;
+  $('#dlgYes').onclick = () => { close(); onYes(); };
+}
+function warn(msg){ fire(msg, ''); return undefined; }
+
+function openSyncSheet() {
+  const code = getSyncCode();
+  let h = '<h2>ซิงค์ข้ามเครื่อง</h2>';
+  if (!FIREBASE_CONFIG) {
+    h += `<p class="sync-note">ยังไม่ได้เปิดใช้งานซิงค์ — ต้องเปิดไฟล์ <b>planner.html</b> แล้ววางค่า Firebase config ตรงตัวแปร <b>FIREBASE_CONFIG</b> (ดูขั้นตอนที่ Claude แนบไว้) จากนั้นนำไฟล์ขึ้นโฮสต์ แล้วเปิดด้วยลิงก์เดียวกันทุกเครื่อง</p>`;
+  } else if (!fbReady) {
+    h += `<p class="sync-note">เชื่อมต่อ Firebase ไม่สำเร็จ — ลองตรวจค่า config ว่าครบและถูกต้อง แล้วรีโหลดหน้าใหม่</p>`;
+  } else if (!code) {
+    h += `<p class="sync-note">เชื่อม Firebase ได้แล้ว เลือกวิธีเริ่ม:</p>
+      <button class="save" id="btnCreate">สร้างพื้นที่ใหม่ (ใช้เครื่องนี้เป็นเครื่องหลัก)</button>
+      <div style="text-align:center;color:var(--ink-soft);margin:14px 0 2px;font-size:.85rem">— หรือถ้าตั้งจากเครื่องอื่นไว้แล้ว —</div>
+      <label class="fld"><span>ใส่รหัสซิงค์จากเครื่องหลัก</span><input class="inp" id="joinCode" placeholder="วางรหัสที่นี่"></label>
+      <button class="save" id="btnJoin" style="background:var(--routine)">เชื่อมเข้าพื้นที่เดิม</button>`;
+  } else {
+    h += `<div class="sync-ok">● เชื่อมต่อแล้ว — ทุกเครื่องที่ใช้รหัสนี้จะอัปเดตตรงกันอัตโนมัติ</div>
+      <label class="fld"><span>รหัสซิงค์ของคุณ (นำไปใส่ในเครื่องที่ 2 และ 3)</span>
+      <input class="inp" id="codeView" readonly value="${code}" onclick="this.select()"></label>
+      <button class="save" id="btnCopy">คัดลอกรหัส</button>
+      <button class="del-btn" id="btnLeave">ตัดการเชื่อมต่อเครื่องนี้</button>`;
+  }
+  showRawSheet(h);
+  const cr = $('#btnCreate'); if (cr) cr.onclick = () => { cr.textContent = 'กำลังสร้าง...'; cr.disabled = true; createSpace(); };
+  const jn = $('#btnJoin'); if (jn) jn.onclick = () => joinSpace($('#joinCode').value);
+  const cp = $('#btnCopy'); if (cp) cp.onclick = () => { try { navigator.clipboard.writeText(code); } catch{} fire('คัดลอกรหัสแล้ว','เปิดแอปบนอีกเครื่อง แล้ววางรหัสนี้ในหน้าซิงค์'); };
+  const lv = $('#btnLeave'); if (lv) lv.onclick = () => askConfirm('ตัดการเชื่อมต่อเครื่องนี้? ข้อมูลบนคลาวด์ยังอยู่ครบ กลับมาใส่รหัสเดิมเมื่อไหร่ก็ได้', 'ตัดการเชื่อมต่อ', () => { localStorage.removeItem(SYNC_CODE_KEY); location.reload(); });
+}
+
+function renderSheet(item) {
+  const body = $('#sheetBody'); const editing = !!sheetState.id; const coll = sheetState.coll;
+  let inner = `<h2>${editing?'แก้ไข':'เพิ่ม'}${({classes:'คาบเรียน',routines:'กิจวัตร',homework:'การบ้าน',appts:'นัดหมาย',exams:'วันสอบ',projects:'โปรเจกต์'})[coll]}</h2>`;
+
+  if (!editing && coll !== 'projects') {
+    inner += `<div class="seg" id="typeSeg">
+      <button data-c="classes">เรียน</button><button data-c="routines">กิจวัตร</button>
+      <button data-c="homework">การบ้าน</button><button data-c="appts">นัด</button><button data-c="exams">สอบ</button></div>`;
+  }
+
+  if (coll === 'classes') {
+    inner += fld('วิชา', `<input class="inp" id="f_subject" value="${attr(item?.subject)}" placeholder="เช่น คณิตศาสตร์">`);
+    inner += `<div class="two">${fld('เริ่ม', `<input class="inp" type="time" id="f_start" value="${item?.start||'08:30'}">`)}${fld('เลิก', `<input class="inp" type="time" id="f_end" value="${item?.end||'09:30'}">`)}</div>`;
+    inner += fld('วัน', daypickHTML());
+    inner += fld('ห้อง (ถ้ามี)', `<input class="inp" id="f_room" value="${attr(item?.room)}" placeholder="เช่น 304">`);
+    inner += onlineFields('เรียนออนไลน์', item?.link);
+    inner += fld('สี', swatchHTML());
+  } else if (coll === 'routines') {
+    inner += fld('กิจวัตร', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น อ่านหนังสือ / ออกกำลังกาย">`);
+    inner += fld('เวลา', `<input class="inp" type="time" id="f_time" value="${item?.time||'07:00'}">`);
+    inner += fld('ทำวันไหนบ้าง', daypickHTML());
+  } else if (coll === 'homework') {
+    inner += fld('ชื่องาน', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น รายงานวิทย์ บทที่ 3">`);
+    inner += fld('วิชา', `<input class="inp" id="f_subject" value="${attr(item?.subject)}" placeholder="เช่น วิทยาศาสตร์">`);
+    inner += `<div class="two">${fld('วันส่ง', `<input class="inp" type="date" id="f_date" value="${dpart(item?.dueAt)}">`)}${fld('เวลา', `<input class="inp" type="time" id="f_time" value="${tpart(item?.dueAt,'23:59')}">`)}</div>`;
+    inner += fld('โน้ต (ถ้ามี)', `<textarea class="inp" id="f_note" placeholder="รายละเอียดเพิ่มเติม">${esc(item?.note)}</textarea>`);
+  } else if (coll === 'appts') {
+    inner += fld('ชื่อนัด', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น หาหมอฟัน / ติวกลุ่ม">`);
+    inner += `<div class="two">${fld('วันที่', `<input class="inp" type="date" id="f_date" value="${dpart(item?.at)}">`)}${fld('เวลา', `<input class="inp" type="time" id="f_time" value="${tpart(item?.at,'09:00')}">`)}</div>`;
+    inner += fld('สถานที่ (ถ้ามี)', `<input class="inp" id="f_place" value="${attr(item?.place)}" placeholder="เช่น คลินิก / ห้องสมุด">`);
+    inner += onlineFields('นัดออนไลน์', item?.link);
+    inner += fld('โน้ต (ถ้ามี)', `<textarea class="inp" id="f_note" placeholder="รายละเอียดเพิ่มเติม">${esc(item?.note)}</textarea>`);
+  } else if (coll === 'exams') {
+    inner += fld('วิชาที่สอบ', `<input class="inp" id="f_subject" value="${attr(item?.subject)}" placeholder="เช่น คณิตศาสตร์ midterm">`);
+    inner += `<div class="two">${fld('วันสอบ', `<input class="inp" type="date" id="f_date" value="${dpart(item?.at)}">`)}${fld('เวลา', `<input class="inp" type="time" id="f_time" value="${tpart(item?.at,'09:00')}">`)}</div>`;
+    inner += fld('ห้องสอบ (ถ้ามี)', `<input class="inp" id="f_room" value="${attr(item?.room)}" placeholder="เช่น อาคาร 5 ห้อง 301">`);
+    inner += fld('โน้ต (เนื้อหาที่ออก ฯลฯ)', `<textarea class="inp" id="f_note" placeholder="บทที่ออกสอบ / สิ่งที่ต้องเตรียม">${esc(item?.note)}</textarea>`);
+  } else if (coll === 'projects') {
+    inner += fld('ชื่อโปรเจกต์', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น ทำแอปจัดตาราง / แต่งเพลง">`);
+    inner += fld('สถานะ', statusPickHTML());
+    inner += fld('รายละเอียด (ถ้ามี)', `<textarea class="inp" id="f_note" placeholder="โปรเจกต์นี้เกี่ยวกับอะไร">${esc(item?.note)}</textarea>`);
+  }
+
+  inner += `<button class="save" id="saveBtn">${editing?'บันทึกการแก้ไข':'เพิ่มลงตาราง'}</button>`;
+  if (editing) inner += `<button class="del-btn" id="delBtn">ลบรายการนี้</button>`;
+  body.innerHTML = inner;
+
+  if (!editing) document.querySelectorAll('#typeSeg button').forEach(b => {
+    b.classList.toggle('on', b.dataset.c === coll);
+    b.onclick = () => { sheetState.coll = b.dataset.c; renderSheet(null); };
+  });
+  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick();
+  $('#saveBtn').onclick = save;
+  if (editing) $('#delBtn').onclick = () => askConfirm('ลบรายการนี้?', 'ลบ', () => { Store.remove(coll, sheetState.id); closeSheet(); });
+}
+
+function fld(label, inner){ return `<label class="fld"><span>${label}</span>${inner}</label>`; }
+const STATUS = [['idea','💡 ไอเดีย'],['doing','🔨 กำลังทำ'],['done','✅ เสร็จแล้ว']];
+function statusPickHTML(){
+  return `<div class="seg" id="statusPick">${STATUS.map(([k,l])=>`<button type="button" data-s="${k}" class="${sheetState.status===k?'on':''}">${l}</button>`).join('')}</div>`;
+}
+function bindStatusPick(){
+  const sp = $('#statusPick'); if(!sp) return;
+  sp.querySelectorAll('button').forEach(b => b.onclick = () => {
+    sheetState.status = b.dataset.s;
+    sp.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  });
+}
+function onlineFields(label, link){
+  const on = sheetState.online;
+  return `<label class="fld toggle-row"><span>${label}</span>
+            <button type="button" id="f_online" class="switch ${on?'on':''}" role="switch" aria-checked="${on}"><span class="knob"></span></button></label>
+          <div id="onlineWrap" class="${on?'':'hidden'}">${fld('ลิงก์ (Zoom / Meet / อื่นๆ)', `<input class="inp" id="f_link" value="${attr(link)}" placeholder="วางลิงก์เข้าห้องที่นี่" inputmode="url">`)}</div>`;
+}
+function bindOnlineToggle(){
+  const sw = $('#f_online'); if(!sw) return;
+  sw.onclick = () => {
+    sheetState.online = !sheetState.online;
+    sw.classList.toggle('on', sheetState.online);
+    sw.setAttribute('aria-checked', sheetState.online);
+    $('#onlineWrap').classList.toggle('hidden', !sheetState.online);
+  };
+}
+function attr(v){ return esc(v).replace(/"/g,'&quot;'); }
+function dpart(iso){ if(!iso) return new Date().toISOString().slice(0,10); return new Date(iso).toLocaleDateString('sv'); }
+function tpart(iso, def){ if(!iso) return def; return new Date(iso).toTimeString().slice(0,5); }
+
+function daypickHTML(){
+  return `<div class="daypick" id="daypick">${ORDER.map(d=>`<button type="button" data-d="${d}" class="${sheetState.days.includes(d)?'on':''}">${TH_DAY_S[d]}</button>`).join('')}</div>`;
+}
+function bindDaypick(){
+  const dp = $('#daypick'); if(!dp) return;
+  dp.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const d = +b.dataset.d;
+    if (sheetState.days.includes(d)) sheetState.days = sheetState.days.filter(x=>x!==d);
+    else sheetState.days.push(d);
+    b.classList.toggle('on');
+  });
+}
+function swatchHTML(){
+  return `<div class="swatch" id="swatch">${COLOR_OPTS.map(c=>`<button type="button" data-c="${c}" style="background:${c}" class="${c===sheetState.color?'on':''}"></button>`).join('')}</div>`;
+}
+function bindSwatch(){
+  const sw = $('#swatch'); if(!sw) return;
+  sw.querySelectorAll('button').forEach(b => b.onclick = () => {
+    sheetState.color = b.dataset.c;
+    sw.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  });
+}
+
+function save() {
+  const c = sheetState.coll, id = sheetState.id;
+  let item = {};
+  const v = sel => { const e = $(sel); return e ? e.value.trim() : ''; };
+
+  if (c === 'classes') {
+    if (!v('#f_subject')) return warn('ใส่ชื่อวิชาก่อนนะ');
+    if (!sheetState.days.length) return warn('เลือกวันอย่างน้อย 1 วัน');
+    const base = { subject:v('#f_subject'), start:$('#f_start').value, end:$('#f_end').value, room:v('#f_room'), color:sheetState.color, online:sheetState.online, link:v('#f_link') };
+    if (id) Store.update(c, id, base);
+    else sheetState.days.forEach(d => Store.add(c, {...base, day:d})); // เพิ่มหลายวันได้ในครั้งเดียว
+  } else if (c === 'routines') {
+    if (!v('#f_title')) return warn('ใส่ชื่อกิจวัตรก่อนนะ');
+    if (!sheetState.days.length) return warn('เลือกวันอย่างน้อย 1 วัน');
+    const o = { title:v('#f_title'), time:$('#f_time').value, days:[...sheetState.days] };
+    id ? Store.update(c, id, o) : Store.add(c, o);
+  } else if (c === 'homework') {
+    if (!v('#f_title')) return warn('ใส่ชื่องานก่อนนะ');
+    const o = { title:v('#f_title'), subject:v('#f_subject'), note:v('#f_note'),
+                dueAt:new Date(`${$('#f_date').value}T${$('#f_time').value}`).toISOString(), done:id?undefined:false };
+    if (o.done===undefined) delete o.done;
+    id ? Store.update(c, id, o) : Store.add(c, {...o, done:false});
+  } else if (c === 'appts') {
+    if (!v('#f_title')) return warn('ใส่ชื่อนัดก่อนนะ');
+    const o = { title:v('#f_title'), place:v('#f_place'), note:v('#f_note'), online:sheetState.online, link:v('#f_link'),
+                at:new Date(`${$('#f_date').value}T${$('#f_time').value}`).toISOString() };
+    id ? Store.update(c, id, o) : Store.add(c, o);
+  } else if (c === 'exams') {
+    if (!v('#f_subject')) return warn('ใส่วิชาที่สอบก่อนนะ');
+    const o = { subject:v('#f_subject'), room:v('#f_room'), note:v('#f_note'),
+                at:new Date(`${$('#f_date').value}T${$('#f_time').value}`).toISOString() };
+    id ? Store.update(c, id, o) : Store.add(c, o);
+  } else if (c === 'projects') {
+    if (!v('#f_title')) return warn('ใส่ชื่อโปรเจกต์ก่อนนะ');
+    const o = { title:v('#f_title'), status:sheetState.status, note:v('#f_note') };
+    if (id) Store.update(c, id, o);
+    else Store.add(c, {...o, updates:[], createdAt:new Date().toISOString()});
+  }
+  closeSheet();
+}
+
+/* ===================== การแจ้งเตือน ===================== */
+const NKEY = 'planner.notified';
+function notified(){ try { return new Set(JSON.parse(localStorage.getItem(NKEY))||[]); } catch { return new Set(); } }
+function saveNotified(s){ localStorage.setItem(NKEY, JSON.stringify([...s])); }
+
+function refreshBell() {
+  const on = 'Notification' in window && Notification.permission === 'granted';
+  $('#bellBtn').classList.toggle('on', on);
+  $('#notifHint').classList.toggle('dismissed', on || Notification.permission === 'denied');
+}
+async function askNotif() {
+  if (!('Notification' in window)) return warn('อุปกรณ์นี้ไม่รองรับการแจ้งเตือนของเบราว์เซอร์');
+  const p = await Notification.requestPermission();
+  refreshBell();
+  if (p === 'granted') fire('เปิดการแจ้งเตือนแล้ว', 'จะเด้งเตือนเมื่อใกล้ถึงกำหนด ✓');
+}
+
+// ตรวจทุกนาที: เตือนที่ 1 วัน และ 1 ชม. ก่อนกำหนด
+function checkDue() {
+  const now = Date.now(), seen = notified();
+  const items = [];
+  Store.all('homework').filter(h=>!h.done).forEach(h => items.push({ id:h.id, at:h.dueAt, label:`การบ้าน: ${h.title}`, wins:[[24*3600000,'1วัน','ครบกำหนดพรุ่งนี้'], [3600000,'1ชม','อีก 1 ชั่วโมง'], [300000,'5น','อีก 5 นาที!']] }));
+  Store.all('appts').forEach(a => items.push({ id:a.id, at:a.at, label:`นัด: ${a.title}`, wins:[[24*3600000,'1วัน','นัดพรุ่งนี้'], [3600000,'1ชม','อีก 1 ชั่วโมง'], [300000,'5น','อีก 5 นาที!']] }));
+  Store.all('exams').forEach(e => items.push({ id:e.id, at:e.at, label:`📝 สอบ: ${e.subject}`, wins:[[7*86400000,'7วัน','สอบในอีก 1 สัปดาห์ เริ่มอ่านได้แล้ว'], [3*86400000,'3วัน','สอบในอีก 3 วัน'], [86400000,'1วัน','สอบพรุ่งนี้!'], [3600000,'1ชม','สอบในอีก 1 ชั่วโมง']] }));
+
+  items.forEach(it => {
+    const ms = new Date(it.at) - now;
+    it.wins.forEach(([win, tag, word]) => {
+      const key = `${it.id}:${tag}`;
+      if (ms > 0 && ms <= win && !seen.has(key)) { seen.add(key); notify(it.label, word); }
+    });
+  });
+  saveNotified(seen);
+}
+function notify(title, body) {
+  fire(title, body);
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try { new Notification(title, { body, tag:title }); } catch {}
+  }
+}
+function fire(title, body) {
+  const t = el('div','toast'); t.innerHTML = `<span class="dot"></span><div><div style="font-weight:600">${esc(title)}</div><div style="opacity:.85;font-size:.82rem">${esc(body)}</div></div>`;
+  $('#toastWrap').appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(),400); }, 5000);
+}
+
+/* ===================== วนเรนเดอร์ ===================== */
+function renderAll() {
+  if (curTab==='today') renderToday();
+  else if (curTab==='cal') renderCal();
+  else if (curTab==='week') renderWeekTab();
+  else if (curTab==='class') renderClass();
+  else if (curTab==='hw') renderHw();
+  else if (curTab==='appt') renderAppt();
+  else if (curTab==='proj') renderProj();
+}
+
+/* ===================== โหมดมืด ===================== */
+function applyThemeIcon(){
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  $('#themeIcon').innerHTML = dark
+    ? '<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>'
+    : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+}
+function toggleTheme(){
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (dark) { document.documentElement.removeAttribute('data-theme'); localStorage.setItem('planner.theme','light'); }
+  else { document.documentElement.setAttribute('data-theme','dark'); localStorage.setItem('planner.theme','dark'); }
+  applyThemeIcon();
+}
+
+/* ===================== เริ่มทำงาน ===================== */
+$('#todayLabel').textContent = fmtDate(new Date());
+buildTabs();
+$('#fab').onclick = () => openSheet(curTab==='class'?'classes':curTab==='hw'?'homework':curTab==='proj'?'projects':(curTab==='appt'||curTab==='cal'||curTab==='week')?'appts':'homework', null);
+$('#scrim').onclick = closeSheet;
+$('#bellBtn').onclick = askNotif;
+$('#enableNotif').onclick = askNotif;
+$('#syncBtn').onclick = openSyncSheet;
+$('#themeBtn').onclick = toggleTheme;
+applyThemeIcon();
+if (Store.__cloud) $('#syncBtn').classList.add('synced');
+
+Store.subscribe(renderAll);
+refreshBell();
+checkDue();
+setInterval(() => { checkDue(); if (curTab==='today') renderToday(); }, 60000); // อัปเดตนับถอยหลัง + ตรวจเตือนทุกนาที
+</script>
+</body>
+</html>

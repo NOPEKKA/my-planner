@@ -1,0 +1,27 @@
+name: ส่งแจ้งเตือน (push)
+
+on:
+  schedule:
+    # ทุก 30 นาที (เวลา UTC) — GitHub อาจดีเลย์ได้บ้างในช่วงคนใช้เยอะ
+    - cron: '*/30 * * * *'
+  workflow_dispatch: {}   # กดรันเองได้จากแท็บ Actions (ไว้ทดสอบ)
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: ติดตั้ง dependencies
+        working-directory: notify
+        run: npm install
+
+      - name: ส่ง push
+        working-directory: notify
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+        run: node send.js

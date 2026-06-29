@@ -401,6 +401,7 @@
 <!-- Firebase (สำหรับซิงค์ข้ามเครื่อง) -->
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-messaging-compat.js"></script>
 
 <script>
 /* =====================================================================
@@ -426,6 +427,8 @@ const FIREBASE_CONFIG = {
 */
 
 const COLLS = ['classes','routines','homework','appts','exams','projects'];
+/* ===== ② Push: วาง "Web Push certificate (VAPID key)" จาก Firebase Console ตรงนี้ (เว้นไว้ = ไม่เปิด push) ===== */
+const VAPID_KEY = 'PASTE_VAPID_KEY_HERE';
 const SYNC_CODE_KEY = 'planner.syncCode';
 const getSyncCode = () => localStorage.getItem(SYNC_CODE_KEY) || '';
 const setSyncCode = (c) => localStorage.setItem(SYNC_CODE_KEY, c);
@@ -569,11 +572,16 @@ function renderToday() {
     classes.forEach(c => box.appendChild(classCard(c, true)));
   }
 
-  // กิจวัตรวันนี้
-  const routines = Store.all('routines').filter(r => r.days.includes(dow)).sort((a,b)=>a.time.localeCompare(b.time));
-  if (routines.length) {
-    box.appendChild(eyebrow('กิจวัตรวันนี้', routines.length));
-    routines.forEach(r => box.appendChild(routineCard(r)));
+  // สิ่งที่ต้องทำ — วันนี้ / พรุ่งนี้
+  const tmr = new Date(now); tmr.setDate(now.getDate()+1);
+  const todoToday = routinesFor(now), todoTmr = routinesFor(tmr);
+  if (todoToday.length) {
+    box.appendChild(eyebrow('สิ่งที่ต้องทำวันนี้', todoToday.length));
+    todoToday.forEach(r => box.appendChild(todoCard(r)));
+  }
+  if (todoTmr.length) {
+    box.appendChild(eyebrow('สิ่งที่ต้องทำพรุ่งนี้', todoTmr.length));
+    todoTmr.forEach(r => box.appendChild(todoCard(r)));
   }
 
   // ใกล้ถึงกำหนด: การบ้าน + นัด รวมกัน เรียงตามเวลา
@@ -619,6 +627,27 @@ function routineCard(r) {
   const days = r.days.length === 7 ? 'ทุกวัน' : r.days.slice().sort((a,b)=>ORDER.indexOf(a)-ORDER.indexOf(b)).map(d=>TH_DAY_S[d]).join(' ');
   b.appendChild(el('div','meta', `<span><b>${r.time}</b></span><span>${days}</span>`));
   card.appendChild(b); card.appendChild(actions('routines', r));
+  return card;
+}
+function routinesFor(date){
+  const dow = date.getDay();
+  return Store.all('routines').filter(r => {
+    if (r.repeat==='once' || r.date) return r.date && sameYMD(new Date(r.date+'T00:00:00'), date);
+    return (r.days||[]).includes(dow);
+  }).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+}
+function todoCard(r){
+  const once = r.repeat==='once' || !!r.date;
+  const card = el('div','card' + (once && r.done ? ' done' : ''));
+  if (once){ const chk=el('button','check'+(r.done?' tick':''), ICON.tick); chk.onclick=()=>Store.update('routines', r.id, {done:!r.done}); card.appendChild(chk); }
+  else card.append(accent('var(--routine)'));
+  const b = el('div','body');
+  b.appendChild(el('div','title', esc(r.title)));
+  const m = el('div','meta');
+  if (once) m.innerHTML = `<span><b>${r.time||''}</b></span><span>ครั้งเดียว</span>`;
+  else { const days = r.days.length===7?'ทุกวัน':r.days.slice().sort((a,b)=>ORDER.indexOf(a)-ORDER.indexOf(b)).map(d=>TH_DAY_S[d]).join(' '); m.innerHTML = `<span><b>${r.time||''}</b></span><span>${days}</span>`; }
+  b.appendChild(m); card.appendChild(b);
+  card.appendChild(actions('routines', r));
   return card;
 }
 
@@ -733,8 +762,11 @@ function weekItemsFor(date, types){
   const classes = types.includes('classes') ? Store.all('classes').filter(c=>c.day===dow).map(c => ({
     s:toH(c.start), e:toH(c.end), title:esc(c.subject),
     sub:c.start + (c.online?' • ออนไลน์':(c.room?' • '+esc(c.room):'')), color:c.color||'var(--primary)', data:['classes',c] })) : [];
-  const routines = types.includes('routines') ? Store.all('routines').filter(r=>r.days.includes(dow)).map(r => {
-    const s = toH(r.time); return { s, e:s+0.75, title:'🔁 '+esc(r.title), sub:r.time, color:'var(--routine)', data:['routines',r] }; }) : [];
+  const routines = types.includes('routines') ? Store.all('routines').filter(r => {
+      if (r.repeat==='once' || r.date) return r.date && sameYMD(new Date(r.date+'T00:00:00'), date);
+      return (r.days||[]).includes(dow);
+    }).map(r => {
+    const s = toH(r.time); return { s, e:s+0.75, title:'🔁 '+esc(r.title), sub:r.time, color:'var(--routine)', data:['routines',r], done:!!r.done }; }) : [];
   const appts = types.includes('appts') ? Store.all('appts').filter(a=>sameYMD(new Date(a.at),date)).map(a => {
     const d=new Date(a.at), s=d.getHours()+d.getMinutes()/60;
     return { s, e:s+1, title:'📌 '+esc(a.title), sub:fmtTime(d), color:'var(--soon)', data:['appts',a] }; }) : [];
@@ -803,6 +835,7 @@ function buildWeekGrid(types, extraChrome, showLegend, rerender) {
   const wireBlock = (blk, it) => {
     blk.style.background = it.color;
     blk.innerHTML = blockHTML(it);
+    if (it.done) blk.style.opacity = '.5';
     if (it.exam) { blk.classList.add('has-exam'); blk.onclick=()=>openSheet('exams', it.examData[1]); }
     else blk.onclick=()=>openSheet(it.data[0], it.data[1]);
   };
@@ -1076,7 +1109,8 @@ function openSheet(coll, item) {
   // coll = ชนิดที่จะเพิ่ม/แก้; item = ข้อมูลเดิม (ถ้าแก้)
   sheetState = { coll, id: item?.id || null, color: item?.color || COLOR_OPTS[0],
                  days: item?.days ? [...item.days] : [1,2,3,4,5], online: item?.online || false,
-                 status: item?.status || 'idea' };
+                 status: item?.status || 'idea',
+                 repeat: item?.repeat || (item?.date ? 'once' : 'weekly'), done: item?.done || false };
   renderSheet(item);
   $('#scrim').classList.add('show'); $('#sheet').classList.add('show');
 }
@@ -1140,9 +1174,13 @@ function renderSheet(item) {
     inner += onlineFields('เรียนออนไลน์', item?.link);
     inner += fld('สี', swatchHTML());
   } else if (coll === 'routines') {
-    inner += fld('กิจวัตร', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น อ่านหนังสือ / ออกกำลังกาย">`);
+    inner += fld('สิ่งที่ต้องทำ', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น อ่านหนังสือ / ส่งใบลา / ออกกำลังกาย">`);
     inner += fld('เวลา', `<input class="inp" type="time" id="f_time" value="${item?.time||'07:00'}">`);
-    inner += fld('ทำวันไหนบ้าง', daypickHTML());
+    inner += fld('ทำซ้ำ', `<div class="seg" id="repPick">
+        <button type="button" data-r="weekly" class="${sheetState.repeat==='weekly'?'on':''}">ลูปทุกสัปดาห์</button>
+        <button type="button" data-r="once" class="${sheetState.repeat==='once'?'on':''}">ครั้งเดียว</button></div>`);
+    inner += `<div id="repWeekly" class="${sheetState.repeat==='once'?'hidden':''}">${fld('ทำวันไหนบ้าง', daypickHTML())}</div>`;
+    inner += `<div id="repOnce" class="${sheetState.repeat==='weekly'?'hidden':''}">${fld('วันที่', `<input class="inp" type="date" id="f_date" value="${item?.date||ymd(new Date())}">`)}</div>`;
   } else if (coll === 'homework') {
     inner += fld('ชื่องาน', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น รายงานวิทย์ บทที่ 3">`);
     inner += fld('วิชา', `<input class="inp" id="f_subject" value="${attr(item?.subject)}" placeholder="เช่น วิทยาศาสตร์">`);
@@ -1166,6 +1204,8 @@ function renderSheet(item) {
   }
 
   inner += `<button class="save" id="saveBtn">${editing?'บันทึกการแก้ไข':'เพิ่มลงตาราง'}</button>`;
+  if (editing && ['homework','exams','appts'].includes(coll))
+    inner += `<button class="save" id="calBtn" style="background:var(--routine);margin-top:10px">📅 เพิ่มลงปฏิทิน (ไว้เตือน)</button>`;
   if (editing) inner += `<button class="del-btn" id="delBtn">ลบรายการนี้</button>`;
   body.innerHTML = inner;
 
@@ -1173,8 +1213,9 @@ function renderSheet(item) {
     b.classList.toggle('on', b.dataset.c === coll);
     b.onclick = () => { sheetState.coll = b.dataset.c; renderSheet(null); };
   });
-  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick();
+  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick(); bindRepeat();
   $('#saveBtn').onclick = save;
+  { const cb = $('#calBtn'); if (cb) cb.onclick = () => exportItemICS(coll, item); }
   if (editing) $('#delBtn').onclick = () => askConfirm('ลบรายการนี้?', 'ลบ', () => { Store.remove(coll, sheetState.id); closeSheet(); });
 }
 
@@ -1212,6 +1253,16 @@ function tpart(iso, def){ if(!iso) return def; return new Date(iso).toTimeString
 function daypickHTML(){
   return `<div class="daypick" id="daypick">${ORDER.map(d=>`<button type="button" data-d="${d}" class="${sheetState.days.includes(d)?'on':''}">${TH_DAY_S[d]}</button>`).join('')}</div>`;
 }
+function bindRepeat(){
+  const seg = $('#repPick'); if (!seg) return;
+  seg.querySelectorAll('button').forEach(b => b.onclick = () => {
+    sheetState.repeat = b.dataset.r;
+    seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    $('#repWeekly').classList.toggle('hidden', sheetState.repeat !== 'weekly');
+    $('#repOnce').classList.toggle('hidden', sheetState.repeat !== 'once');
+  });
+}
+function ymd(d){ const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; }
 function bindDaypick(){
   const dp = $('#daypick'); if(!dp) return;
   dp.querySelectorAll('button').forEach(b => b.onclick = () => {
@@ -1244,10 +1295,17 @@ function save() {
     if (id) Store.update(c, id, base);
     else sheetState.days.forEach(d => Store.add(c, {...base, day:d})); // เพิ่มหลายวันได้ในครั้งเดียว
   } else if (c === 'routines') {
-    if (!v('#f_title')) return warn('ใส่ชื่อกิจวัตรก่อนนะ');
-    if (!sheetState.days.length) return warn('เลือกวันอย่างน้อย 1 วัน');
-    const o = { title:v('#f_title'), time:$('#f_time').value, days:[...sheetState.days] };
-    id ? Store.update(c, id, o) : Store.add(c, o);
+    if (!v('#f_title')) return warn('ใส่ชื่อสิ่งที่ต้องทำก่อนนะ');
+    const time = $('#f_time').value;
+    if (sheetState.repeat === 'once') {
+      const date = $('#f_date').value; if (!date) return warn('เลือกวันที่ก่อนนะ');
+      const o = { title:v('#f_title'), time, repeat:'once', date, done: sheetState.done };
+      id ? Store.update(c, id, o) : Store.add(c, o);
+    } else {
+      if (!sheetState.days.length) return warn('เลือกวันอย่างน้อย 1 วัน');
+      const o = { title:v('#f_title'), time, repeat:'weekly', days:[...sheetState.days] };
+      id ? Store.update(c, id, o) : Store.add(c, o);
+    }
   } else if (c === 'homework') {
     if (!v('#f_title')) return warn('ใส่ชื่องานก่อนนะ');
     const o = { title:v('#f_title'), subject:v('#f_subject'), note:v('#f_note'),
@@ -1288,6 +1346,105 @@ async function askNotif() {
   const p = await Notification.requestPermission();
   refreshBell();
   if (p === 'granted') fire('เปิดการแจ้งเตือนแล้ว', 'จะเด้งเตือนเมื่อใกล้ถึงกำหนด ✓');
+}
+
+/* ===================== ส่งออกลงปฏิทิน (.ics) — เตือนแม้ปิดแอป ===================== */
+function icsEsc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+function icsDate(d){ return new Date(d).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,''); }
+function buildICS(events){
+  let s = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//my-planner//TH\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n';
+  const stamp = icsDate(new Date());
+  events.forEach(e => {
+    s += 'BEGIN:VEVENT\r\n';
+    s += `UID:${e.uid}\r\nDTSTAMP:${stamp}\r\n`;
+    s += `DTSTART:${icsDate(e.start)}\r\nDTEND:${icsDate(e.end)}\r\n`;
+    s += `SUMMARY:${icsEsc(e.summary)}\r\n`;
+    if (e.desc) s += `DESCRIPTION:${icsEsc(e.desc)}\r\n`;
+    if (e.location) s += `LOCATION:${icsEsc(e.location)}\r\n`;
+    (e.alarms||[]).forEach(t => { s += `BEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:${icsEsc(e.summary)}\r\nTRIGGER:${t}\r\nEND:VALARM\r\n`; });
+    s += 'END:VEVENT\r\n';
+  });
+  s += 'END:VCALENDAR\r\n';
+  return s;
+}
+function downloadICS(name, text){
+  const blob = new Blob([text], { type:'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+function itemToEvent(type, it){
+  if (type==='homework'){ const s=new Date(it.dueAt);
+    return { uid:it.id+'@planner', start:s, end:new Date(s.getTime()+30*60000),
+      summary:'📚 ส่ง: '+(it.title||''), desc:(it.subject?it.subject+' — ':'')+(it.note||''), location:'', alarms:['-P1D','-PT2H'] }; }
+  if (type==='exams'){ const s=new Date(it.at);
+    return { uid:it.id+'@planner', start:s, end:new Date(s.getTime()+2*3600000),
+      summary:'📝 สอบ: '+(it.subject||''), desc:it.note||'', location:it.room||'', alarms:['-P3D','-P1D','-PT1H'] }; }
+  const s=new Date(it.at); // appts
+  return { uid:it.id+'@planner', start:s, end:new Date(s.getTime()+3600000),
+    summary:'📌 '+(it.title||''), desc:it.note||'', location:it.online?'ออนไลน์':'', alarms:['-P1D','-PT1H'] };
+}
+function exportItemICS(type, it){
+  downloadICS('planner-event.ics', buildICS([itemToEvent(type, it)]));
+  fire('สร้างไฟล์ปฏิทินแล้ว', 'เปิดไฟล์ที่ดาวน์โหลดเพื่อเพิ่มลงปฏิทินของเครื่อง');
+}
+function exportAllICS(){
+  const cut = Date.now() - 86400000, evs = [];
+  Store.all('homework').filter(h=>!h.done && new Date(h.dueAt)>cut).forEach(h=>evs.push(itemToEvent('homework',h)));
+  Store.all('exams').filter(e=>new Date(e.at)>cut).forEach(e=>evs.push(itemToEvent('exams',e)));
+  Store.all('appts').filter(a=>new Date(a.at)>cut).forEach(a=>evs.push(itemToEvent('appts',a)));
+  if (!evs.length) return warn('ยังไม่มีการบ้าน/นัด/สอบที่จะส่งออก');
+  downloadICS('my-planner.ics', buildICS(evs));
+  fire(`ส่งออก ${evs.length} รายการแล้ว`, 'เปิดไฟล์ที่ดาวน์โหลด แล้วเพิ่มลงปฏิทินของเครื่อง');
+}
+
+function openNotifSheet(){
+  const granted = ('Notification' in window) && Notification.permission==='granted';
+  const pushReady = fbReady && VAPID_KEY && VAPID_KEY!=='PASTE_VAPID_KEY_HERE' && getSyncCode();
+  let h = '<h2>การแจ้งเตือน</h2>';
+  h += `<p class="sync-note">เด้งเตือนก่อนถึงกำหนด — การบ้าน/นัด 1 วัน · 1 ชม. · 5 นาที, สอบ 7 · 3 · 1 วัน</p>`;
+  if (granted) h += `<div class="sync-ok">● เปิดแจ้งเตือนในแอปแล้ว (เตือนตอนเปิดแอป)</div>`;
+  else h += `<button class="save" id="enInApp">เปิดแจ้งเตือนในแอป</button>`;
+
+  if (pushReady) {
+    h += `<div style="height:1px;background:var(--line);margin:18px 0"></div>`;
+    h += `<h2 style="font-size:1.05rem">Push — เด้งแม้ปิดแอป (Chrome/Android) 📲</h2>`;
+    h += `<p class="sync-note">ลงทะเบียนเครื่องนี้รับ push จะเด้งเตือนแม้ปิดแท็บ (บนคอมต้องเปิด Chrome ค้างไว้ บน Android เด้งได้แม้ปิด)</p>`;
+    h += `<button class="save" id="enPush" style="background:var(--primary)">เปิด Push บนเครื่องนี้</button>`;
+  }
+
+  h += `<div style="height:1px;background:var(--line);margin:18px 0"></div>`;
+  h += `<h2 style="font-size:1.05rem">เตือนผ่านปฏิทิน 🔔</h2>`;
+  h += `<p class="sync-note">ส่งออกการบ้าน/นัด/สอบลงปฏิทินของเครื่อง แล้วให้ <b>แอปปฏิทินของมือถือ</b> เตือนแทน — ชัวร์ทุกเครื่อง (รวม iPhone) แม้ปิดแอป</p>`;
+  h += `<button class="save" id="calAll" style="background:var(--routine)">📅 ส่งออกทั้งหมดลงปฏิทิน</button>`;
+  showRawSheet(h);
+  const e=$('#enInApp'); if(e) e.onclick=()=>{ closeSheet(); askNotif(); };
+  const ep=$('#enPush'); if(ep) ep.onclick=enablePush;
+  $('#calAll').onclick = exportAllICS;
+}
+
+async function enablePush(){
+  try {
+    if (!fbReady) return warn('ต้องตั้งค่าซิงค์ก่อน (ปุ่มเมฆ)');
+    if (!VAPID_KEY || VAPID_KEY==='PASTE_VAPID_KEY_HERE') return warn('ยังไม่ได้ใส่ VAPID key ในไฟล์');
+    if (!('serviceWorker' in navigator)) return warn('เบราว์เซอร์นี้ไม่รองรับ Push');
+    const perm = await Notification.requestPermission();
+    refreshBell();
+    if (perm !== 'granted') return warn('ยังไม่ได้อนุญาตแจ้งเตือน');
+    const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+    if (!token) return warn('ขอ token ไม่สำเร็จ ลองใหม่อีกครั้ง');
+    await _db.collection('spaces').doc(getSyncCode()).collection('_pushtokens').doc(token)
+      .set({ token, ua: navigator.userAgent.slice(0,140), ts: Date.now() });
+    messaging.onMessage(p => { const n=p.notification||{}; fire(n.title||'แจ้งเตือน', n.body||''); });
+    closeSheet();
+    fire('เปิด Push สำเร็จ ✓', 'เครื่องนี้จะได้รับแจ้งเตือนแม้ปิดแอป');
+  } catch (e) {
+    console.error(e);
+    warn('เปิด Push ไม่สำเร็จ: ' + (e?.message || 'ไม่ทราบสาเหตุ') + ' (iPhone ต้อง Add to Home Screen ก่อน)');
+  }
 }
 
 // ตรวจทุกนาที: เตือนที่ 1 วัน และ 1 ชม. ก่อนกำหนด
@@ -1349,7 +1506,7 @@ $('#todayLabel').textContent = fmtDate(new Date());
 buildTabs();
 $('#fab').onclick = () => openSheet(curTab==='class'?'classes':curTab==='hw'?'homework':curTab==='proj'?'projects':(curTab==='appt'||curTab==='cal'||curTab==='week')?'appts':'homework', null);
 $('#scrim').onclick = closeSheet;
-$('#bellBtn').onclick = askNotif;
+$('#bellBtn').onclick = openNotifSheet;
 $('#enableNotif').onclick = askNotif;
 $('#syncBtn').onclick = openSyncSheet;
 $('#themeBtn').onclick = toggleTheme;

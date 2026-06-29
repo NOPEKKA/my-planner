@@ -1,0 +1,10 @@
+{
+  "name": "planner-notify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ตัวส่ง push แจ้งเตือนการบ้าน/นัด/สอบ ของ my-planner",
+  "type": "commonjs",
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

@@ -1406,6 +1406,7 @@ function openNotifSheet(){
   h += `<p class="sync-note">เด้งเตือนก่อนถึงกำหนด — การบ้าน/นัด 1 วัน · 1 ชม. · 5 นาที, สอบ 7 · 3 · 1 วัน</p>`;
   if (granted) h += `<div class="sync-ok">● เปิดแจ้งเตือนในแอปแล้ว (เตือนตอนเปิดแอป)</div>`;
   else h += `<button class="save" id="enInApp">เปิดแจ้งเตือนในแอป</button>`;
+  h += `<button class="save" id="testNotif" style="background:var(--ink-soft);margin-top:10px">🔔 ทดสอบ — เด้งใน 10 วินาที</button>`;
 
   if (pushReady) {
     h += `<div style="height:1px;background:var(--line);margin:18px 0"></div>`;
@@ -1421,7 +1422,32 @@ function openNotifSheet(){
   showRawSheet(h);
   const e=$('#enInApp'); if(e) e.onclick=()=>{ closeSheet(); askNotif(); };
   const ep=$('#enPush'); if(ep) ep.onclick=enablePush;
+  const tn=$('#testNotif'); if(tn) tn.onclick=testNotif;
   $('#calAll').onclick = exportAllICS;
+}
+
+async function testNotif(){
+  try {
+    if (!('Notification' in window)) return warn('เครื่องนี้ไม่รองรับการแจ้งเตือน');
+    let perm = Notification.permission;
+    if (perm !== 'granted') perm = await Notification.requestPermission();
+    refreshBell();
+    if (perm !== 'granted') return warn('ยังไม่ได้อนุญาตแจ้งเตือน — กดอนุญาตก่อนนะ');
+    // ใช้ service worker แสดง (จำเป็นบน Android Chrome) เผื่อ fallback เป็น Notification ปกติ
+    let reg = null;
+    try { reg = await navigator.serviceWorker.register('firebase-messaging-sw.js'); await navigator.serviceWorker.ready; } catch(e){}
+    closeSheet();
+    fire('ตั้งเวลาแล้ว ⏱️', 'จะเด้งใน 10 วินาที — ลองปิดหน้าจอ/สลับแอปรอดูได้ (อย่าปิด Chrome)');
+    setTimeout(() => {
+      const title = '🔔 ทดสอบแจ้งเตือน';
+      const opts = { body: 'ถ้าเห็นข้อความนี้ = แจ้งเตือนบนเครื่องนี้ทำงานปกติ ✓', tag: 'planner-test', renotify: true };
+      if (reg && reg.showNotification) reg.showNotification(title, opts);
+      else if (window.Notification) { try { new Notification(title, opts); } catch(e){ fire(title, opts.body); } }
+    }, 10000);
+  } catch (e) {
+    console.error(e);
+    warn('ทดสอบไม่สำเร็จ: ' + (e?.message || 'ไม่ทราบสาเหตุ'));
+  }
 }
 
 async function enablePush(){

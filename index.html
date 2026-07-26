@@ -91,6 +91,27 @@
   .card .meta { font-size: .85rem; color: var(--ink-soft); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
   .card .meta b { color: var(--ink); font-weight: 600; }
   .card.done .title { text-decoration: line-through; color: var(--ink-soft); }
+  .card .note-line { font-size: .78rem; color: var(--ink-soft); margin-top: 5px; white-space: pre-wrap;
+                     padding-left: 9px; border-left: 2px solid var(--line); }
+  .card .note-line a.note-link { color: var(--primary-deep); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--teal-soft); word-break: break-all; }
+  .card.overdue { box-shadow: inset 3px 0 0 var(--exam); }
+  /* เช็กลิสต์ในฟอร์ม */
+  .ck-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .ck-row .ck-text { flex: 1; }
+  .ck-del { flex: none; width: 38px; border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft);
+            border-radius: 10px; font-size: .85rem; cursor: pointer; }
+  .ck-add { background: none; border: 1.5px dashed var(--line); color: var(--ink-soft); width: 100%; padding: 9px;
+            border-radius: 10px; font-size: .85rem; cursor: pointer; margin-top: 2px; }
+  .ck-add:hover { border-color: var(--primary); color: var(--primary-deep); }
+  /* เช็กลิสต์ในการ์ด */
+  .card .ck-list { margin-top: 8px; }
+  .card .ck-prog { font-size: .72rem; color: var(--ink-soft); font-weight: 600; margin-bottom: 4px; }
+  .card .ck-item { display: flex; align-items: center; gap: 8px; padding: 3px 0; cursor: pointer; font-size: .84rem; }
+  .card .ck-box { flex: none; width: 18px; height: 18px; border: 1.5px solid var(--line); border-radius: 6px;
+                  display: inline-flex; align-items: center; justify-content: center; }
+  .card .ck-box svg { width: 12px; height: 12px; stroke: #fff; }
+  .card .ck-item.on .ck-box { background: var(--primary); border-color: var(--primary); }
+  .card .ck-item.on .ck-txt { text-decoration: line-through; color: var(--ink-soft); }
 
   /* นาฬิกานับถอยหลัง = signature */
   .pill { font-size: .76rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap;
@@ -172,9 +193,12 @@
   nav.tabs button { flex: 1; background: none; border: none; padding: 8px 4px; display: flex; flex-direction: column;
                     align-items: center; gap: 3px; color: var(--ink-soft); border-radius: 12px; }
   nav.tabs button svg { width: 22px; height: 22px; }
-  nav.tabs button span { font-size: .58rem; font-weight: 500; white-space: nowrap; }
-  nav.tabs button { padding: 8px 1px; }
-  nav.tabs button svg { width: 19px; height: 19px; }
+  nav.tabs button span { font-size: .54rem; font-weight: 500; white-space: nowrap; }
+  nav.tabs button { padding: 8px 0; }
+  nav.tabs button svg { width: 18px; height: 18px; }
+  .note-card .note-body { white-space: pre-wrap; font-size: .9rem; color: var(--ink); margin-top: 5px; line-height: 1.5; }
+  .note-card .note-body a.note-link, .note-card .title a.note-link { color: var(--primary-deep); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--teal-soft); word-break: break-all; }
+  .note-card .title { white-space: pre-wrap; }
 
   /* วันสอบ */
   .exam-hero { background: linear-gradient(135deg, var(--exam), #C03460); color: #fff; border-radius: var(--radius);
@@ -375,6 +399,9 @@
 
     <!-- โปรเจกต์ -->
     <section class="view" id="view-proj"><div id="projContent"></div></section>
+
+    <!-- โน้ต -->
+    <section class="view" id="view-note"><div id="noteContent"></div></section>
   </main>
 </div>
 
@@ -426,7 +453,7 @@ const FIREBASE_CONFIG = {
 };
 */
 
-const COLLS = ['classes','routines','homework','appts','exams','projects'];
+const COLLS = ['classes','routines','homework','appts','exams','projects','notes'];
 /* ===== ② Push: วาง "Web Push certificate (VAPID key)" จาก Firebase Console ตรงนี้ (เว้นไว้ = ไม่เปิด push) ===== */
 const VAPID_KEY = 'BKbKwJGd7RSN5uwIkxQ96ANkSv7Ut1SoQb3qnwPb5aieHgtZR4aQKFMsocEcE3X-kYtDAfFwefjVuMYonsuhls4';
 const SYNC_CODE_KEY = 'planner.syncCode';
@@ -439,7 +466,7 @@ const LocalStore = (() => {
   const listeners = new Set();
   let data = load();
   function load() { try { return { ...base(), ...(JSON.parse(localStorage.getItem(KEY)) || {}) }; } catch { return base(); } }
-  function base() { return { classes: [], routines: [], homework: [], appts: [], exams: [], projects: [] }; }
+  function base() { return { classes: [], routines: [], homework: [], appts: [], exams: [], projects: [], notes: [] }; }
   function persist() { localStorage.setItem(KEY, JSON.stringify(data)); emit(); }
   function emit() { listeners.forEach(fn => fn(data)); }
   return {
@@ -574,7 +601,13 @@ function renderToday() {
 
   // สิ่งที่ต้องทำ — วันนี้ / พรุ่งนี้
   const tmr = new Date(now); tmr.setDate(now.getDate()+1);
-  const todoToday = routinesFor(now), todoTmr = routinesFor(tmr);
+  const todayY = ymd(now);
+  // งานครั้งเดียวที่เลยกำหนดแล้วยังไม่เสร็จ — ยกยอดมาไว้วันนี้จนกว่าจะติ๊กเสร็จ
+  const overdue = Store.all('routines')
+    .filter(r => (r.repeat==='once'||r.date) && r.date && !r.done && r.date < todayY)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  const todoToday = [...overdue, ...routinesFor(now)];
+  const todoTmr = routinesFor(tmr);
   if (todoToday.length) {
     box.appendChild(eyebrow('สิ่งที่ต้องทำวันนี้', todoToday.length));
     todoToday.forEach(r => box.appendChild(todoCard(r)));
@@ -634,19 +667,45 @@ function routinesFor(date){
   return Store.all('routines').filter(r => {
     if (r.repeat==='once' || r.date) return r.date && sameYMD(new Date(r.date+'T00:00:00'), date);
     return (r.days||[]).includes(dow);
-  }).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  }).sort((a,b)=> (a.allDay?0:1)-(b.allDay?0:1) || (a.time||'').localeCompare(b.time||''));
 }
 function todoCard(r){
   const once = r.repeat==='once' || !!r.date;
-  const card = el('div','card' + (once && r.done ? ' done' : ''));
+  const todayY = ymd(new Date());
+  const overdue = once && !r.done && r.date && r.date < todayY;
+  const card = el('div','card' + (once && r.done ? ' done' : '') + (overdue ? ' overdue' : ''));
   if (once){ const chk=el('button','check'+(r.done?' tick':''), ICON.tick); chk.onclick=()=>Store.update('routines', r.id, {done:!r.done}); card.appendChild(chk); }
   else card.append(accent('var(--routine)'));
   const b = el('div','body');
   b.appendChild(el('div','title', esc(r.title)));
   const m = el('div','meta');
-  if (once) m.innerHTML = `<span><b>${r.time||''}</b></span><span>ครั้งเดียว</span>`;
-  else { const days = r.days.length===7?'ทุกวัน':r.days.slice().sort((a,b)=>ORDER.indexOf(a)-ORDER.indexOf(b)).map(d=>TH_DAY_S[d]).join(' '); m.innerHTML = `<span><b>${r.time||''}</b></span><span>${days}</span>`; }
-  b.appendChild(m); card.appendChild(b);
+  const timeStr = r.allDay ? 'ทั้งวัน' : (r.time||'');
+  if (once) {
+    let right = 'ครั้งเดียว';
+    if (overdue) { const d=new Date(r.date+'T00:00:00'); right = `⚠ เลยกำหนด ${d.getDate()} ${TH_MON[d.getMonth()]}`; }
+    m.innerHTML = `<span><b>${timeStr}</b></span><span${overdue?' style="color:var(--exam);font-weight:600"':''}>${right}</span>`;
+  } else {
+    const days = r.days.length===7?'ทุกวัน':r.days.slice().sort((a,b)=>ORDER.indexOf(a)-ORDER.indexOf(b)).map(d=>TH_DAY_S[d]).join(' ');
+    m.innerHTML = `<span><b>${timeStr}</b></span><span>${days}</span>`;
+  }
+  b.appendChild(m);
+  if (r.checklist && r.checklist.length){
+    const doneN = r.checklist.filter(x=>x.done).length;
+    const cl = el('div','ck-list');
+    cl.appendChild(el('div','ck-prog', `เช็กลิสต์ ${doneN}/${r.checklist.length}`));
+    r.checklist.forEach((x,i) => {
+      const row = el('div','ck-item'+(x.done?' on':''));
+      row.appendChild(el('span','ck-box', x.done?ICON.tick:''));
+      row.appendChild(el('span','ck-txt', esc(x.text)));
+      row.onclick = (e) => { e.stopPropagation();
+        const nl = r.checklist.map((y,j)=> j===i ? {...y, done:!y.done} : y);
+        Store.update('routines', r.id, { checklist:nl });
+      };
+      cl.appendChild(row);
+    });
+    b.appendChild(cl);
+  }
+  card.appendChild(b);
   card.appendChild(actions('routines', r));
   return card;
 }
@@ -763,6 +822,7 @@ function weekItemsFor(date, types){
     s:toH(c.start), e:toH(c.end), title:esc(c.subject),
     sub:c.start + (c.online?' • ออนไลน์':(c.room?' • '+esc(c.room):'')), color:c.color||'var(--primary)', data:['classes',c] })) : [];
   const routines = types.includes('routines') ? Store.all('routines').filter(r => {
+      if (r.allDay) return false;                       // ทั้งวัน — ไม่ลงตารางสัปดาห์
       if (r.repeat==='once' || r.date) return r.date && sameYMD(new Date(r.date+'T00:00:00'), date);
       return (r.days||[]).includes(dow);
     }).map(r => {
@@ -1079,8 +1139,9 @@ const TABS = [
   { id:'hw',    label:'การบ้าน',  icon:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/>' },
   { id:'appt',  label:'นัด',      icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' },
   { id:'proj',  label:'โปรเจกต์', icon:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 13l2 2 4-4"/>' },
+  { id:'note',  label:'โน้ต',     icon:'<path d="M4 4a2 2 0 0 1 2-2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>' },
 ];
-const TITLES = { today:'วันนี้', week:'สัปดาห์นี้', cal:'ปฏิทิน', class:'ตารางเรียน', hw:'การบ้าน', appt:'นัดหมาย', proj:'โปรเจกต์' };
+const TITLES = { today:'วันนี้', week:'สัปดาห์นี้', cal:'ปฏิทิน', class:'ตารางเรียน', hw:'การบ้าน', appt:'นัดหมาย', proj:'โปรเจกต์', note:'โน้ต' };
 let curTab = 'today';
 
 function buildTabs() {
@@ -1110,7 +1171,9 @@ function openSheet(coll, item) {
   sheetState = { coll, id: item?.id || null, color: item?.color || COLOR_OPTS[0],
                  days: item?.days ? [...item.days] : [1,2,3,4,5], online: item?.online || false,
                  status: item?.status || 'idea',
-                 repeat: item?.repeat || (item?.date ? 'once' : 'weekly'), done: item?.done || false };
+                 repeat: item?.repeat || (item?.date ? 'once' : 'weekly'), done: item?.done || false,
+                 allDay: item?.allDay || false,
+                 checklist: item?.checklist ? item.checklist.map(x=>({...x})) : [] };
   renderSheet(item);
   $('#scrim').classList.add('show'); $('#sheet').classList.add('show');
 }
@@ -1160,7 +1223,7 @@ function renderSheet(item) {
   const body = $('#sheetBody'); const editing = !!sheetState.id; const coll = sheetState.coll;
   let inner = `<h2>${editing?'แก้ไข':'เพิ่ม'}${({classes:'คาบเรียน',routines:'กิจวัตร',homework:'การบ้าน',appts:'นัดหมาย',exams:'วันสอบ',projects:'โปรเจกต์'})[coll]}</h2>`;
 
-  if (!editing && coll !== 'projects') {
+  if (!editing && coll !== 'projects' && coll !== 'notes') {
     inner += `<div class="seg" id="typeSeg">
       <button data-c="classes">เรียน</button><button data-c="routines">กิจวัตร</button>
       <button data-c="homework">การบ้าน</button><button data-c="appts">นัด</button><button data-c="exams">สอบ</button></div>`;
@@ -1175,12 +1238,20 @@ function renderSheet(item) {
     inner += fld('สี', swatchHTML());
   } else if (coll === 'routines') {
     inner += fld('สิ่งที่ต้องทำ', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น อ่านหนังสือ / ส่งใบลา / ออกกำลังกาย">`);
-    inner += fld('เวลา', `<input class="inp" type="time" id="f_time" value="${item?.time||'07:00'}">`);
+    inner += fld('เวลา', `<div class="seg" id="timeMode">
+        <button type="button" data-t="time" class="${sheetState.allDay?'':'on'}">เลือกเวลา</button>
+        <button type="button" data-t="allday" class="${sheetState.allDay?'on':''}">ทั้งวัน</button></div>
+      <div id="timeInput" class="${sheetState.allDay?'hidden':''}" style="margin-top:8px">
+        <input class="inp" type="time" id="f_time" value="${item?.time||'07:00'}"></div>`);
     inner += fld('ทำซ้ำ', `<div class="seg" id="repPick">
         <button type="button" data-r="weekly" class="${sheetState.repeat==='weekly'?'on':''}">ลูปทุกสัปดาห์</button>
         <button type="button" data-r="once" class="${sheetState.repeat==='once'?'on':''}">ครั้งเดียว</button></div>`);
     inner += `<div id="repWeekly" class="${sheetState.repeat==='once'?'hidden':''}">${fld('ทำวันไหนบ้าง', daypickHTML())}</div>`;
     inner += `<div id="repOnce" class="${sheetState.repeat==='weekly'?'hidden':''}">${fld('วันที่', `<input class="inp" type="date" id="f_date" value="${item?.date||ymd(new Date())}">`)}</div>`;
+    inner += fld('เช็กลิสต์ย่อย (ถ้ามี)', checklistHTML(sheetState.checklist));
+  } else if (coll === 'notes') {
+    inner += fld('หัวข้อ (ถ้ามี)', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น รหัส WiFi / ไอเดีย / ฝากเพื่อน">`);
+    inner += fld('โน้ต', `<textarea class="inp" id="f_note" rows="7" placeholder="พิมพ์อะไรก็ได้ — วางลิงก์แล้วกดเปิดได้">${esc(item?.text||'')}</textarea>`);
   } else if (coll === 'homework') {
     inner += fld('ชื่องาน', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น รายงานวิทย์ บทที่ 3">`);
     inner += fld('วิชา', `<input class="inp" id="f_subject" value="${attr(item?.subject)}" placeholder="เช่น วิทยาศาสตร์">`);
@@ -1213,7 +1284,7 @@ function renderSheet(item) {
     b.classList.toggle('on', b.dataset.c === coll);
     b.onclick = () => { sheetState.coll = b.dataset.c; renderSheet(null); };
   });
-  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick(); bindRepeat();
+  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick(); bindRepeat(); bindTimeMode(); bindChecklist();
   $('#saveBtn').onclick = save;
   { const cb = $('#calBtn'); if (cb) cb.onclick = () => exportItemICS(coll, item); }
   if (editing) $('#delBtn').onclick = () => askConfirm('ลบรายการนี้?', 'ลบ', () => { Store.remove(coll, sheetState.id); closeSheet(); });
@@ -1262,6 +1333,67 @@ function bindRepeat(){
     $('#repOnce').classList.toggle('hidden', sheetState.repeat !== 'once');
   });
 }
+function bindTimeMode(){
+  const seg = $('#timeMode'); if (!seg) return;
+  seg.querySelectorAll('button').forEach(b => b.onclick = () => {
+    sheetState.allDay = b.dataset.t === 'allday';
+    seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    $('#timeInput').classList.toggle('hidden', sheetState.allDay);
+  });
+}
+// ---- เช็กลิสต์ย่อย (ในฟอร์ม) ----
+function ckRowHTML(text, done){
+  return `<div class="ck-row" data-done="${done?'1':'0'}">
+    <input class="inp ck-text" value="${attr(text)}" placeholder="ข้อย่อย...">
+    <button type="button" class="ck-del" title="ลบ">✕</button></div>`;
+}
+function checklistHTML(items){
+  const rows = (items||[]).map(x => ckRowHTML(x.text, x.done)).join('');
+  return `<div id="ckWrap">${rows}</div><button type="button" class="ck-add" id="ckAdd">+ เพิ่มข้อย่อย</button>`;
+}
+function bindCkDel(row){ const d=row.querySelector('.ck-del'); if(d) d.onclick=()=>row.remove(); }
+function bindChecklist(){
+  const add = $('#ckAdd'); if (!add) return;
+  add.onclick = () => {
+    const wrap=$('#ckWrap'); const box=document.createElement('div'); box.innerHTML=ckRowHTML('',false);
+    const row=box.firstElementChild; wrap.appendChild(row); bindCkDel(row); row.querySelector('.ck-text').focus();
+  };
+  $('#ckWrap').querySelectorAll('.ck-row').forEach(bindCkDel);
+}
+function readChecklist(){
+  return [...document.querySelectorAll('#ckWrap .ck-row')]
+    .map(r => ({ text: r.querySelector('.ck-text').value.trim(), done: r.dataset.done==='1' }))
+    .filter(x => x.text);
+}
+// ---- แปลงลิงก์ในข้อความให้กดได้ (escape ก่อนเสมอ) ----
+function linkifyNote(text){
+  const e = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const re = /(https?:\/\/[^\s]+)/g; let out='', last=0, m;
+  while ((m = re.exec(text))){
+    out += e(text.slice(last, m.index));
+    const url = m[1];
+    out += `<a href="${e(url)}" target="_blank" rel="noopener" class="note-link">${e(url.replace(/^https?:\/\/(www\.)?/,''))}</a>`;
+    last = m.index + url.length;
+  }
+  out += e(text.slice(last));
+  return out;
+}
+
+function renderNotes(){
+  const box = $('#noteContent'); box.innerHTML = '';
+  const notes = Store.all('notes').slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  if (!notes.length){ box.appendChild(empty('📝','ยังไม่มีโน้ต — กดปุ่ม + จดอะไรก็ได้ (วางลิงก์แล้วกดเปิดได้)')); return; }
+  notes.forEach(n => box.appendChild(noteCard(n)));
+}
+function noteCard(n){
+  const card = el('div','card note-card');
+  const b = el('div','body');
+  if (n.title) b.appendChild(el('div','title', esc(n.title)));
+  if (n.text){ const t = el('div', n.title ? 'note-body' : 'title'); t.innerHTML = linkifyNote(n.text); b.appendChild(t); }
+  card.appendChild(b);
+  card.appendChild(actions('notes', n));
+  return card;
+}
 function ymd(d){ const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; }
 function bindDaypick(){
   const dp = $('#daypick'); if(!dp) return;
@@ -1296,16 +1428,22 @@ function save() {
     else sheetState.days.forEach(d => Store.add(c, {...base, day:d})); // เพิ่มหลายวันได้ในครั้งเดียว
   } else if (c === 'routines') {
     if (!v('#f_title')) return warn('ใส่ชื่อสิ่งที่ต้องทำก่อนนะ');
-    const time = $('#f_time').value;
+    const time = sheetState.allDay ? '' : $('#f_time').value;
+    const checklist = readChecklist();
     if (sheetState.repeat === 'once') {
       const date = $('#f_date').value; if (!date) return warn('เลือกวันที่ก่อนนะ');
-      const o = { title:v('#f_title'), time, repeat:'once', date, done: sheetState.done };
+      const o = { title:v('#f_title'), time, allDay:sheetState.allDay, checklist, repeat:'once', date, done: sheetState.done };
       id ? Store.update(c, id, o) : Store.add(c, o);
     } else {
       if (!sheetState.days.length) return warn('เลือกวันอย่างน้อย 1 วัน');
-      const o = { title:v('#f_title'), time, repeat:'weekly', days:[...sheetState.days] };
+      const o = { title:v('#f_title'), time, allDay:sheetState.allDay, checklist, repeat:'weekly', days:[...sheetState.days] };
       id ? Store.update(c, id, o) : Store.add(c, o);
     }
+  } else if (c === 'notes') {
+    const title = v('#f_title'), text = ($('#f_note')?.value || '').trim();
+    if (!title && !text) return warn('พิมพ์อะไรสักอย่างก่อนนะ');
+    const o = { title, text, updatedAt: Date.now() };
+    id ? Store.update(c, id, o) : Store.add(c, o);
   } else if (c === 'homework') {
     if (!v('#f_title')) return warn('ใส่ชื่องานก่อนนะ');
     const o = { title:v('#f_title'), subject:v('#f_subject'), note:v('#f_note'),
@@ -1511,6 +1649,7 @@ function renderAll() {
   else if (curTab==='hw') renderHw();
   else if (curTab==='appt') renderAppt();
   else if (curTab==='proj') renderProj();
+  else if (curTab==='note') renderNotes();
 }
 
 /* ===================== โหมดมืด ===================== */
@@ -1530,7 +1669,7 @@ function toggleTheme(){
 /* ===================== เริ่มทำงาน ===================== */
 $('#todayLabel').textContent = fmtDate(new Date());
 buildTabs();
-$('#fab').onclick = () => openSheet(curTab==='class'?'classes':curTab==='hw'?'homework':curTab==='proj'?'projects':(curTab==='appt'||curTab==='cal'||curTab==='week')?'appts':'homework', null);
+$('#fab').onclick = () => openSheet(curTab==='class'?'classes':curTab==='hw'?'homework':curTab==='proj'?'projects':curTab==='note'?'notes':(curTab==='appt'||curTab==='cal'||curTab==='week')?'appts':'homework', null);
 $('#scrim').onclick = closeSheet;
 $('#bellBtn').onclick = openNotifSheet;
 $('#enableNotif').onclick = askNotif;

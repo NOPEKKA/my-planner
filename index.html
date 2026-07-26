@@ -295,6 +295,7 @@
   .grab { width: 40px; height: 4px; background: var(--line-strong); border-radius: 4px; margin: 8px auto 14px; }
   .sheet h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
   .seg { display: flex; gap: 6px; background: var(--line); padding: 4px; border-radius: 13px; margin: 14px 0 4px; }
+  #timeMode button { font-size: .66rem; padding: 9px 1px; }
   .seg button { flex: 1; border: none; background: none; padding: 9px 3px; border-radius: 10px; font-size: .76rem;
                 font-weight: 500; color: var(--ink-soft); white-space: nowrap; }
   .seg button.on { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: var(--shadow); }
@@ -544,7 +545,7 @@ function countdown(target) {
   const past = ms < 0, a = Math.abs(ms);
   const min = Math.floor(a/60000), hr = Math.floor(min/60), day = Math.floor(hr/24);
   let txt;
-  if (day >= 1) txt = `${day} วัน`;
+  if (day >= 1) txt = `${day} วัน ${hr%24} ชม.`;
   else if (hr >= 1) txt = `${hr} ชม. ${min%60} น.`;
   else txt = `${min} นาที`;
   let cls = 'pill';
@@ -627,6 +628,16 @@ function renderToday() {
   box.appendChild(eyebrow('ใกล้ถึงกำหนด', future.length));
   if (!future.length) box.appendChild(empty('🌤️','ตอนนี้ยังไม่มีอะไรใกล้ถึงกำหนด สบายๆ'));
   future.slice(0,12).forEach(u => box.appendChild(u.t==='hw' ? hwCard(u.item) : apptCard(u.item)));
+
+  // สิ่งที่ต้องทำภายในสัปดาห์นี้ — เฉพาะที่ครบกำหนดไม่เกินสิ้นสัปดาห์นี้ (สัปดาห์หน้ายังไม่โชว์)
+  const eow = endOfWeek(now, 0);
+  const cdTasks = Store.all('routines')
+    .filter(r => r.countdown && !r.done && new Date(r.date+'T'+(r.time||'23:59')+':00') <= eow)
+    .sort((a,b)=> new Date(a.date+'T'+(a.time||'23:59')) - new Date(b.date+'T'+(b.time||'23:59')));
+  if (cdTasks.length) {
+    box.appendChild(eyebrow('สิ่งที่ต้องทำภายในสัปดาห์นี้', cdTasks.length));
+    cdTasks.forEach(r => box.appendChild(todoCard(r)));
+  }
 }
 
 function eyebrow(text, count) {
@@ -665,22 +676,37 @@ function routineCard(r) {
 function routinesFor(date){
   const dow = date.getDay();
   return Store.all('routines').filter(r => {
+    if (r.countdown) return false;                        // นับถอยหลังโชว์ในลิสต์วันนี้แยก
     if (r.repeat==='once' || r.date) return r.date && sameYMD(new Date(r.date+'T00:00:00'), date);
     return (r.days||[]).includes(dow);
   }).sort((a,b)=> (a.allDay?0:1)-(b.allDay?0:1) || (a.time||'').localeCompare(b.time||''));
 }
+function cdText(dateStr, timeStr){
+  const ms = new Date(dateStr+'T'+(timeStr||'23:59')+':00') - Date.now();
+  if (ms < 0) return { txt:'⚠ เลยกำหนด', over:true, soon:true };
+  const totalMin = Math.floor(ms/60000), hr = Math.floor(totalMin/60), day = Math.floor(hr/24);
+  let t;
+  if (day >= 1) t = `${day} วัน ${hr%24} ชม.`;
+  else if (hr >= 1) t = `${hr} ชม. ${totalMin%60} น.`;
+  else t = `${totalMin} นาที`;
+  return { txt:`⏳ เหลือ ${t}`, over:false, soon: ms < 24*3600000 };
+}
 function todoCard(r){
   const once = r.repeat==='once' || !!r.date;
   const todayY = ymd(new Date());
-  const overdue = once && !r.done && r.date && r.date < todayY;
-  const card = el('div','card' + (once && r.done ? ' done' : '') + (overdue ? ' overdue' : ''));
-  if (once){ const chk=el('button','check'+(r.done?' tick':''), ICON.tick); chk.onclick=()=>Store.update('routines', r.id, {done:!r.done}); card.appendChild(chk); }
+  const cd = r.countdown ? cdText(r.date, r.time) : null;
+  const overdue = (once && !r.countdown && !r.done && r.date && r.date < todayY) || (cd && cd.over && !r.done);
+  const card = el('div','card' + ((once||r.countdown) && r.done ? ' done' : '') + (overdue ? ' overdue' : ''));
+  if (once || r.countdown){ const chk=el('button','check'+(r.done?' tick':''), ICON.tick); chk.onclick=()=>Store.update('routines', r.id, {done:!r.done}); card.appendChild(chk); }
   else card.append(accent('var(--routine)'));
   const b = el('div','body');
   b.appendChild(el('div','title', esc(r.title)));
   const m = el('div','meta');
   const timeStr = r.allDay ? 'ทั้งวัน' : (r.time||'');
-  if (once) {
+  if (r.countdown) {
+    const d = new Date(r.date+'T00:00:00');
+    m.innerHTML = `<span style="color:${cd.over?'var(--exam)':(cd.soon?'var(--soon-deep, var(--exam))':'var(--primary-deep)')};font-weight:600">${cd.txt}</span><span>กำหนด ${d.getDate()} ${TH_MON[d.getMonth()]}${r.time?' '+r.time:''}</span>`;
+  } else if (once) {
     let right = 'ครั้งเดียว';
     if (overdue) { const d=new Date(r.date+'T00:00:00'); right = `⚠ เลยกำหนด ${d.getDate()} ${TH_MON[d.getMonth()]}`; }
     m.innerHTML = `<span><b>${timeStr}</b></span><span${overdue?' style="color:var(--exam);font-weight:600"':''}>${right}</span>`;
@@ -812,6 +838,7 @@ function renderClassList() {
   list.forEach(c => box.appendChild(classCard(c, false)));
 }
 function mondayOf(d){ const x = startOfDay(d); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return x; }
+function endOfWeek(d, offsetWeeks=0){ const s = mondayOf(d); s.setDate(s.getDate() + 6 + offsetWeeks*7); s.setHours(23,59,0,0); return s; }
 let weekStart = mondayOf(new Date());
 let weekOrient = 'dayRows'; // 'dayRows' = วันซ้าย/เวลาบน | 'timeRows' = เวลาซ้าย/วันบน
 const SWAP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4"/><path d="M20 7H4"/><path d="M8 21l-4-4 4-4"/><path d="M4 17h16"/></svg>';
@@ -822,7 +849,7 @@ function weekItemsFor(date, types){
     s:toH(c.start), e:toH(c.end), title:esc(c.subject),
     sub:c.start + (c.online?' • ออนไลน์':(c.room?' • '+esc(c.room):'')), color:c.color||'var(--primary)', data:['classes',c] })) : [];
   const routines = types.includes('routines') ? Store.all('routines').filter(r => {
-      if (r.allDay) return false;                       // ทั้งวัน — ไม่ลงตารางสัปดาห์
+      if (r.allDay || r.countdown) return false;         // ทั้งวัน/นับถอยหลัง — ไม่ลงตารางสัปดาห์
       if (r.repeat==='once' || r.date) return r.date && sameYMD(new Date(r.date+'T00:00:00'), date);
       return (r.days||[]).includes(dow);
     }).map(r => {
@@ -1172,7 +1199,8 @@ function openSheet(coll, item) {
                  days: item?.days ? [...item.days] : [1,2,3,4,5], online: item?.online || false,
                  status: item?.status || 'idea',
                  repeat: item?.repeat || (item?.date ? 'once' : 'weekly'), done: item?.done || false,
-                 allDay: item?.allDay || false,
+                 timeMode: item?.countdown ? 'week' : (item?.allDay ? 'allday' : 'time'),
+                 weekWhich: (item?.countdown && item?.date && new Date(item.date+'T23:59:00') > endOfWeek(new Date(),0)) ? 'next' : 'this',
                  checklist: item?.checklist ? item.checklist.map(x=>({...x})) : [] };
   renderSheet(item);
   $('#scrim').classList.add('show'); $('#sheet').classList.add('show');
@@ -1237,17 +1265,26 @@ function renderSheet(item) {
     inner += onlineFields('เรียนออนไลน์', item?.link);
     inner += fld('สี', swatchHTML());
   } else if (coll === 'routines') {
+    const tm = sheetState.timeMode;
     inner += fld('สิ่งที่ต้องทำ', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น อ่านหนังสือ / ส่งใบลา / ออกกำลังกาย">`);
     inner += fld('เวลา', `<div class="seg" id="timeMode">
-        <button type="button" data-t="time" class="${sheetState.allDay?'':'on'}">เลือกเวลา</button>
-        <button type="button" data-t="allday" class="${sheetState.allDay?'on':''}">ทั้งวัน</button></div>
-      <div id="timeInput" class="${sheetState.allDay?'hidden':''}" style="margin-top:8px">
-        <input class="inp" type="time" id="f_time" value="${item?.time||'07:00'}"></div>`);
+        <button type="button" data-t="time" class="${tm==='time'?'on':''}">เลือกเวลา</button>
+        <button type="button" data-t="allday" class="${tm==='allday'?'on':''}">ทั้งวัน</button>
+        <button type="button" data-t="week" class="${tm==='week'?'on':''}">ภายในสัปดาห์</button></div>
+      <div id="timeInput" class="${tm==='time'?'':'hidden'}" style="margin-top:8px">
+        <input class="inp" type="time" id="f_time" value="${item?.time||'07:00'}"></div>
+      <div id="weekWhich" class="${tm==='week'?'':'hidden'}" style="margin-top:8px">
+        <div class="seg" id="weekSeg">
+          <button type="button" data-w="this" class="${sheetState.weekWhich!=='next'?'on':''}">สัปดาห์นี้</button>
+          <button type="button" data-w="next" class="${sheetState.weekWhich==='next'?'on':''}">สัปดาห์หน้า</button></div>
+        <p class="sync-note">ตั้งเส้นตายเป็นสิ้นสัปดาห์ให้อัตโนมัติ (คืนวันอาทิตย์) แล้วนับถอยหลังให้ ติ๊กเสร็จได้</p></div>`);
+    inner += `<div id="repBlock" class="${tm==='week'?'hidden':''}">`;
     inner += fld('ทำซ้ำ', `<div class="seg" id="repPick">
         <button type="button" data-r="weekly" class="${sheetState.repeat==='weekly'?'on':''}">ลูปทุกสัปดาห์</button>
         <button type="button" data-r="once" class="${sheetState.repeat==='once'?'on':''}">ครั้งเดียว</button></div>`);
     inner += `<div id="repWeekly" class="${sheetState.repeat==='once'?'hidden':''}">${fld('ทำวันไหนบ้าง', daypickHTML())}</div>`;
     inner += `<div id="repOnce" class="${sheetState.repeat==='weekly'?'hidden':''}">${fld('วันที่', `<input class="inp" type="date" id="f_date" value="${item?.date||ymd(new Date())}">`)}</div>`;
+    inner += `</div>`;
     inner += fld('เช็กลิสต์ย่อย (ถ้ามี)', checklistHTML(sheetState.checklist));
   } else if (coll === 'notes') {
     inner += fld('หัวข้อ (ถ้ามี)', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น รหัส WiFi / ไอเดีย / ฝากเพื่อน">`);
@@ -1334,11 +1371,19 @@ function bindRepeat(){
   });
 }
 function bindTimeMode(){
-  const seg = $('#timeMode'); if (!seg) return;
-  seg.querySelectorAll('button').forEach(b => b.onclick = () => {
-    sheetState.allDay = b.dataset.t === 'allday';
+  const seg = $('#timeMode');
+  if (seg) seg.querySelectorAll('button').forEach(b => b.onclick = () => {
+    sheetState.timeMode = b.dataset.t;
     seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
-    $('#timeInput').classList.toggle('hidden', sheetState.allDay);
+    const tm = sheetState.timeMode;
+    $('#timeInput').classList.toggle('hidden', tm !== 'time');
+    $('#weekWhich').classList.toggle('hidden', tm !== 'week');
+    $('#repBlock').classList.toggle('hidden', tm === 'week');
+  });
+  const ws = $('#weekSeg');
+  if (ws) ws.querySelectorAll('button').forEach(b => b.onclick = () => {
+    sheetState.weekWhich = b.dataset.w;
+    ws.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
   });
 }
 // ---- เช็กลิสต์ย่อย (ในฟอร์ม) ----
@@ -1428,16 +1473,25 @@ function save() {
     else sheetState.days.forEach(d => Store.add(c, {...base, day:d})); // เพิ่มหลายวันได้ในครั้งเดียว
   } else if (c === 'routines') {
     if (!v('#f_title')) return warn('ใส่ชื่อสิ่งที่ต้องทำก่อนนะ');
-    const time = sheetState.allDay ? '' : $('#f_time').value;
     const checklist = readChecklist();
-    if (sheetState.repeat === 'once') {
-      const date = $('#f_date').value; if (!date) return warn('เลือกวันที่ก่อนนะ');
-      const o = { title:v('#f_title'), time, allDay:sheetState.allDay, checklist, repeat:'once', date, done: sheetState.done };
+    const tm = sheetState.timeMode;
+    if (tm === 'week') {
+      const eow = endOfWeek(new Date(), sheetState.weekWhich === 'next' ? 1 : 0);
+      const o = { title:v('#f_title'), countdown:true, allDay:false, date:ymd(eow), time:'23:59', checklist, repeat:'once', done: sheetState.done };
       id ? Store.update(c, id, o) : Store.add(c, o);
+      closeSheet(); switchTab('today'); return;
     } else {
-      if (!sheetState.days.length) return warn('เลือกวันอย่างน้อย 1 วัน');
-      const o = { title:v('#f_title'), time, allDay:sheetState.allDay, checklist, repeat:'weekly', days:[...sheetState.days] };
-      id ? Store.update(c, id, o) : Store.add(c, o);
+      const allDay = tm === 'allday';
+      const time = allDay ? '' : $('#f_time').value;
+      if (sheetState.repeat === 'once') {
+        const date = $('#f_date').value; if (!date) return warn('เลือกวันที่ก่อนนะ');
+        const o = { title:v('#f_title'), time, allDay, countdown:false, checklist, repeat:'once', date, done: sheetState.done };
+        id ? Store.update(c, id, o) : Store.add(c, o);
+      } else {
+        if (!sheetState.days.length) return warn('เลือกวันอย่างน้อย 1 วัน');
+        const o = { title:v('#f_title'), time, allDay, countdown:false, checklist, repeat:'weekly', days:[...sheetState.days] };
+        id ? Store.update(c, id, o) : Store.add(c, o);
+      }
     }
   } else if (c === 'notes') {
     const title = v('#f_title'), text = ($('#f_note')?.value || '').trim();

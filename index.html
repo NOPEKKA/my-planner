@@ -95,6 +95,17 @@
                      padding-left: 9px; border-left: 2px solid var(--line); }
   .card .note-line a.note-link { color: var(--primary-deep); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--teal-soft); word-break: break-all; }
   .card.overdue { box-shadow: inset 3px 0 0 var(--exam); }
+  .card.prio { box-shadow: inset 3px 0 0 var(--soon); }
+  .card .prio-badge { display: inline-block; background: var(--soon); color: #fff; font-size: .62rem; font-weight: 700;
+                      padding: 2px 7px; border-radius: 7px; margin-left: 6px; vertical-align: middle; }
+  .hw-item { margin-bottom: 12px; }
+  .hw-item .card { margin-bottom: 0; touch-action: pan-y; }
+  .hw-item .card.swiped { box-shadow: inset 3px 0 0 var(--primary); }
+  .reorder-bar { display: flex; gap: 8px; padding: 8px 2px 2px; }
+  .reorder-bar.hidden { display: none; }
+  .reorder-bar button { flex: 1; border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+                        border-radius: 10px; padding: 10px; font-size: .82rem; font-weight: 600; cursor: pointer; }
+  .reorder-bar button:active { background: var(--line); color: var(--primary-deep); }
   /* เช็กลิสต์ในฟอร์ม */
   .ck-row { display: flex; gap: 6px; margin-bottom: 6px; }
   .ck-row .ck-text { flex: 1; }
@@ -199,6 +210,9 @@
   .note-card .note-body { white-space: pre-wrap; font-size: .9rem; color: var(--ink); margin-top: 5px; line-height: 1.5; }
   .note-card .note-body a.note-link, .note-card .title a.note-link { color: var(--primary-deep); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--teal-soft); word-break: break-all; }
   .note-card .title { white-space: pre-wrap; }
+  .note-card .note-head { font-weight: 700; font-size: .9rem; color: var(--ink); margin-top: 10px; }
+  .sec-row { display: flex; flex-direction: column; gap: 5px; padding: 8px; margin-bottom: 8px; border: 1px solid var(--line); border-radius: 11px; }
+  .sec-row .sec-del { align-self: flex-start; background: none; border: none; color: var(--exam); font-size: .74rem; cursor: pointer; padding: 0; }
 
   /* วันสอบ */
   .exam-hero { background: linear-gradient(135deg, var(--exam), #C03460); color: #fff; border-radius: var(--radius);
@@ -627,7 +641,8 @@ function renderToday() {
 
   box.appendChild(eyebrow('ใกล้ถึงกำหนด', future.length));
   if (!future.length) box.appendChild(empty('🌤️','ตอนนี้ยังไม่มีอะไรใกล้ถึงกำหนด สบายๆ'));
-  future.slice(0,12).forEach(u => box.appendChild(u.t==='hw' ? hwCard(u.item) : apptCard(u.item)));
+  const topHwId = hwPending()[0]?.id;
+  future.slice(0,12).forEach(u => box.appendChild(u.t==='hw' ? hwCard(u.item, { top: u.item.id===topHwId }) : apptCard(u.item)));
 
   // สิ่งที่ต้องทำภายในสัปดาห์นี้ — เฉพาะที่ครบกำหนดไม่เกินสิ้นสัปดาห์นี้ (สัปดาห์หน้ายังไม่โชว์)
   const eow = endOfWeek(now, 0);
@@ -736,13 +751,15 @@ function todoCard(r){
   return card;
 }
 
-function hwCard(h) {
-  const card = el('div','card' + (h.done ? ' done' : ''));
+function hwCard(h, opts={}) {
+  const card = el('div','card' + (h.done ? ' done' : '') + (opts.top ? ' prio' : ''));
+  if (opts.reorder) card.dataset.hwid = h.id;
   const chk = el('button','check' + (h.done ? ' tick' : ''), ICON.tick);
   chk.onclick = () => Store.update('homework', h.id, { done: !h.done });
   card.appendChild(chk);
   const b = el('div','body');
   const t = el('div','title', esc(h.title));
+  if (opts.top) t.appendChild(el('span','prio-badge','⭐ ทำก่อน'));
   b.appendChild(t);
   const m = el('div','meta');
   const d = new Date(h.dueAt);
@@ -752,6 +769,16 @@ function hwCard(h) {
   if (!h.done) { const cd = countdown(h.dueAt); t.appendChild(el('span', cd.cls, cd.txt)); }
   card.appendChild(actions('homework', h));
   return card;
+}
+function hwPending(){
+  return Store.all('homework').filter(h=>!h.done)
+    .sort((a,b)=> (a.order??1e9)-(b.order??1e9) || new Date(a.dueAt)-new Date(b.dueAt));
+}
+function moveHw(id, dir){
+  const list = hwPending(); const i = list.findIndex(h=>h.id===id); const j = i+dir;
+  if (i<0 || j<0 || j>=list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  list.forEach((h,idx)=>{ if (h.order !== idx) Store.update('homework', h.id, { order: idx }); });
 }
 
 function apptCard(a) {
@@ -992,16 +1019,56 @@ function renderWeekTab(){
 }
 
 /* ---------- การบ้าน ---------- */
+let hwRevealed = null;   // id การบ้านที่ปัดเปิดแถบเลื่อนไว้
 function renderHw() {
   const box = $('#hwContent'); box.innerHTML = '';
   const all = Store.all('homework');
-  const pending = all.filter(h=>!h.done).sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt));
+  const pending = hwPending();
   const done = all.filter(h=>h.done).sort((a,b)=>new Date(b.dueAt)-new Date(a.dueAt));
   if (!all.length) { box.appendChild(empty('✏️','ยังไม่มีการบ้าน — กดปุ่ม + เพื่อเพิ่มงานชิ้นแรก')); return; }
   box.appendChild(eyebrow('ยังไม่เสร็จ', pending.length));
   if (!pending.length) box.appendChild(empty('🎉','เคลียร์หมดแล้ว!'));
-  pending.forEach(h => box.appendChild(hwCard(h)));
+  const many = pending.length>1;
+  pending.forEach((h,i) => {
+    const item = el('div','hw-item');
+    const card = hwCard(h, { top: i===0 });
+    item.appendChild(card);
+    if (many) {
+      const bar = el('div','reorder-bar' + (hwRevealed===h.id ? '' : ' hidden'));
+      const up = el('button','','⌃ เลื่อนขึ้น'); up.onclick = ()=>moveHw(h.id,-1);
+      const dn = el('button','','⌄ เลื่อนลง'); dn.onclick = ()=>moveHw(h.id,1);
+      bar.append(up, dn); item.appendChild(bar);
+      if (hwRevealed===h.id) card.classList.add('swiped');
+      addSwipeReveal(card, bar, h.id);
+    }
+    box.appendChild(item);
+  });
   if (done.length) { box.appendChild(eyebrow('เสร็จแล้ว', done.length)); done.forEach(h => box.appendChild(hwCard(h))); }
+}
+// ปัดขวาที่การ์ด → เผยแถบปุ่มเลื่อนขึ้น/ลงข้างล่าง (ปัดซ้ายเพื่อซ่อน)
+function addSwipeReveal(card, bar, id){
+  let x0=null, y0=null, horiz=false;
+  card.addEventListener('pointerdown', e => {
+    if (e.target.closest('button')) return;
+    x0=e.clientX; y0=e.clientY; horiz=false;
+  });
+  card.addEventListener('pointermove', e => {
+    if (x0==null) return;
+    const dx=e.clientX-x0, dy=e.clientY-y0;
+    if (!horiz && Math.abs(dx)>10 && Math.abs(dx)>Math.abs(dy)) horiz=true;
+    if (horiz) card.style.transform = `translateX(${Math.max(-12, Math.min(dx,74))}px)`;
+  });
+  const end = e => {
+    if (x0==null) return;
+    const dx=(e.clientX ?? x0)-x0;
+    card.style.transition='transform .18s'; card.style.transform='';
+    setTimeout(()=>{ card.style.transition=''; }, 200);
+    if (horiz && dx>45){ bar.classList.remove('hidden'); card.classList.add('swiped'); hwRevealed=id; }
+    else if (horiz && dx<-30){ bar.classList.add('hidden'); card.classList.remove('swiped'); if(hwRevealed===id) hwRevealed=null; }
+    x0=null;
+  };
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
 }
 
 /* ---------- นัดหมาย ---------- */
@@ -1102,6 +1169,14 @@ function itemsOn(date){
            ex: Store.all('exams').filter(e => sameYMD(new Date(e.at), date)) };
 }
 function dayISO(d, time){ const [hh,mm]=time.split(':'); const x=new Date(d); x.setHours(+hh,+mm,0,0); return x.toISOString(); }
+function sameWeek(a, b){ return sameYMD(mondayOf(a), mondayOf(b)); }
+function routineTasksOn(date){
+  return Store.all('routines').filter(r => {
+    if (!r.date) return false;
+    const dl = new Date(r.date+'T00:00:00');
+    return r.countdown ? sameWeek(date, dl) : sameYMD(dl, date);   // งานสัปดาห์ = ทั้งสัปดาห์, งานวันที่ = เฉพาะวันนั้น
+  }).sort((a,b)=> (a.allDay||a.countdown?0:1)-(b.allDay||b.countdown?0:1) || (a.time||'').localeCompare(b.time||''));
+}
 
 function renderCal(){
   const box = $('#calContent'); box.innerHTML = '';
@@ -1149,10 +1224,14 @@ function renderCal(){
   add.append(aHw, aAp, aEx); box.appendChild(add);
 
   const {hw, ap, ex} = itemsOn(sd);
+  const rts = routineTasksOn(sd);
   const classes = Store.all('classes').filter(c=>c.day===sd.getDay()).sort((a,b)=>a.start.localeCompare(b.start));
-  if (!hw.length && !ap.length && !ex.length && !classes.length){ box.appendChild(empty('🗓️','วันนี้ยังว่าง — กดปุ่มด้านบนเพื่อเพิ่ม')); return; }
+  if (!hw.length && !ap.length && !ex.length && !classes.length && !rts.length){ box.appendChild(empty('🗓️','วันนี้ยังว่าง — กดปุ่มด้านบนเพื่อเพิ่ม')); return; }
   if (ex.length){ box.appendChild(eyebrow('สอบ', ex.length)); ex.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(e=>box.appendChild(examCard(e))); }
   if (classes.length){ box.appendChild(eyebrow('คาบเรียน', classes.length)); classes.forEach(c=>box.appendChild(classCard(c, true))); }
+  const weekTs = rts.filter(r=>r.countdown), dayTs = rts.filter(r=>!r.countdown);
+  if (weekTs.length){ box.appendChild(eyebrow('สิ่งที่ต้องทำภายในสัปดาห์นี้', weekTs.length)); weekTs.forEach(r=>box.appendChild(todoCard(r))); }
+  if (dayTs.length){ box.appendChild(eyebrow('สิ่งที่ต้องทำ', dayTs.length)); dayTs.forEach(r=>box.appendChild(todoCard(r))); }
   if (hw.length){ box.appendChild(eyebrow('การบ้านส่งวันนี้', hw.length)); hw.sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt)).forEach(h=>box.appendChild(hwCard(h))); }
   if (ap.length){ box.appendChild(eyebrow('นัดหมาย', ap.length)); ap.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(a=>box.appendChild(apptCard(a))); }
 }
@@ -1288,7 +1367,8 @@ function renderSheet(item) {
     inner += fld('เช็กลิสต์ย่อย (ถ้ามี)', checklistHTML(sheetState.checklist));
   } else if (coll === 'notes') {
     inner += fld('หัวข้อ (ถ้ามี)', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น รหัส WiFi / ไอเดีย / ฝากเพื่อน">`);
-    inner += fld('โน้ต', `<textarea class="inp" id="f_note" rows="7" placeholder="พิมพ์อะไรก็ได้ — วางลิงก์แล้วกดเปิดได้">${esc(item?.text||'')}</textarea>`);
+    inner += fld('โน้ต', `<textarea class="inp" id="f_note" rows="5" placeholder="พิมพ์อะไรก็ได้ — วางลิงก์แล้วกดเปิดได้">${esc(item?.text||'')}</textarea>`);
+    inner += fld('เช็กลิสต์ (ถ้ามี)', checklistHTML(item?.checklist||[]));
   } else if (coll === 'homework') {
     inner += fld('ชื่องาน', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น รายงานวิทย์ บทที่ 3">`);
     inner += fld('วิชา', `<input class="inp" id="f_subject" value="${attr(item?.subject)}" placeholder="เช่น วิทยาศาสตร์">`);
@@ -1321,7 +1401,7 @@ function renderSheet(item) {
     b.classList.toggle('on', b.dataset.c === coll);
     b.onclick = () => { sheetState.coll = b.dataset.c; renderSheet(null); };
   });
-  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick(); bindRepeat(); bindTimeMode(); bindChecklist();
+  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick(); bindRepeat(); bindTimeMode(); bindChecklist(); bindSections();
   $('#saveBtn').onclick = save;
   { const cb = $('#calBtn'); if (cb) cb.onclick = () => exportItemICS(coll, item); }
   if (editing) $('#delBtn').onclick = () => askConfirm('ลบรายการนี้?', 'ลบ', () => { Store.remove(coll, sheetState.id); closeSheet(); });
@@ -1410,6 +1490,31 @@ function readChecklist(){
     .map(r => ({ text: r.querySelector('.ck-text').value.trim(), done: r.dataset.done==='1' }))
     .filter(x => x.text);
 }
+// ---- หัวข้อย่อยของโน้ต ----
+function secRowHTML(head, body){
+  return `<div class="sec-row">
+    <input class="inp sec-head" value="${attr(head)}" placeholder="หัวข้อย่อย">
+    <textarea class="inp sec-body" rows="2" placeholder="เนื้อหา (วางลิงก์ได้)">${esc(body||'')}</textarea>
+    <button type="button" class="sec-del">✕ ลบหัวข้อนี้</button></div>`;
+}
+function sectionsHTML(items){
+  const rows = (items||[]).map(x => secRowHTML(x.head, x.body)).join('');
+  return `<div id="secWrap">${rows}</div><button type="button" class="ck-add" id="secAdd">+ เพิ่มหัวข้อย่อย</button>`;
+}
+function bindSecDel(row){ const d=row.querySelector('.sec-del'); if(d) d.onclick=()=>row.remove(); }
+function bindSections(){
+  const add = $('#secAdd'); if (!add) return;
+  add.onclick = () => {
+    const w=$('#secWrap'); const box=document.createElement('div'); box.innerHTML=secRowHTML('','');
+    const row=box.firstElementChild; w.appendChild(row); bindSecDel(row); row.querySelector('.sec-head').focus();
+  };
+  $('#secWrap').querySelectorAll('.sec-row').forEach(bindSecDel);
+}
+function readSections(){
+  return [...document.querySelectorAll('#secWrap .sec-row')]
+    .map(r => ({ head: r.querySelector('.sec-head').value.trim(), body: r.querySelector('.sec-body').value.trim() }))
+    .filter(x => x.head || x.body);
+}
 // ---- แปลงลิงก์ในข้อความให้กดได้ (escape ก่อนเสมอ) ----
 function linkifyNote(text){
   const e = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1435,6 +1540,22 @@ function noteCard(n){
   const b = el('div','body');
   if (n.title) b.appendChild(el('div','title', esc(n.title)));
   if (n.text){ const t = el('div', n.title ? 'note-body' : 'title'); t.innerHTML = linkifyNote(n.text); b.appendChild(t); }
+  if (n.checklist && n.checklist.length){
+    const doneN = n.checklist.filter(x=>x.done).length;
+    const cl = el('div','ck-list');
+    cl.appendChild(el('div','ck-prog', `เช็กลิสต์ ${doneN}/${n.checklist.length}`));
+    n.checklist.forEach((x,i) => {
+      const row = el('div','ck-item'+(x.done?' on':''));
+      row.appendChild(el('span','ck-box', x.done?ICON.tick:''));
+      row.appendChild(el('span','ck-txt', esc(x.text)));
+      row.onclick = (e) => { e.stopPropagation();
+        const nl = n.checklist.map((y,j)=> j===i ? {...y, done:!y.done} : y);
+        Store.update('notes', n.id, { checklist:nl });
+      };
+      cl.appendChild(row);
+    });
+    b.appendChild(cl);
+  }
   card.appendChild(b);
   card.appendChild(actions('notes', n));
   return card;
@@ -1495,8 +1616,9 @@ function save() {
     }
   } else if (c === 'notes') {
     const title = v('#f_title'), text = ($('#f_note')?.value || '').trim();
-    if (!title && !text) return warn('พิมพ์อะไรสักอย่างก่อนนะ');
-    const o = { title, text, updatedAt: Date.now() };
+    const checklist = readChecklist();
+    if (!title && !text && !checklist.length) return warn('พิมพ์อะไรสักอย่างก่อนนะ');
+    const o = { title, text, checklist, updatedAt: Date.now() };
     id ? Store.update(c, id, o) : Store.add(c, o);
   } else if (c === 'homework') {
     if (!v('#f_title')) return warn('ใส่ชื่องานก่อนนะ');

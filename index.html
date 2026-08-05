@@ -29,7 +29,7 @@
     --font: "IBM Plex Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
     --invert-bg: #1B1C2A; --invert-fg: #FFFFFF; --invert-fg-soft: rgba(255,255,255,.7);
     --nav-bg: rgba(251,250,246,.92);
-    --exam: #E0466E; --exam-soft: #FBE0E8;
+    --exam: #E0466E; --exam-soft: #FBE0E8; --danger: #DC2626;
   }
   [data-theme="dark"] {
     --paper: #14151B; --card: #1E2029; --ink: #E9E9F0; --ink-soft: #9A9CAD;
@@ -37,7 +37,7 @@
     --primary: #2DD4BF; --primary-deep: #5EEAD4;
     --soon: #FBBF4D; --over: #F87171; --routine: #A99CF5; --routine-soft: #2A2740;
     --teal-soft: #15393A; --amber-soft: #3A2E16; --over-soft: #3A1E1E;
-    --exam: #F4789A; --exam-soft: #3A1E28;
+    --exam: #F4789A; --exam-soft: #3A1E28; --danger: #F87171;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.4);
     --invert-bg: #E9E9F0; --invert-fg: #14151B; --invert-fg-soft: rgba(20,21,27,.6);
     --nav-bg: rgba(20,21,27,.92);
@@ -94,7 +94,7 @@
   .card .note-line { font-size: .78rem; color: var(--ink-soft); margin-top: 5px; white-space: pre-wrap;
                      padding-left: 9px; border-left: 2px solid var(--line); }
   .card .note-line a.note-link { color: var(--primary-deep); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--teal-soft); word-break: break-all; }
-  .card.overdue { box-shadow: inset 3px 0 0 var(--exam); }
+  .card.overdue { box-shadow: inset 3px 0 0 var(--over); }
   .card.prio { box-shadow: inset 3px 0 0 var(--soon); }
   .card .prio-badge { display: inline-block; background: var(--soon); color: #fff; font-size: .62rem; font-weight: 700;
                       padding: 2px 7px; border-radius: 7px; margin-left: 6px; vertical-align: middle; }
@@ -106,6 +106,21 @@
   .reorder-bar button { flex: 1; border: 1px solid var(--line); background: var(--paper); color: var(--ink);
                         border-radius: 10px; padding: 10px; font-size: .82rem; font-weight: 600; cursor: pointer; }
   .reorder-bar button:active { background: var(--line); color: var(--primary-deep); }
+  .seg.seg-wrap { flex-wrap: wrap; }
+  .seg.seg-wrap button { flex: 1 1 28%; }
+  .see-all { display: block; margin: 4px 0 2px auto; padding: 4px 2px; background: none; border: none;
+             color: var(--ink-soft); font-size: .76rem; text-decoration: underline; cursor: pointer; }
+  .see-all:hover { color: var(--primary-deep); }
+  .agenda { display: flex; flex-direction: column; gap: 6px; }
+  .ag-row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: var(--paper);
+            border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+  .ag-row:active { background: var(--line); }
+  .ag-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .ag-mid { flex: 1; min-width: 0; }
+  .ag-t { font-weight: 600; font-size: .9rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ag-s { font-size: .72rem; color: var(--ink-soft); margin-top: 1px; }
+  .ag-c { flex: none; font-size: .76rem; font-weight: 700; color: var(--ink-soft); text-align: right; }
+  .ag-c.soon { color: var(--exam); }
   /* เช็กลิสต์ในฟอร์ม */
   .ck-row { display: flex; gap: 6px; margin-bottom: 6px; }
   .ck-row .ck-text { flex: 1; }
@@ -161,7 +176,7 @@
   .cal-cell.sel { background: var(--invert-bg); } .cal-cell.sel .dn { color: var(--invert-fg); }
   .cal-dots { display: flex; gap: 3px; }
   .cal-dots i { width: 6px; height: 6px; border-radius: 50%; }
-  .cal-dots i.hw { background: var(--soon); } .cal-dots i.ap { background: var(--primary); }
+  .cal-dots i.hw { background: #22C55E; } .cal-dots i.ap { background: #FACC15; } .cal-dots i.oc { background: var(--routine); }
   .cal-cell.sel .cal-dots i { box-shadow: 0 0 0 1px rgba(255,255,255,.5); }
   .cal-day-head { font-size: .95rem; font-weight: 700; margin: 20px 4px 8px; display: flex; align-items: center; gap: 10px; }
   .cal-add { display: flex; gap: 8px; margin: 4px 0 14px; }
@@ -222,6 +237,9 @@
   .exam-hero .cd { font-size: .9rem; font-weight: 600; margin-top: 6px; opacity: .95; }
   .pill.exam { background: var(--exam-soft); color: var(--exam); }
   .cal-dots i.ex { background: var(--exam); }
+  .cal-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; margin: 2px 0 10px; }
+  .cal-legend span { display: inline-flex; align-items: center; gap: 5px; font-size: .68rem; color: var(--ink-soft); }
+  .cal-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 
   /* ตารางทั้งสัปดาห์ (กริด) */
   .view-seg { display: flex; gap: 6px; background: var(--line); padding: 4px; border-radius: 12px; margin: 0 2px 12px; }
@@ -468,7 +486,7 @@ const FIREBASE_CONFIG = {
 };
 */
 
-const COLLS = ['classes','routines','homework','appts','exams','projects','notes'];
+const COLLS = ['classes','routines','homework','appts','exams','projects','notes','occasions'];
 /* ===== ② Push: วาง "Web Push certificate (VAPID key)" จาก Firebase Console ตรงนี้ (เว้นไว้ = ไม่เปิด push) ===== */
 const VAPID_KEY = 'BKbKwJGd7RSN5uwIkxQ96ANkSv7Ut1SoQb3qnwPb5aieHgtZR4aQKFMsocEcE3X-kYtDAfFwefjVuMYonsuhls4';
 const SYNC_CODE_KEY = 'planner.syncCode';
@@ -481,7 +499,7 @@ const LocalStore = (() => {
   const listeners = new Set();
   let data = load();
   function load() { try { return { ...base(), ...(JSON.parse(localStorage.getItem(KEY)) || {}) }; } catch { return base(); } }
-  function base() { return { classes: [], routines: [], homework: [], appts: [], exams: [], projects: [], notes: [] }; }
+  function base() { return { classes: [], routines: [], homework: [], appts: [], exams: [], projects: [], notes: [], occasions: [] }; }
   function persist() { localStorage.setItem(KEY, JSON.stringify(data)); emit(); }
   function emit() { listeners.forEach(fn => fn(data)); }
   return {
@@ -632,17 +650,21 @@ function renderToday() {
     todoTmr.forEach(r => box.appendChild(todoCard(r)));
   }
 
-  // ใกล้ถึงกำหนด: การบ้าน + นัด รวมกัน เรียงตามเวลา
+  // ใกล้ถึงกำหนด: การบ้าน + นัด + วันสำคัญ รวมกัน เรียงตามเวลา (เฉพาะภายใน 100 วัน)
   const up = [];
-  Store.all('homework').filter(h=>!h.done).forEach(h => up.push({t:'hw', at:h.dueAt, item:h}));
-  Store.all('appts').forEach(a => up.push({t:'appt', at:a.at, item:a}));
-  up.sort((x,y)=> new Date(x.at) - new Date(y.at));
-  const future = up.filter(u => new Date(u.at) - now > -12*3600000); // เก็บที่เพิ่งเลยภายใน 12 ชม.ด้วย
+  Store.all('homework').filter(h=>!h.done).forEach(h => up.push({when:new Date(h.dueAt), kind:'hw', item:h}));
+  Store.all('appts').forEach(a => up.push({when:new Date(a.at), kind:'ap', item:a}));
+  Store.all('occasions').forEach(o => up.push({when:nextOccur(o), kind:'oc', item:o}));
+  up.sort((x,y)=> x.when - y.when);
+  const recent = up.filter(u => u.when - now > -12*3600000);           // รวมที่เพิ่งเลยภายใน 12 ชม.
+  const future = recent.filter(u => dDays(u.when) <= 100);
 
   box.appendChild(eyebrow('ใกล้ถึงกำหนด', future.length));
   if (!future.length) box.appendChild(empty('🌤️','ตอนนี้ยังไม่มีอะไรใกล้ถึงกำหนด สบายๆ'));
-  const topHwId = hwPending()[0]?.id;
-  future.slice(0,12).forEach(u => box.appendChild(u.t==='hw' ? hwCard(u.item, { top: u.item.id===topHwId }) : apptCard(u.item)));
+  future.forEach(u => box.appendChild(u.kind==='hw' ? hwCard(u.item) : u.kind==='ap' ? apptCard(u.item) : occasionCard(u.item)));
+  const seeAllH = el('button','see-all', `ดูทั้งหมดในปฏิทิน →`);
+  seeAllH.onclick = ()=>switchTab('cal');
+  box.appendChild(seeAllH);
 
   // สิ่งที่ต้องทำภายในสัปดาห์นี้ — เฉพาะที่ครบกำหนดไม่เกินสิ้นสัปดาห์นี้ (สัปดาห์หน้ายังไม่โชว์)
   const eow = endOfWeek(now, 0);
@@ -688,10 +710,12 @@ function routineCard(r) {
   card.appendChild(b); card.appendChild(actions('routines', r));
   return card;
 }
+function domOn(dom, date){ const last = new Date(date.getFullYear(), date.getMonth()+1, 0).getDate(); return date.getDate() === Math.min(dom, last); }
 function routinesFor(date){
   const dow = date.getDay();
   return Store.all('routines').filter(r => {
     if (r.countdown) return false;                        // นับถอยหลังโชว์ในลิสต์วันนี้แยก
+    if (r.repeat==='monthly') return domOn(r.dom, date);
     if (r.repeat==='once' || r.date) return r.date && sameYMD(new Date(r.date+'T00:00:00'), date);
     return (r.days||[]).includes(dow);
   }).sort((a,b)=> (a.allDay?0:1)-(b.allDay?0:1) || (a.time||'').localeCompare(b.time||''));
@@ -705,6 +729,82 @@ function cdText(dateStr, timeStr){
   else if (hr >= 1) t = `${hr} ชม. ${totalMin%60} น.`;
   else t = `${totalMin} นาที`;
   return { txt:`⏳ เหลือ ${t}`, over:false, soon: ms < 24*3600000 };
+}
+function dDays(d){ return Math.round((startOfDay(new Date(d)) - startOfDay(new Date()))/86400000); }
+function dCount(d){ const n=dDays(d); return n===0 ? 'วันนี้' : n>0 ? `อีก ${n} วัน` : `เลย ${-n} วัน`; }
+function nextOccur(o){
+  const base = new Date(o.date+'T00:00:00'), now = startOfDay(new Date());
+  let d;
+  if (o.repeat === 'monthly'){
+    d = new Date(now.getFullYear(), now.getMonth(), base.getDate());
+    while (d < now) d = new Date(d.getFullYear(), d.getMonth()+1, base.getDate());
+  } else {
+    d = new Date(now.getFullYear(), base.getMonth(), base.getDate());
+    if (d < now) d = new Date(now.getFullYear()+1, base.getMonth(), base.getDate());
+  }
+  return d;
+}
+function occursOn(o, date){
+  const base = new Date(o.date+'T00:00:00');
+  return o.repeat === 'monthly' ? date.getDate()===base.getDate()
+       : date.getMonth()===base.getMonth() && date.getDate()===base.getDate();
+}
+function occasionCard(o){
+  const d = nextOccur(o);
+  const card = el('div','card');
+  card.append(accent('var(--routine)'));
+  const b = el('div','body');
+  const t = el('div','title', '🎉 '+esc(o.title));
+  b.appendChild(t);
+  const m = el('div','meta');
+  m.innerHTML = `<span><b>${fmtDate(d)}</b></span><span>${o.repeat==='monthly'?'ทุกเดือน':'ทุกปี'}</span>`;
+  b.appendChild(m); card.appendChild(b);
+  const cd = countdown(d); t.appendChild(el('span', cd.cls, cd.txt));
+  card.appendChild(actions('occasions', o));
+  return card;
+}
+// ---- รายการรวมทั้งหมดที่จะถึง (agenda) ----
+function agendaItems(){
+  const out = [];
+  Store.all('homework').filter(h=>!h.done).forEach(h=>{ const d=new Date(h.dueAt);
+    out.push({ when:d, color:'#22C55E', title:h.title, sub:'การบ้าน · ส่ง '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('homework',h) }); });
+  Store.all('appts').forEach(a=>{ const d=new Date(a.at); if(dDays(d)<0) return;
+    out.push({ when:d, color:'#FACC15', title:a.title, sub:'นัด · '+fmtDate(d)+' '+fmtTime(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('appts',a) }); });
+  Store.all('exams').forEach(e=>{ const d=new Date(e.at); if(dDays(d)<0) return;
+    out.push({ when:d, color:'var(--exam)', title:e.subject, sub:'สอบ · '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('exams',e) }); });
+  Store.all('occasions').forEach(o=>{ const d=nextOccur(o);
+    out.push({ when:d, color:'var(--routine)', title:o.title, sub:(o.repeat==='monthly'?'ทุกเดือน':'ทุกปี')+' · '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('occasions',o) }); });
+  Store.all('routines').filter(r=>r.date && !r.done).forEach(r=>{
+    if (r.countdown){ const start=mondayOf(new Date(r.date+'T00:00:00')), n=dDays(start);
+      out.push({ when:start, color:'var(--ink-soft)', title:r.title, sub:'สิ่งที่ต้องทำภายในสัปดาห์', count: n<=0?'เริ่มแล้ว':`อีก ${n} วันจะเริ่ม`, soon:n<=7, tap:()=>openSheet('routines',r) }); }
+    else { const d=new Date(r.date+'T00:00:00'); if(dDays(d)<0) return;
+      out.push({ when:d, color:'var(--ink-soft)', title:r.title, sub:'สิ่งที่ต้องทำ · '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('routines',r) }); }
+  });
+  return out.sort((a,b)=> a.when - b.when);
+}
+function agendaRow(it){
+  const row = el('div','ag-row');
+  row.innerHTML = `<span class="ag-dot" style="background:${it.color}"></span><div class="ag-mid"><div class="ag-t">${esc(it.title)}</div><div class="ag-s">${it.sub}</div></div><span class="ag-c${it.soon?' soon':''}">${it.count}</span>`;
+  if (it.tap) row.onclick = it.tap;
+  return row;
+}
+let agendaAll = false;
+function renderAgenda(box){
+  const items = agendaItems();
+  box.appendChild(eyebrow('รายการทั้งหมดที่จะถึง', items.length));
+  if (!items.length){ box.appendChild(empty('🗓️','ยังไม่มีรายการข้างหน้า')); return; }
+  const within = items.filter(it => dDays(it.when) <= 100);
+  const show = agendaAll ? items : within;
+  const wrap = el('div','agenda'); show.forEach(it=>wrap.appendChild(agendaRow(it))); box.appendChild(wrap);
+  if (!agendaAll && items.length > within.length){
+    const btn = el('button','see-all', `ดูทั้งหมด (${items.length} รายการ) →`);
+    btn.onclick = ()=>{ agendaAll = true; renderCal(); };
+    box.appendChild(btn);
+  } else if (agendaAll){
+    const btn = el('button','see-all', `ย่อกลับ (แสดง 100 วันแรก)`);
+    btn.onclick = ()=>{ agendaAll = false; renderCal(); };
+    box.appendChild(btn);
+  }
 }
 function todoCard(r){
   const once = r.repeat==='once' || !!r.date;
@@ -720,13 +820,14 @@ function todoCard(r){
   const timeStr = r.allDay ? 'ทั้งวัน' : (r.time||'');
   if (r.countdown) {
     const d = new Date(r.date+'T00:00:00');
-    m.innerHTML = `<span style="color:${cd.over?'var(--exam)':(cd.soon?'var(--soon-deep, var(--exam))':'var(--primary-deep)')};font-weight:600">${cd.txt}</span><span>กำหนด ${d.getDate()} ${TH_MON[d.getMonth()]}${r.time?' '+r.time:''}</span>`;
+    m.innerHTML = `<span style="color:${cd.over?"var(--over)":(cd.soon?'var(--soon)':'var(--primary-deep)')};font-weight:600">${cd.txt}</span><span>กำหนด ${d.getDate()} ${TH_MON[d.getMonth()]}${r.time?' '+r.time:''}</span>`;
   } else if (once) {
     let right = 'ครั้งเดียว';
     if (overdue) { const d=new Date(r.date+'T00:00:00'); right = `⚠ เลยกำหนด ${d.getDate()} ${TH_MON[d.getMonth()]}`; }
-    m.innerHTML = `<span><b>${timeStr}</b></span><span${overdue?' style="color:var(--exam);font-weight:600"':''}>${right}</span>`;
+    m.innerHTML = `<span><b>${timeStr}</b></span><span${overdue?' style="color:var(--over);font-weight:600"':''}>${right}</span>`;
   } else {
-    const days = r.days.length===7?'ทุกวัน':r.days.slice().sort((a,b)=>ORDER.indexOf(a)-ORDER.indexOf(b)).map(d=>TH_DAY_S[d]).join(' ');
+    const days = r.repeat==='monthly' ? `ทุกเดือน วันที่ ${r.dom}`
+      : (r.days.length===7?'ทุกวัน':r.days.slice().sort((a,b)=>ORDER.indexOf(a)-ORDER.indexOf(b)).map(d=>TH_DAY_S[d]).join(' '));
     m.innerHTML = `<span><b>${timeStr}</b></span><span>${days}</span>`;
   }
   b.appendChild(m);
@@ -752,14 +853,12 @@ function todoCard(r){
 }
 
 function hwCard(h, opts={}) {
-  const card = el('div','card' + (h.done ? ' done' : '') + (opts.top ? ' prio' : ''));
-  if (opts.reorder) card.dataset.hwid = h.id;
+  const card = el('div','card' + (h.done ? ' done' : ''));
   const chk = el('button','check' + (h.done ? ' tick' : ''), ICON.tick);
   chk.onclick = () => Store.update('homework', h.id, { done: !h.done });
   card.appendChild(chk);
   const b = el('div','body');
   const t = el('div','title', esc(h.title));
-  if (opts.top) t.appendChild(el('span','prio-badge','⭐ ทำก่อน'));
   b.appendChild(t);
   const m = el('div','meta');
   const d = new Date(h.dueAt);
@@ -877,6 +976,7 @@ function weekItemsFor(date, types){
     sub:c.start + (c.online?' • ออนไลน์':(c.room?' • '+esc(c.room):'')), color:c.color||'var(--primary)', data:['classes',c] })) : [];
   const routines = types.includes('routines') ? Store.all('routines').filter(r => {
       if (r.allDay || r.countdown) return false;         // ทั้งวัน/นับถอยหลัง — ไม่ลงตารางสัปดาห์
+      if (r.repeat==='monthly') return domOn(r.dom, date);
       if (r.repeat==='once' || r.date) return r.date && sameYMD(new Date(r.date+'T00:00:00'), date);
       return (r.days||[]).includes(dow);
     }).map(r => {
@@ -1191,6 +1291,10 @@ function renderCal(){
   head.append(prev, el('div','mo', `${TH_MON_FULL[calM]} ${calY+543}`), next, tb);
   box.appendChild(head);
 
+  const legend = el('div','cal-legend');
+  legend.innerHTML = `<span><i style="background:#FACC15"></i>นัด</span><span><i style="background:var(--exam)"></i>สอบ</span><span><i style="background:#22C55E"></i>การบ้าน</span><span><i style="background:var(--routine)"></i>วันสำคัญ</span><span><i style="background:var(--ink-soft)"></i>สิ่งที่ต้องทำ</span>`;
+  box.appendChild(legend);
+
   const grid = el('div','cal-grid');
   ['จ','อ','พ','พฤ','ศ','ส','อา'].forEach(d => grid.appendChild(el('div','cal-dow', d)));
   const first = new Date(calY, calM, 1);
@@ -1201,11 +1305,13 @@ function renderCal(){
     const cell = el('div','cal-cell' + (inMonth?'':' dim') + (sameYMD(d,today)?' today':'') + (sameYMD(d,selDate)?' sel':''));
     cell.appendChild(el('div','dn', String(d.getDate())));
     const {hw, ap, ex} = itemsOn(d);
-    if (hw.length || ap.length || ex.length){
+    const occHere = Store.all('occasions').some(o=>occursOn(o, d));
+    if (hw.length || ap.length || ex.length || occHere){
       const dots = el('div','cal-dots');
       if (ex.length) dots.appendChild(el('i','ex'));
       if (hw.length) dots.appendChild(el('i','hw'));
       if (ap.length) dots.appendChild(el('i','ap'));
+      if (occHere) dots.appendChild(el('i','oc'));
       cell.appendChild(dots);
     }
     const dd = new Date(d);
@@ -1221,19 +1327,28 @@ function renderCal(){
   const aHw = el('button','','+ การบ้าน'); aHw.onclick = ()=>openSheet('homework', { dueAt: dayISO(sd,'23:59') });
   const aAp = el('button','','+ นัดหมาย'); aAp.onclick = ()=>openSheet('appts', { at: dayISO(sd,'09:00') });
   const aEx = el('button','','+ สอบ'); aEx.onclick = ()=>openSheet('exams', { at: dayISO(sd,'09:00') });
-  add.append(aHw, aAp, aEx); box.appendChild(add);
+  const aOc = el('button','','+ วันสำคัญ'); aOc.onclick = ()=>openSheet('occasions', { date: ymd(sd) });
+  add.append(aHw, aAp, aEx, aOc); box.appendChild(add);
 
   const {hw, ap, ex} = itemsOn(sd);
   const rts = routineTasksOn(sd);
+  const occ = Store.all('occasions').filter(o=>occursOn(o, sd));
   const classes = Store.all('classes').filter(c=>c.day===sd.getDay()).sort((a,b)=>a.start.localeCompare(b.start));
-  if (!hw.length && !ap.length && !ex.length && !classes.length && !rts.length){ box.appendChild(empty('🗓️','วันนี้ยังว่าง — กดปุ่มด้านบนเพื่อเพิ่ม')); return; }
-  if (ex.length){ box.appendChild(eyebrow('สอบ', ex.length)); ex.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(e=>box.appendChild(examCard(e))); }
-  if (classes.length){ box.appendChild(eyebrow('คาบเรียน', classes.length)); classes.forEach(c=>box.appendChild(classCard(c, true))); }
-  const weekTs = rts.filter(r=>r.countdown), dayTs = rts.filter(r=>!r.countdown);
-  if (weekTs.length){ box.appendChild(eyebrow('สิ่งที่ต้องทำภายในสัปดาห์นี้', weekTs.length)); weekTs.forEach(r=>box.appendChild(todoCard(r))); }
-  if (dayTs.length){ box.appendChild(eyebrow('สิ่งที่ต้องทำ', dayTs.length)); dayTs.forEach(r=>box.appendChild(todoCard(r))); }
-  if (hw.length){ box.appendChild(eyebrow('การบ้านส่งวันนี้', hw.length)); hw.sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt)).forEach(h=>box.appendChild(hwCard(h))); }
-  if (ap.length){ box.appendChild(eyebrow('นัดหมาย', ap.length)); ap.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(a=>box.appendChild(apptCard(a))); }
+  if (!hw.length && !ap.length && !ex.length && !classes.length && !rts.length && !occ.length){
+    box.appendChild(empty('🗓️','วันนี้ยังว่าง — กดปุ่มด้านบนเพื่อเพิ่ม'));
+  } else {
+    if (ex.length){ box.appendChild(eyebrow('สอบ', ex.length)); ex.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(e=>box.appendChild(examCard(e))); }
+    if (classes.length){ box.appendChild(eyebrow('คาบเรียน', classes.length)); classes.forEach(c=>box.appendChild(classCard(c, true))); }
+    const weekTs = rts.filter(r=>r.countdown), dayTs = rts.filter(r=>!r.countdown);
+    if (weekTs.length){ box.appendChild(eyebrow('สิ่งที่ต้องทำภายในสัปดาห์นี้', weekTs.length)); weekTs.forEach(r=>box.appendChild(todoCard(r))); }
+    if (dayTs.length){ box.appendChild(eyebrow('สิ่งที่ต้องทำ', dayTs.length)); dayTs.forEach(r=>box.appendChild(todoCard(r))); }
+    if (occ.length){ box.appendChild(eyebrow('วันสำคัญ', occ.length)); occ.forEach(o=>box.appendChild(occasionCard(o))); }
+    if (hw.length){ box.appendChild(eyebrow('การบ้านส่งวันนี้', hw.length)); hw.sort((a,b)=>new Date(a.dueAt)-new Date(b.dueAt)).forEach(h=>box.appendChild(hwCard(h))); }
+    if (ap.length){ box.appendChild(eyebrow('นัดหมาย', ap.length)); ap.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(a=>box.appendChild(apptCard(a))); }
+  }
+
+  // รายการทั้งหมดที่จะถึง — ล่างสุด เลื่อนดูยาวๆ
+  renderAgenda(box);
 }
 
 /* ===================== แท็บ ===================== */
@@ -1280,6 +1395,7 @@ function openSheet(coll, item) {
                  repeat: item?.repeat || (item?.date ? 'once' : 'weekly'), done: item?.done || false,
                  timeMode: item?.countdown ? 'week' : (item?.allDay ? 'allday' : 'time'),
                  weekWhich: (item?.countdown && item?.date && new Date(item.date+'T23:59:00') > endOfWeek(new Date(),0)) ? 'next' : 'this',
+                 occRepeat: item?.repeat || 'yearly',
                  checklist: item?.checklist ? item.checklist.map(x=>({...x})) : [] };
   renderSheet(item);
   $('#scrim').classList.add('show'); $('#sheet').classList.add('show');
@@ -1328,12 +1444,12 @@ function openSyncSheet() {
 
 function renderSheet(item) {
   const body = $('#sheetBody'); const editing = !!sheetState.id; const coll = sheetState.coll;
-  let inner = `<h2>${editing?'แก้ไข':'เพิ่ม'}${({classes:'คาบเรียน',routines:'กิจวัตร',homework:'การบ้าน',appts:'นัดหมาย',exams:'วันสอบ',projects:'โปรเจกต์'})[coll]}</h2>`;
+  let inner = `<h2>${editing?'แก้ไข':'เพิ่ม'}${({classes:'คาบเรียน',routines:'กิจวัตร',homework:'การบ้าน',appts:'นัดหมาย',exams:'วันสอบ',projects:'โปรเจกต์',occasions:'วันสำคัญ'})[coll]}</h2>`;
 
   if (!editing && coll !== 'projects' && coll !== 'notes') {
-    inner += `<div class="seg" id="typeSeg">
+    inner += `<div class="seg seg-wrap" id="typeSeg">
       <button data-c="classes">เรียน</button><button data-c="routines">กิจวัตร</button>
-      <button data-c="homework">การบ้าน</button><button data-c="appts">นัด</button><button data-c="exams">สอบ</button></div>`;
+      <button data-c="homework">การบ้าน</button><button data-c="appts">นัด</button><button data-c="exams">สอบ</button><button data-c="occasions">วันสำคัญ</button></div>`;
   }
 
   if (coll === 'classes') {
@@ -1359,10 +1475,12 @@ function renderSheet(item) {
         <p class="sync-note">ตั้งเส้นตายเป็นสิ้นสัปดาห์ให้อัตโนมัติ (คืนวันอาทิตย์) แล้วนับถอยหลังให้ ติ๊กเสร็จได้</p></div>`);
     inner += `<div id="repBlock" class="${tm==='week'?'hidden':''}">`;
     inner += fld('ทำซ้ำ', `<div class="seg" id="repPick">
-        <button type="button" data-r="weekly" class="${sheetState.repeat==='weekly'?'on':''}">ลูปทุกสัปดาห์</button>
+        <button type="button" data-r="weekly" class="${sheetState.repeat==='weekly'?'on':''}">ทุกสัปดาห์</button>
+        <button type="button" data-r="monthly" class="${sheetState.repeat==='monthly'?'on':''}">ทุกเดือน</button>
         <button type="button" data-r="once" class="${sheetState.repeat==='once'?'on':''}">ครั้งเดียว</button></div>`);
-    inner += `<div id="repWeekly" class="${sheetState.repeat==='once'?'hidden':''}">${fld('ทำวันไหนบ้าง', daypickHTML())}</div>`;
-    inner += `<div id="repOnce" class="${sheetState.repeat==='weekly'?'hidden':''}">${fld('วันที่', `<input class="inp" type="date" id="f_date" value="${item?.date||ymd(new Date())}">`)}</div>`;
+    inner += `<div id="repWeekly" class="${sheetState.repeat==='weekly'?'':'hidden'}">${fld('ทำวันไหนบ้าง', daypickHTML())}</div>`;
+    inner += `<div id="repMonthly" class="${sheetState.repeat==='monthly'?'':'hidden'}">${fld('ทุกวันที่', `<select class="inp" id="f_dom">${Array.from({length:31},(_,i)=>`<option value="${i+1}"${(item?.dom||1)===i+1?' selected':''}>${i+1}</option>`).join('')}</select>`)}</div>`;
+    inner += `<div id="repOnce" class="${sheetState.repeat==='once'?'':'hidden'}">${fld('วันที่', `<input class="inp" type="date" id="f_date" value="${item?.date||ymd(new Date())}">`)}</div>`;
     inner += `</div>`;
     inner += fld('เช็กลิสต์ย่อย (ถ้ามี)', checklistHTML(sheetState.checklist));
   } else if (coll === 'notes') {
@@ -1389,6 +1507,12 @@ function renderSheet(item) {
     inner += fld('ชื่อโปรเจกต์', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น ทำแอปจัดตาราง / แต่งเพลง">`);
     inner += fld('สถานะ', statusPickHTML());
     inner += fld('รายละเอียด (ถ้ามี)', `<textarea class="inp" id="f_note" placeholder="โปรเจกต์นี้เกี่ยวกับอะไร">${esc(item?.note)}</textarea>`);
+  } else if (coll === 'occasions') {
+    inner += fld('วันสำคัญ', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น วันเกิดแม่ / ครบรอบ / เงินเดือนออก">`);
+    inner += fld('วันที่', `<input class="inp" type="date" id="f_date" value="${item?.date||ymd(new Date())}">`);
+    inner += fld('ทำซ้ำ', `<div class="seg" id="occRepeat">
+        <button type="button" data-o="yearly" class="${sheetState.occRepeat!=='monthly'?'on':''}">ทุกปี</button>
+        <button type="button" data-o="monthly" class="${sheetState.occRepeat==='monthly'?'on':''}">ทุกเดือน</button></div>`);
   }
 
   inner += `<button class="save" id="saveBtn">${editing?'บันทึกการแก้ไข':'เพิ่มลงตาราง'}</button>`;
@@ -1401,7 +1525,7 @@ function renderSheet(item) {
     b.classList.toggle('on', b.dataset.c === coll);
     b.onclick = () => { sheetState.coll = b.dataset.c; renderSheet(null); };
   });
-  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick(); bindRepeat(); bindTimeMode(); bindChecklist(); bindSections();
+  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick(); bindRepeat(); bindTimeMode(); bindChecklist(); bindSections(); bindOccRepeat();
   $('#saveBtn').onclick = save;
   { const cb = $('#calBtn'); if (cb) cb.onclick = () => exportItemICS(coll, item); }
   if (editing) $('#delBtn').onclick = () => askConfirm('ลบรายการนี้?', 'ลบ', () => { Store.remove(coll, sheetState.id); closeSheet(); });
@@ -1447,7 +1571,15 @@ function bindRepeat(){
     sheetState.repeat = b.dataset.r;
     seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
     $('#repWeekly').classList.toggle('hidden', sheetState.repeat !== 'weekly');
+    $('#repMonthly').classList.toggle('hidden', sheetState.repeat !== 'monthly');
     $('#repOnce').classList.toggle('hidden', sheetState.repeat !== 'once');
+  });
+}
+function bindOccRepeat(){
+  const seg = $('#occRepeat'); if (!seg) return;
+  seg.querySelectorAll('button').forEach(b => b.onclick = () => {
+    sheetState.occRepeat = b.dataset.o;
+    seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
   });
 }
 function bindTimeMode(){
@@ -1608,6 +1740,9 @@ function save() {
         const date = $('#f_date').value; if (!date) return warn('เลือกวันที่ก่อนนะ');
         const o = { title:v('#f_title'), time, allDay, countdown:false, checklist, repeat:'once', date, done: sheetState.done };
         id ? Store.update(c, id, o) : Store.add(c, o);
+      } else if (sheetState.repeat === 'monthly') {
+        const o = { title:v('#f_title'), time, allDay, countdown:false, checklist, repeat:'monthly', dom: +$('#f_dom').value };
+        id ? Store.update(c, id, o) : Store.add(c, o);
       } else {
         if (!sheetState.days.length) return warn('เลือกวันอย่างน้อย 1 วัน');
         const o = { title:v('#f_title'), time, allDay, countdown:false, checklist, repeat:'weekly', days:[...sheetState.days] };
@@ -1641,6 +1776,11 @@ function save() {
     const o = { title:v('#f_title'), status:sheetState.status, note:v('#f_note') };
     if (id) Store.update(c, id, o);
     else Store.add(c, {...o, updates:[], createdAt:new Date().toISOString()});
+  } else if (c === 'occasions') {
+    if (!v('#f_title')) return warn('ใส่ชื่อวันสำคัญก่อนนะ');
+    const date = $('#f_date').value; if (!date) return warn('เลือกวันที่ก่อนนะ');
+    const o = { title:v('#f_title'), date, repeat: sheetState.occRepeat };
+    id ? Store.update(c, id, o) : Store.add(c, o);
   }
   closeSheet();
 }

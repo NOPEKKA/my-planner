@@ -764,6 +764,15 @@ function occasionCard(o){
   return card;
 }
 // ---- รายการรวมทั้งหมดที่จะถึง (agenda) ----
+function nextMonthly(dom){
+  const now = startOfDay(new Date());
+  for (let i=0;i<2;i++){
+    const y=now.getFullYear(), m=now.getMonth()+i, last=new Date(y, m+1, 0).getDate();
+    const d=new Date(y, m, Math.min(dom, last));
+    if (d>=now) return d;
+  }
+  return now;
+}
 function agendaItems(){
   const out = [];
   Store.all('homework').filter(h=>!h.done).forEach(h=>{ const d=new Date(h.dueAt);
@@ -774,10 +783,12 @@ function agendaItems(){
     out.push({ when:d, color:'var(--exam)', title:e.subject, sub:'สอบ · '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('exams',e) }); });
   Store.all('occasions').forEach(o=>{ const d=nextOccur(o);
     out.push({ when:d, color:'var(--routine)', title:o.title, sub:(o.repeat==='monthly'?'ทุกเดือน':'ทุกปี')+' · '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('occasions',o) }); });
-  Store.all('routines').filter(r=>r.date && !r.done).forEach(r=>{
+  Store.all('routines').filter(r=>!r.done).forEach(r=>{
     if (r.countdown){ const start=mondayOf(new Date(r.date+'T00:00:00')), n=dDays(start);
       out.push({ when:start, color:'var(--ink-soft)', title:r.title, sub:'สิ่งที่ต้องทำภายในสัปดาห์', count: n<=0?'เริ่มแล้ว':`อีก ${n} วันจะเริ่ม`, soon:n<=7, tap:()=>openSheet('routines',r) }); }
-    else { const d=new Date(r.date+'T00:00:00'); if(dDays(d)<0) return;
+    else if (r.repeat==='monthly'){ const d=nextMonthly(r.dom);
+      out.push({ when:d, color:'var(--ink-soft)', title:r.title, sub:'สิ่งที่ต้องทำ · ทุกวันที่ '+r.dom, count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('routines',r) }); }
+    else if (r.date){ const d=new Date(r.date+'T00:00:00'); if(dDays(d)<0) return;
       out.push({ when:d, color:'var(--ink-soft)', title:r.title, sub:'สิ่งที่ต้องทำ · '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('routines',r) }); }
   });
   return out.sort((a,b)=> a.when - b.when);
@@ -1272,6 +1283,7 @@ function dayISO(d, time){ const [hh,mm]=time.split(':'); const x=new Date(d); x.
 function sameWeek(a, b){ return sameYMD(mondayOf(a), mondayOf(b)); }
 function routineTasksOn(date){
   return Store.all('routines').filter(r => {
+    if (r.repeat==='monthly') return domOn(r.dom, date);
     if (!r.date) return false;
     const dl = new Date(r.date+'T00:00:00');
     return r.countdown ? sameWeek(date, dl) : sameYMD(dl, date);   // งานสัปดาห์ = ทั้งสัปดาห์, งานวันที่ = เฉพาะวันนั้น

@@ -1941,11 +1941,17 @@ async function enablePush(){
 
 // ตรวจทุกนาที: เตือนที่ 1 วัน และ 1 ชม. ก่อนกำหนด
 function checkDue() {
-  const now = Date.now(), seen = notified();
+  const now = Date.now(), seen = notified(), nd = new Date();
   const items = [];
   Store.all('homework').filter(h=>!h.done).forEach(h => items.push({ id:h.id, at:h.dueAt, label:`การบ้าน: ${h.title}`, wins:[[24*3600000,'1วัน','ครบกำหนดพรุ่งนี้'], [3600000,'1ชม','อีก 1 ชั่วโมง'], [300000,'5น','อีก 5 นาที!']] }));
   Store.all('appts').forEach(a => items.push({ id:a.id, at:a.at, label:`นัด: ${a.title}`, wins:[[24*3600000,'1วัน','นัดพรุ่งนี้'], [3600000,'1ชม','อีก 1 ชั่วโมง'], [300000,'5น','อีก 5 นาที!']] }));
   Store.all('exams').forEach(e => items.push({ id:e.id, at:e.at, label:`📝 สอบ: ${e.subject}`, wins:[[7*86400000,'7วัน','สอบในอีก 1 สัปดาห์ เริ่มอ่านได้แล้ว'], [3*86400000,'3วัน','สอบในอีก 3 วัน'], [86400000,'1วัน','สอบพรุ่งนี้!'], [3600000,'1ชม','สอบในอีก 1 ชั่วโมง']] }));
+  // วันสำคัญ — 3 วันก่อน + 1 วันก่อน (ช่วงเช้า ~9 โมง)
+  Store.all('occasions').forEach(o => {
+    const d = nextOccur(o); d.setHours(9,0,0,0);
+    items.push({ id:`occ:${o.id}:${ymd(d)}`, at:d.toISOString(), label:`🎉 ${o.title}`,
+      wins:[[3*86400000,'3วัน','อีก 3 วัน'], [86400000,'1วัน','พรุ่งนี้แล้ว!']] });
+  });
 
   items.forEach(it => {
     const ms = new Date(it.at) - now;
@@ -1953,6 +1959,18 @@ function checkDue() {
       const key = `${it.id}:${tag}`;
       if (ms > 0 && ms <= win && !seen.has(key)) { seen.add(key); notify(it.label, word); }
     });
+  });
+
+  // วันสำคัญ — เช้าวันนั้น
+  if (nd.getHours() >= 7) Store.all('occasions').forEach(o => {
+    if (occursOn(o, nd)) { const key = `occday:${o.id}:${ymd(nd)}`; if (!seen.has(key)) { seen.add(key); notify(`🎉 ${o.title}`, 'วันนี้! 🎉'); } }
+  });
+  // สิ่งที่ต้องทำภายในสัปดาห์ — เตือนทุกเย็น (18:00) ถ้ายังไม่เสร็จ จนถึงวันครบกำหนด
+  if (nd.getHours() >= 18) Store.all('routines').filter(r=>r.countdown && !r.done).forEach(r => {
+    const dl = new Date(r.date+'T'+(r.time||'23:59')+':00');
+    if (dl < startOfDay(nd)) return;
+    const key = `evetask:${r.id}:${ymd(nd)}`;
+    if (!seen.has(key)) { const cd = cdText(r.date, r.time); seen.add(key); notify(`⏳ ${r.title}`, `ยังไม่เสร็จ · ${cd.txt}`); }
   });
   saveNotified(seen);
 }

@@ -299,6 +299,21 @@
   .log-item::before { content: ''; position: absolute; left: 5px; top: 16px; bottom: -2px; width: 2px; background: var(--line); }
   .log-item:last-child::before { display: none; }
   .log-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--primary); flex: none; margin-top: 3px; z-index: 1; }
+  .log-dot.idea { background: var(--soon); }
+  .idea-add { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 16px; }
+  .idea-add textarea { width: 100%; resize: vertical; min-height: 46px; }
+  .idea-add button { align-self: stretch; background: var(--primary); color: #fff; border: none; border-radius: 11px;
+                     padding: 11px; font-weight: 600; font-size: .88rem; cursor: pointer; }
+  .idea-item { background: var(--paper); border: 1px solid var(--line); border-radius: 13px; padding: 13px 15px; margin-bottom: 10px; }
+  .idea-item .idea-text { font-size: .92rem; line-height: 1.55; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+  .idea-item .idea-text a.note-link { color: var(--primary-deep); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--teal-soft); }
+  .idea-item .idea-edit { width: 100%; resize: vertical; }
+  .idea-btns { display: flex; gap: 8px; margin-top: 11px; justify-content: flex-end; }
+  .idea-btns button { border: 1px solid var(--line); background: var(--card); color: var(--ink-soft);
+                      border-radius: 9px; padding: 6px 15px; font-size: .78rem; font-weight: 600; cursor: pointer; }
+  .idea-btns button:active { background: var(--line); }
+  .idea-btns .idea-del { color: var(--over); border-color: var(--over-soft); }
+  .idea-btns .idea-save.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
   .log-body { flex: 1; }
   .log-date { font-size: .74rem; color: var(--ink-soft); font-weight: 500; }
   .log-text { font-size: .92rem; margin-top: 2px; white-space: pre-wrap; }
@@ -1212,17 +1227,19 @@ function renderProj() {
 function projCard(p) {
   const card = el('div','proj-card');
   const [k,l] = PSTAT[p.status] || PSTAT.idea;
-  const ups = p.updates || [];
+  const ideas = p.ideas || [];
   const head = el('div','ph');
   head.appendChild(el('div','pt', esc(p.title)));
   head.appendChild(el('span','pstat '+k, l));
   card.appendChild(head);
   if (p.note) card.appendChild(el('div','pnote', esc(p.note)));
-  if (ups.length){
-    const last = ups[ups.length-1], d = new Date(last.at);
-    card.appendChild(el('div','plast', `<b>${d.getDate()} ${TH_MON[d.getMonth()]}:</b> <span>${esc(last.text)}</span>`));
+  if (ideas.length){
+    const last = ideas[ideas.length-1];
+    const t = el('div','plast'); t.innerHTML = `<span>💡 ${linkifyNote(last.text)}</span>`;
+    card.appendChild(t);
+    if (ideas.length>1) card.appendChild(el('div','pcount', `+ อีก ${ideas.length-1} บันทึก`));
   } else {
-    card.appendChild(el('div','plast', `<span style="color:var(--ink-soft)">ยังไม่มีบันทึก — แตะเพื่อเพิ่มความคืบหน้า</span>`));
+    card.appendChild(el('div','plast', `<span style="color:var(--ink-soft)">ยังไม่มีบันทึก — แตะเพื่อจดไอเดีย</span>`));
   }
   card.onclick = () => openProjectSheet(p.id);
   return card;
@@ -1231,40 +1248,59 @@ function openProjectSheet(id) {
   const p = Store.all('projects').find(x=>x.id===id);
   if (p) renderProjectSheet(p);
 }
-function renderProjectSheet(p) {
+function renderProjectSheet(p, editIdx) {
   const id = p.id;
   const [k,l] = PSTAT[p.status] || PSTAT.idea;
-  const updArr = p.updates || [];
-  const ups = updArr.slice().reverse();
+  const noteArr = p.ideas || [];
+  const ideas = noteArr.slice().reverse();
   let h = `<h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${esc(p.title)} <span class="pstat ${k}">${l}</span></h2>`;
   if (p.note) h += `<p class="sync-note">${esc(p.note)}</p>`;
-  h += `<div class="add-log"><input id="logInput" placeholder="วันนี้ทำอะไรไป..." maxlength="300"><button id="logAdd">เพิ่ม</button></div>`;
-  h += `<div class="log" id="logList">`;
-  if (!ups.length) h += `<p class="sync-note">ยังไม่มีบันทึก เริ่มจดความคืบหน้าได้เลย</p>`;
-  ups.forEach((u, i) => {
-    const realIdx = (updArr.length-1) - i, d = new Date(u.at);
-    h += `<div class="log-item"><div class="log-dot"></div><div class="log-body">
-            <div class="log-date">${fmtDate(d)} ${fmtTime(d)} · <button class="log-del" data-i="${realIdx}">ลบ</button></div>
-            <div class="log-text">${esc(u.text)}</div></div></div>`;
+
+  h += `<div class="idea-add"><textarea id="ideaInput" placeholder="สะสมไอเดีย / จดเพิ่ม / วางลิงก์ได้..." rows="2" maxlength="1000"></textarea><button id="ideaAdd">+ เพิ่มบันทึก</button></div>`;
+  h += `<div id="ideaList">`;
+  if (!ideas.length) h += `<p class="sync-note" style="text-align:center;padding:18px 0">ยังไม่มีบันทึก — จดไอเดียหรือลิงก์ไว้ได้เลย</p>`;
+  ideas.forEach((u, i) => {
+    const realIdx = (noteArr.length-1) - i;
+    if (realIdx === editIdx) {
+      h += `<div class="idea-item editing">
+        <textarea class="inp idea-edit" rows="3">${esc(u.text)}</textarea>
+        <div class="idea-btns"><button class="idea-cancel">ยกเลิก</button><button class="idea-save primary" data-i="${realIdx}">บันทึก</button></div></div>`;
+    } else {
+      h += `<div class="idea-item">
+        <div class="idea-text">${linkifyNote(u.text)}</div>
+        <div class="idea-btns"><button class="idea-edit-btn" data-i="${realIdx}">แก้ไข</button><button class="idea-del" data-i="${realIdx}">ลบ</button></div></div>`;
+    }
   });
   h += `</div>`;
   h += `<button class="save" id="projEdit" style="background:var(--ink-soft)">แก้ไขชื่อ/สถานะ</button>`;
   h += `<button class="del-btn" id="projDel">ลบโปรเจกต์นี้</button>`;
   showRawSheet(h);
-  const add = () => {
-    const t = $('#logInput').value.trim(); if (!t) return;
-    const updates = [...updArr, { at:new Date().toISOString(), text:t }];
-    Store.update('projects', id, { updates });
-    renderProjectSheet({ ...p, updates });   // เรนเดอร์ทันทีจากข้อมูลใหม่ ไม่รอ cache
+
+  const addIdea = () => {
+    const t = $('#ideaInput').value.trim(); if (!t) return;
+    const ideasNew = [...noteArr, { at:new Date().toISOString(), text:t }];
+    Store.update('projects', id, { ideas: ideasNew });
+    renderProjectSheet({ ...p, ideas: ideasNew });
   };
-  $('#logAdd').onclick = add;
-  $('#logInput').addEventListener('keydown', e => { if (e.key==='Enter') add(); });
-  $('#logList').querySelectorAll('.log-del').forEach(b => b.onclick = () => {
-    const idx = +b.dataset.i;
-    const updates = updArr.filter((_,j)=>j!==idx);
-    Store.update('projects', id, { updates });
-    renderProjectSheet({ ...p, updates });
+  $('#ideaAdd').onclick = addIdea;
+
+  $('#ideaList').querySelectorAll('.idea-edit-btn').forEach(b => b.onclick = () => renderProjectSheet(p, +b.dataset.i));
+  const cancel = $('#ideaList').querySelector('.idea-cancel'); if (cancel) cancel.onclick = () => renderProjectSheet(p);
+  const saveBtn = $('#ideaList').querySelector('.idea-save');
+  if (saveBtn) saveBtn.onclick = () => {
+    const t = $('#ideaList .idea-edit').value.trim(); if (!t) return;
+    const ideasNew = noteArr.map((x,j)=> j===+saveBtn.dataset.i ? {...x, text:t} : x);
+    Store.update('projects', id, { ideas: ideasNew });
+    renderProjectSheet({ ...p, ideas: ideasNew });
+  };
+  $('#ideaList').querySelectorAll('.idea-del').forEach(b => b.onclick = () => {
+    askConfirm('ลบบันทึกนี้?', 'ลบ', () => {
+      const ideasNew = noteArr.filter((_,j)=>j!==+b.dataset.i);
+      Store.update('projects', id, { ideas: ideasNew });
+      renderProjectSheet({ ...p, ideas: ideasNew });
+    });
   });
+
   $('#projEdit').onclick = () => openSheet('projects', p);
   $('#projDel').onclick = () => askConfirm('ลบโปรเจกต์นี้?', 'ลบ', () => { Store.remove('projects', id); closeSheet(); });
 }
@@ -1797,7 +1833,7 @@ function save() {
     if (!v('#f_title')) return warn('ใส่ชื่อโปรเจกต์ก่อนนะ');
     const o = { title:v('#f_title'), status:sheetState.status, note:v('#f_note') };
     if (id) Store.update(c, id, o);
-    else Store.add(c, {...o, updates:[], createdAt:new Date().toISOString()});
+    else Store.add(c, {...o, updates:[], ideas:[], createdAt:new Date().toISOString()});
   } else if (c === 'occasions') {
     if (!v('#f_title')) return warn('ใส่ชื่อวันสำคัญก่อนนะ');
     const date = $('#f_date').value; if (!date) return warn('เลือกวันที่ก่อนนะ');

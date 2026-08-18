@@ -362,7 +362,9 @@
   .daypick button { border: 1px solid var(--line-strong); background: var(--card); border-radius: 10px;
                     width: 42px; height: 40px; font-weight: 600; font-size: .82rem; color: var(--ink-soft); }
   .daypick button.on { background: var(--routine); border-color: var(--routine); color: #fff; }
-  .swatch { display: flex; gap: 8px; margin-top: 6px; }
+  .swatch { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .swatch .sw-def { background: var(--card); color: var(--ink); border: 1.5px solid var(--line-strong);
+                    display: flex; align-items: center; justify-content: center; font-size: .82rem; font-weight: 700; }
   .swatch button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--card);
                    box-shadow: 0 0 0 1px var(--line-strong); }
   .swatch button.on { box-shadow: 0 0 0 2px var(--ink); }
@@ -1150,7 +1152,26 @@ function renderWeekTab(){
 }
 
 /* ---------- การบ้าน ---------- */
-let hwRevealed = null;   // id การบ้านที่ปัดเปิดแถบเลื่อนไว้
+let revealedId = null;   // id ที่ปัดเปิดแถบเลื่อนไว้ (ใช้ร่วมทุก tab)
+function moveInList(coll, list, id, dir){
+  const i = list.findIndex(x=>x.id===id), j = i+dir;
+  if (i<0 || j<0 || j>=list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  list.forEach((x,idx)=>{ if (x.order !== idx) Store.update(coll, x.id, { order: idx }); });
+}
+function reorderWrap(card, coll, list, id){
+  const item = el('div','hw-item');
+  item.appendChild(card);
+  if (list.length > 1){
+    const bar = el('div','reorder-bar' + (revealedId===id ? '' : ' hidden'));
+    const up = el('button','','⌃ เลื่อนขึ้น'); up.onclick = ()=>moveInList(coll, list, id, -1);
+    const dn = el('button','','⌄ เลื่อนลง'); dn.onclick = ()=>moveInList(coll, list, id, 1);
+    bar.append(up, dn); item.appendChild(bar);
+    if (revealedId===id) card.classList.add('swiped');
+    addSwipeReveal(card, bar, id);
+  }
+  return item;
+}
 function renderHw() {
   const box = $('#hwContent'); box.innerHTML = '';
   const all = Store.all('homework');
@@ -1159,21 +1180,7 @@ function renderHw() {
   if (!all.length) { box.appendChild(empty('✏️','ยังไม่มีการบ้าน — กดปุ่ม + เพื่อเพิ่มงานชิ้นแรก')); return; }
   box.appendChild(eyebrow('ยังไม่เสร็จ', pending.length));
   if (!pending.length) box.appendChild(empty('🎉','เคลียร์หมดแล้ว!'));
-  const many = pending.length>1;
-  pending.forEach((h,i) => {
-    const item = el('div','hw-item');
-    const card = hwCard(h, { top: i===0 });
-    item.appendChild(card);
-    if (many) {
-      const bar = el('div','reorder-bar' + (hwRevealed===h.id ? '' : ' hidden'));
-      const up = el('button','','⌃ เลื่อนขึ้น'); up.onclick = ()=>moveHw(h.id,-1);
-      const dn = el('button','','⌄ เลื่อนลง'); dn.onclick = ()=>moveHw(h.id,1);
-      bar.append(up, dn); item.appendChild(bar);
-      if (hwRevealed===h.id) card.classList.add('swiped');
-      addSwipeReveal(card, bar, h.id);
-    }
-    box.appendChild(item);
-  });
+  pending.forEach(h => box.appendChild(reorderWrap(hwCard(h), 'homework', pending, h.id)));
   if (done.length) { box.appendChild(eyebrow('เสร็จแล้ว', done.length)); done.forEach(h => box.appendChild(hwCard(h))); }
 }
 // ปัดขวาที่การ์ด → เผยแถบปุ่มเลื่อนขึ้น/ลงข้างล่าง (ปัดซ้ายเพื่อซ่อน)
@@ -1194,12 +1201,14 @@ function addSwipeReveal(card, bar, id){
     const dx=(e.clientX ?? x0)-x0;
     card.style.transition='transform .18s'; card.style.transform='';
     setTimeout(()=>{ card.style.transition=''; }, 200);
-    if (horiz && dx>45){ bar.classList.remove('hidden'); card.classList.add('swiped'); hwRevealed=id; }
-    else if (horiz && dx<-30){ bar.classList.add('hidden'); card.classList.remove('swiped'); if(hwRevealed===id) hwRevealed=null; }
+    if (horiz && Math.abs(dx)>10) card._justSwiped = true;   // กันแตะเปิดหลังปัด
+    if (horiz && dx>45){ bar.classList.remove('hidden'); card.classList.add('swiped'); revealedId=id; }
+    else if (horiz && dx<-30){ bar.classList.add('hidden'); card.classList.remove('swiped'); if(revealedId===id) revealedId=null; }
     x0=null;
   };
   card.addEventListener('pointerup', end);
   card.addEventListener('pointercancel', end);
+  card.addEventListener('click', e => { if (card._justSwiped){ e.stopImmediatePropagation(); e.preventDefault(); card._justSwiped=false; } }, true);
 }
 
 /* ---------- นัดหมาย ---------- */
@@ -1223,8 +1232,9 @@ function renderProj() {
   if (!all.length) { box.appendChild(empty('🚀','ยังไม่มีโปรเจกต์ — กดปุ่ม + จดไอเดียที่อยากทำ เช่น ทำแอป แต่งเพลง')); return; }
   const order = { doing:0, idea:1, done:2 };
   const sorted = all.slice().sort((a,b)=> (order[a.status]??1)-(order[b.status]??1));
-  const active = sorted.filter(p=>p.status!=='done'), done = sorted.filter(p=>p.status==='done');
-  if (active.length){ box.appendChild(eyebrow('กำลังทำ / ไอเดีย', active.length)); active.forEach(p=>box.appendChild(projCard(p))); }
+  const active = sorted.filter(p=>p.status!=='done').sort((a,b)=> (a.order??1e9)-(b.order??1e9) || (order[a.status]??1)-(order[b.status]??1));
+  const done = sorted.filter(p=>p.status==='done');
+  if (active.length){ box.appendChild(eyebrow('กำลังทำ / ไอเดีย', active.length)); active.forEach(p=>box.appendChild(reorderWrap(projCard(p), 'projects', active, p.id))); }
   if (done.length){ box.appendChild(eyebrow('เสร็จแล้ว', done.length)); done.forEach(p=>box.appendChild(projCard(p))); }
 }
 function projCard(p) {
@@ -1232,7 +1242,8 @@ function projCard(p) {
   const [k,l] = PSTAT[p.status] || PSTAT.idea;
   const ideas = p.ideas || [];
   const head = el('div','ph');
-  head.appendChild(el('div','pt', esc(p.title)));
+  const pt = el('div','pt', esc(p.title)); if (p.color) pt.style.color = p.color;
+  head.appendChild(pt);
   head.appendChild(el('span','pstat '+k, l));
   card.appendChild(head);
   if (p.note) card.appendChild(el('div','pnote', esc(p.note)));
@@ -1256,7 +1267,7 @@ function renderProjectSheet(p, editIdx) {
   const [k,l] = PSTAT[p.status] || PSTAT.idea;
   const noteArr = p.ideas || [];
   const ideas = noteArr.slice().reverse();
-  let h = `<h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${esc(p.title)} <span class="pstat ${k}">${l}</span></h2>`;
+  let h = `<h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap${p.color?';color:'+p.color:''}">${esc(p.title)} <span class="pstat ${k}">${l}</span></h2>`;
   if (p.note) h += `<p class="sync-note">${esc(p.note)}</p>`;
 
   h += `<div class="idea-add"><textarea id="ideaInput" placeholder="สะสมไอเดีย / จดเพิ่ม / วางลิงก์ได้..." rows="2" maxlength="1000"></textarea><button id="ideaAdd">+ เพิ่มบันทึก</button></div>`;
@@ -1450,7 +1461,7 @@ let sheetState = null;
 
 function openSheet(coll, item) {
   // coll = ชนิดที่จะเพิ่ม/แก้; item = ข้อมูลเดิม (ถ้าแก้)
-  sheetState = { coll, id: item?.id || null, color: item?.color || COLOR_OPTS[0],
+  sheetState = { coll, id: item?.id || null, color: item?.color ?? (coll==='classes' ? COLOR_OPTS[0] : ''),
                  days: item?.days ? [...item.days] : [1,2,3,4,5], online: item?.online || false,
                  status: item?.status || 'idea',
                  repeat: item?.repeat || (item?.date ? 'once' : 'weekly'), done: item?.done || false,
@@ -1546,6 +1557,7 @@ function renderSheet(item) {
     inner += fld('เช็กลิสต์ย่อย (ถ้ามี)', checklistHTML(sheetState.checklist));
   } else if (coll === 'notes') {
     inner += fld('หัวข้อ (ถ้ามี)', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น รหัส WiFi / ไอเดีย / ฝากเพื่อน">`);
+    inner += fld('สีหัวข้อ', swatchHTML(true));
     inner += fld('โน้ต', `<textarea class="inp" id="f_note" rows="5" placeholder="พิมพ์อะไรก็ได้ — วางลิงก์แล้วกดเปิดได้">${esc(item?.text||'')}</textarea>`);
     inner += fld('เช็กลิสต์ (ถ้ามี)', checklistHTML(item?.checklist||[]));
   } else if (coll === 'homework') {
@@ -1566,6 +1578,7 @@ function renderSheet(item) {
     inner += fld('โน้ต (เนื้อหาที่ออก ฯลฯ)', `<textarea class="inp" id="f_note" placeholder="บทที่ออกสอบ / สิ่งที่ต้องเตรียม">${esc(item?.note)}</textarea>`);
   } else if (coll === 'projects') {
     inner += fld('ชื่อโปรเจกต์', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น ทำแอปจัดตาราง / แต่งเพลง">`);
+    inner += fld('สีหัวข้อ', swatchHTML(true));
     inner += fld('สถานะ', statusPickHTML());
     inner += fld('รายละเอียด (ถ้ามี)', `<textarea class="inp" id="f_note" placeholder="โปรเจกต์นี้เกี่ยวกับอะไร">${esc(item?.note)}</textarea>`);
   } else if (coll === 'occasions') {
@@ -1724,15 +1737,15 @@ function linkifyNote(text){
 
 function renderNotes(){
   const box = $('#noteContent'); box.innerHTML = '';
-  const notes = Store.all('notes').slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  const notes = Store.all('notes').slice().sort((a,b)=> (a.order??1e9)-(b.order??1e9) || (b.updatedAt||0)-(a.updatedAt||0));
   if (!notes.length){ box.appendChild(empty('📝','ยังไม่มีโน้ต — กดปุ่ม + จดอะไรก็ได้ (วางลิงก์แล้วกดเปิดได้)')); return; }
-  notes.forEach(n => box.appendChild(noteCard(n)));
+  notes.forEach(n => box.appendChild(reorderWrap(noteCard(n), 'notes', notes, n.id)));
 }
 function noteCard(n){
   const card = el('div','card note-card');
   const b = el('div','body');
-  if (n.title) b.appendChild(el('div','title', esc(n.title)));
-  if (n.text){ const t = el('div', n.title ? 'note-body' : 'title'); t.innerHTML = linkifyNote(n.text); b.appendChild(t); }
+  if (n.title){ const t = el('div','title', esc(n.title)); if (n.color) t.style.color = n.color; b.appendChild(t); }
+  if (n.text){ const t = el('div', n.title ? 'note-body' : 'title'); t.innerHTML = linkifyNote(n.text); if (!n.title && n.color) t.style.color = n.color; b.appendChild(t); }
   if (n.checklist && n.checklist.length){
     const doneN = n.checklist.filter(x=>x.done).length;
     const cl = el('div','ck-list');
@@ -1763,8 +1776,9 @@ function bindDaypick(){
     b.classList.toggle('on');
   });
 }
-function swatchHTML(){
-  return `<div class="swatch" id="swatch">${COLOR_OPTS.map(c=>`<button type="button" data-c="${c}" style="background:${c}" class="${c===sheetState.color?'on':''}"></button>`).join('')}</div>`;
+function swatchHTML(withDefault){
+  const def = withDefault ? `<button type="button" data-c="" class="sw-def ${!sheetState.color?'on':''}" title="ปกติ">ก</button>` : '';
+  return `<div class="swatch" id="swatch">${def}${COLOR_OPTS.map(c=>`<button type="button" data-c="${c}" style="background:${c}" class="${c===sheetState.color?'on':''}"></button>`).join('')}</div>`;
 }
 function bindSwatch(){
   const sw = $('#swatch'); if(!sw) return;
@@ -1814,7 +1828,7 @@ function save() {
     const title = v('#f_title'), text = ($('#f_note')?.value || '').trim();
     const checklist = readChecklist();
     if (!title && !text && !checklist.length) return warn('พิมพ์อะไรสักอย่างก่อนนะ');
-    const o = { title, text, checklist, updatedAt: Date.now() };
+    const o = { title, text, checklist, color: sheetState.color, updatedAt: Date.now() };
     id ? Store.update(c, id, o) : Store.add(c, o);
   } else if (c === 'homework') {
     if (!v('#f_title')) return warn('ใส่ชื่องานก่อนนะ');
@@ -1834,7 +1848,7 @@ function save() {
     id ? Store.update(c, id, o) : Store.add(c, o);
   } else if (c === 'projects') {
     if (!v('#f_title')) return warn('ใส่ชื่อโปรเจกต์ก่อนนะ');
-    const o = { title:v('#f_title'), status:sheetState.status, note:v('#f_note') };
+    const o = { title:v('#f_title'), status:sheetState.status, note:v('#f_note'), color: sheetState.color };
     if (id) Store.update(c, id, o);
     else Store.add(c, {...o, updates:[], ideas:[], createdAt:new Date().toISOString()});
   } else if (c === 'occasions') {

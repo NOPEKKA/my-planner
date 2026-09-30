@@ -304,6 +304,98 @@
   .more-row .mr-chev { flex: none; color: var(--ink-faint); font-size: 1.4rem; line-height: 1; }
   .more-row.on { box-shadow: inset 0 0 0 1.5px var(--primary), var(--shadow); }
 
+  /* ---------- เพิ่มเร็วด้วยประโยคเดียว ---------- */
+  .quick { background: var(--card); border: 1.5px solid var(--card-edge); border-radius: 18px; box-shadow: var(--shadow); margin: 2px 0 14px; transition: border-color .15s; }
+  .quick:focus-within, .quick.open { border-color: var(--primary); }
+  .q-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 6px 6px 14px; }
+  .q-ic { flex: none; display: grid; color: var(--primary-deep); padding-top: 11px; }
+  .q-ic svg { width: 18px; height: 18px; }
+  .q-in { flex: 1; min-width: 0; border: none; background: none; padding: 9px 2px; font-size: .98rem; line-height: 1.5; resize: none; overflow-y: auto; max-height: 150px; }
+  .q-in:focus, .q-in:focus-visible { outline: none; }
+  .q-in::placeholder { color: var(--ink-faint); }
+  .q-kbd { flex: none; margin-top: 10px; font: 600 .74rem var(--font); color: var(--ink-faint); border: 1px solid var(--line-strong); border-radius: 6px; padding: 1px 7px; }
+  .quick.open .q-kbd, .quick:focus-within .q-kbd { display: none; }
+  @media (hover: none) { .q-kbd { display: none; } }
+  .q-help { flex: none; width: 36px; height: 36px; margin-top: 2px; border-radius: 50%; border: none; background: var(--field); color: var(--ink-soft); font-weight: 700; font-size: .9rem; }
+  .q-help:hover { color: var(--ink); }
+  .q-add { flex: none; margin-top: 2px; border: none; background: var(--primary); color: var(--on-primary); border-radius: 12px; padding: 9px 16px; font-weight: 600; font-size: .88rem; white-space: nowrap; }
+  .q-add:disabled { background: var(--field); color: var(--ink-faint); cursor: default; }
+  .q-prev { border-top: 1px solid var(--line); padding: 12px 14px; }
+  .q-prev:empty { display: none; }
+  .q-read { font-size: .82rem; color: var(--ink-soft); line-height: 2; margin-bottom: 8px; overflow-wrap: anywhere; }
+  .q-read-lb { font-size: .7rem; font-weight: 600; color: var(--ink-faint); margin-right: 6px; }
+  .q-read mark { border-radius: 6px; padding: 1px 5px; margin: 0 1px; font-weight: 600; color: var(--ink); background: var(--field); }
+  .q-read mark.h-date, .q-read mark.h-days { background: var(--teal-soft); color: var(--primary-deep); }
+  .q-read mark.h-time { background: var(--amber-soft); color: var(--soon-ink); }
+  .q-read mark.h-subject { background: color-mix(in srgb, var(--c-hw) 16%, var(--card)); color: color-mix(in srgb, var(--c-hw) 72%, var(--ink)); }
+  .q-read mark.h-repeat { background: var(--routine-soft); color: var(--routine); }
+  .q-read mark.h-place, .q-read mark.h-room, .q-read mark.h-link { background: var(--online-soft); color: var(--online); }
+  .q-card { display: flex; gap: 12px; align-items: flex-start; }
+  .q-main { flex: 1; min-width: 0; }
+  .q-kind { font-size: .72rem; font-weight: 600; color: var(--ink-soft); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .q-tag { background: var(--routine-soft); color: var(--routine); border-radius: 10px; padding: 0 8px; font-size: .66rem; }
+  .q-title { display: inline; text-align: left; border: none; background: none; padding: 0; font-weight: 600; font-size: 1rem; line-height: 1.45;
+             color: var(--ink); overflow-wrap: anywhere; border-bottom: 1.5px dashed var(--line-strong); }
+  .q-title:hover { border-bottom-color: var(--primary); }
+  .q-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .q-chip { border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 10px; padding: 4px 10px; font-size: .8rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .q-chip:hover { border-color: var(--primary); }
+  .q-chip.on { border-color: var(--primary); background: var(--teal-soft); color: var(--primary-deep); }
+  .q-chip.empty { border-style: dashed; color: var(--ink-soft); }
+  .q-chip.static { cursor: default; background: var(--online-soft); color: var(--online); border-color: transparent; }
+  .q-hint { font-size: .76rem; color: var(--soon-ink); margin-top: 6px; }
+  .q-form { flex: none; border: none; background: var(--field); color: var(--ink-soft); border-radius: 10px; padding: 6px 10px; font-size: .76rem; font-weight: 600; }
+  .q-form:hover { color: var(--ink); }
+  .q-ed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; padding: 12px; background: var(--paper); border-radius: 14px; }
+  .q-f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .q-f > span { font-size: .74rem; font-weight: 600; color: var(--ink-soft); }
+  .q-f .inp { padding: 9px 11px; font-size: .92rem; }
+  .q-f-wide { grid-column: 1 / -1; }
+  .q-days { gap: 4px; }
+  .q-days button { width: 38px; height: 34px; }
+  .q-learn { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: .8rem; color: var(--ink-soft); }
+  .q-learn .inp { width: 7.5em; padding: 5px 8px; font-size: .84rem; }
+  .q-ed-foot { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+  .q-ed-done { border: none; background: var(--primary); color: var(--on-primary); border-radius: 10px; padding: 7px 16px; font-weight: 600; font-size: .84rem; }
+  .q-kinds { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .q-kinds button { border: none; background: var(--field); color: var(--ink-soft); border-radius: 20px; padding: 5px 11px; font-size: .76rem; font-weight: 600; }
+  .q-kinds button.on { background: var(--invert-bg); color: var(--invert-fg); }
+  .q-learn-note { font-size: .74rem; color: var(--routine); margin-top: 8px; }
+  .q-foot { font-size: .72rem; color: var(--ink-faint); margin-top: 10px; }
+  .q-mhead { font-size: .84rem; color: var(--ink-soft); margin-bottom: 8px; }
+  .q-mhead b { color: var(--ink); }
+  .q-list { display: flex; flex-direction: column; gap: 6px; }
+  .q-hdr { font-size: .76rem; color: var(--ink-faint); padding: 2px 4px; overflow-wrap: anywhere; }
+  .q-hdr span { font-size: .66rem; font-weight: 600; background: var(--field); border-radius: 6px; padding: 1px 6px; margin-right: 6px; }
+  .q-it { border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+  .q-it.open { border-color: var(--primary); }
+  .q-it.off .q-it-row > :not(.q-tick) { opacity: .45; }
+  .q-it-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+  .q-tick { width: 24px; height: 24px; flex: none; border-radius: 50%; border: 2px solid var(--line-strong); background: transparent; display: grid; place-items: center; padding: 0; }
+  .q-tick svg { width: 13px; height: 13px; color: var(--on-primary); opacity: 0; }
+  .q-tick.on { background: var(--primary); border-color: var(--primary); }
+  .q-tick.on svg { opacity: 1; }
+  .kind-tile.sm { width: 30px; height: 30px; border-radius: 9px; }
+  .kind-tile.sm svg { width: 16px; height: 16px; }
+  .q-it-main { flex: 1; min-width: 0; border: none; background: none; text-align: left; padding: 0; color: var(--ink); display: flex; flex-direction: column; }
+  .q-it-main b { font-weight: 600; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .q-it-main span { font-size: .76rem; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .q-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--soon); flex: none; }
+  .q-chev { flex: none; border: none; background: none; color: var(--ink-faint); font-size: .9rem; width: 28px; height: 28px; border-radius: 8px; }
+  .q-chev:hover { background: var(--field); color: var(--ink); }
+  .q-it-body { padding: 2px 12px 12px; }
+  .sheet .quick { margin: 12px 0 4px; box-shadow: none; }
+  .q-or { font-size: .78rem; color: var(--ink-faint); text-align: center; margin: 10px 0 -6px; }
+  .toast .t-txt { flex: 1; min-width: 0; }
+  .toast-act { pointer-events: auto; flex: none; background: transparent; color: var(--invert-fg); border: 1px solid var(--invert-fg-soft);
+               border-radius: 10px; padding: 6px 12px; font-weight: 600; font-size: .82rem; }
+  .q-exs { display: flex; flex-direction: column; gap: 6px; }
+  .q-ex { text-align: left; border: 1px solid var(--card-edge); background: var(--card); border-radius: 12px; padding: 10px 12px; font-size: .88rem; color: var(--ink); line-height: 1.55; }
+  .q-ex:hover { border-color: var(--primary); }
+  .q-learned { display: flex; flex-direction: column; gap: 4px; }
+  .q-lr { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--card-edge); border-radius: 12px; padding: 4px 4px 4px 12px; font-size: .86rem; }
+  .q-lr span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
   /* ---------- โน้ต ---------- */
   .note-card .note-body { white-space: pre-wrap; font-size: .9rem; margin-top: 5px; line-height: 1.55; overflow-wrap: anywhere; }
   .note-card .title { white-space: pre-wrap; }
@@ -543,9 +635,7 @@
     header.top h1 { font-size: 2.1rem; }
     .add-btn { display: inline-flex; }
     main { padding: 6px 36px 40px; }
-    #view-hw, #view-appt { max-width: 760px; }
-    .today-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); column-gap: 32px; align-items: start; }
-    .today-grid > .tcol-b > .eyebrow:first-child { margin-top: 8px; }
+    #view-today, #view-hw, #view-appt { max-width: 760px; }   /* วันนี้ = คอลัมน์เดียวเหมือนเดิม */
     .cal-layout { display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); column-gap: 32px; align-items: start; }
     .cal-left { position: sticky; top: 104px; }
     .cal-right > .cal-day-head:first-child { margin-top: 6px; }
@@ -791,6 +881,8 @@ const KIND_ICON = {
   occ:    '<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M12 8S10.5 3.5 8 4.5 9 8 12 8zm0 0s1.5-4.5 4-3.5S15 8 12 8z"/>',
   todo:   '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
   folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  hw:     '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/>',
+  class:  '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 19.5v-15M9 7h7"/>',
 };
 
 function empty(emoji, msg) {
@@ -840,9 +932,14 @@ function nowCard(classes, now, s){
   return card;
 }
 function renderToday() {
+  const f = qKeepFocus(document.querySelector('.quick[data-qid="quickIn"]'));
+  renderTodayInner(); qRestoreFocus(f);
+}
+function renderTodayInner() {
   const root = $('#todayContent'); root.innerHTML = '';
   const now = new Date(), dow = now.getDay();
   const grid = el('div','today-grid'), A = el('div','tcol-a'), B = el('div','tcol-b');
+  root.appendChild(quickBar({ id:'quickIn', state: quickState, kbd: true }));
   grid.append(A, B); root.appendChild(grid);
 
   if (fbReady && !getSyncCode()) {
@@ -1157,7 +1254,7 @@ function apptCard(a) {
   b.appendChild(t);
   const d = new Date(a.at);
   const m = el('div','meta');
-  m.innerHTML = `<span><b>${fmtDate(d)} ${fmtTime(d)}</b></span>` +
+  m.innerHTML = `<span><b>${fmtDate(d)} ${fmtTime(d)}${a.end ? '–' + esc(a.end) : ''}</b></span>` +
                 (a.online ? onlineMeta(a, 'เข้าห้อง') : (a.place ? `<span>📍 ${esc(a.place)}</span>` : '')) +
                 (a.note ? `<span>📝 ${esc(a.note)}</span>` : '');
   b.appendChild(m); card.appendChild(b);
@@ -1256,7 +1353,7 @@ function weekItemsFor(date, types){
     const s = toH(r.time); return { s, e:s+0.75, title:'🔁 '+esc(r.title), sub:r.time, color:'var(--routine)', data:['routines',r], done:!!r.done }; }) : [];
   const appts = types.includes('appts') ? Store.all('appts').filter(a=>sameYMD(new Date(a.at),date)).map(a => {
     const d=new Date(a.at), s=d.getHours()+d.getMinutes()/60;
-    return { s, e:s+1, title:'📌 '+esc(a.title), sub:fmtTime(d), color:'var(--soon)', data:['appts',a] }; }) : [];
+    return { s, e:(a.end && toH(a.end) > s ? toH(a.end) : s+1), title:'📌 '+esc(a.title), sub:fmtTime(d)+(a.end ? '–'+esc(a.end) : ''), color:'var(--soon)', data:['appts',a] }; }) : [];
   let exams = types.includes('exams') ? Store.all('exams').filter(e=>sameYMD(new Date(e.at),date)).map(e => {
     const d=new Date(e.at), s=d.getHours()+d.getMinutes()/60;
     return { s, e:s+1.5, title:'📝 '+esc(e.subject), sub:fmtTime(d), color:'var(--exam)', data:['exams',e] }; }) : [];
@@ -1685,6 +1782,803 @@ function renderCal(){
   renderAgenda(box);
 }
 
+/* ===================== เพิ่มเร็วด้วยประโยคเดียว: ตัวแยกประโยค (v2) =====================
+   "ส่งรายงานเคมี พรุ่งนี้ 5 โมง" → { kind:'homework', title:'รายงาน', subject:'เคมี', when: พรุ่งนี้ 17:00, spans:[…] }
+   - กฎตายตัวในเครื่อง ไม่ส่งข้อความไปไหน · ใช้ได้ทั้งในเบราว์เซอร์และ Node (ไว้ทดสอบ)
+   - ไม่ใช้ lookbehind ใน regex (Safari รุ่นเก่ายังไม่รองรับ)
+   - spans ชี้ตำแหน่งในข้อความเดิม (แปลงตัวอักษรแบบ 1:1 เท่านั้น) ไว้ไฮไลต์คำที่อ่านได้ */
+const QuickParse = (() => {
+  const NUMW = { 'หนึ่ง':1,'สอง':2,'สาม':3,'สี่':4,'ห้า':5,'หก':6,'เจ็ด':7,'แปด':8,'เก้า':9,'สิบ':10,'สิบเอ็ด':11,'สิบสอง':12 };
+  const NUM = '(\\d{1,2}|สิบสอง|สิบเอ็ด|สิบ|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า)';
+  const NUM3 = '\\d{1,3}|สิบสอง|สิบเอ็ด|สิบ|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า';   // ไม่มีวงเล็บ — ใส่กลุ่มเองตอนใช้
+  const num = s => /^\d+$/.test(s) ? +s : NUMW[s];
+  const PERIOD = { 'เช้า':[8,0], 'สาย':[10,0], 'บ่าย':[13,0], 'เย็น':[17,0], 'ค่ำ':[19,0], 'คืน':[21,0], 'กลางคืน':[21,0], 'ดึก':[22,0],
+                   morning:[8,0], afternoon:[13,0], evening:[17,0], night:[21,0], tonight:[21,0] };
+  const PER = '(กลางคืน|เช้า|สาย|บ่าย|เย็น|ค่ำ|คืน|ดึก)';
+  const NOT_NUM = '(?!\\s*(?:\\d|โมง|สิบ|หนึ่ง|สอง|สาม|สี่|ห้า|หก|เจ็ด|แปด|เก้า|ครึ่ง))';
+  // ช่วงเวลาที่ต่อท้ายวัน เช่น "พรุ่งนี้เย็น" (แต่ไม่กิน "บ่าย" ใน "พรุ่งนี้บ่าย 3")
+  const PER_AFTER = `(?:\\s*(?:ตอน)?${PER}${NOT_NUM})?`;
+  const EN_PER = '(?:\\s+(morning|afternoon|evening|night))?';
+  const MONTHS = [['มกราคม','มกรา','ม.ค.','มค'],['กุมภาพันธ์','กุมภา','ก.พ.','กพ'],['มีนาคม','มีนา','มี.ค.','มีค'],['เมษายน','เมษา','เม.ย.','เมย'],
+                  ['พฤษภาคม','พฤษภา','พ.ค.','พค'],['มิถุนายน','มิถุนา','มิ.ย.','มิย'],['กรกฎาคม','กรกฎา','ก.ค.','กค'],['สิงหาคม','สิงหา','ส.ค.','สค'],
+                  ['กันยายน','กันยา','ก.ย.','กย'],['ตุลาคม','ตุลา','ต.ค.','ตค'],['พฤศจิกายน','พฤศจิกา','พ.ย.','พย'],['ธันวาคม','ธันวา','ธ.ค.','ธค']];
+  const EN_MON = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  const EN_MON_RE = '(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\\.?';
+  const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const MON_ALT = MONTHS.flatMap((ns, i) => ns.map(n => [n, i])).sort((a, b) => b[0].length - a[0].length);
+  const MON_RE = '(' + MON_ALT.map(([n]) => escRe(n)).join('|') + ')';
+  const monIdx = s => MON_ALT.find(([n]) => n === s)[1];
+  const enMonIdx = s => EN_MON.indexOf(s.toLowerCase().slice(0, 3));
+  const DOW_ALT = [['อาทิตย์',0],['จันทร์',1],['อังคาร',2],['พุธ',3],['พฤหัสบดี',4],['พฤหัส',4],['ศุกร์',5],['เสาร์',6]];
+  const DOW_RE = '(' + DOW_ALT.map(([n]) => n).join('|') + ')';
+  const EN_DOW_RE = '(sun(?:day)?|mon(?:day)?|tue(?:s|sday)?|wed(?:s|nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?)';
+  const EN_DOW = ['sun','mon','tue','wed','thu','fri','sat'];
+  // ชื่อย่อวันแบบมีจุด (ใช้เฉพาะตอนเพิ่มคาบเรียน) — ไม่กิน "ส.ค." หรือ "อ.สมชาย"
+  const DOW_SHORT_RE = '(อา|พฤ|จ|อ|พ|ศ|ส)\\.(?=\\s|$|,|\\d|-)';
+  const DOW_SHORT = { 'อา':0,'จ':1,'อ':2,'พ':3,'พฤ':4,'ศ':5,'ส':6 };
+  const dowOf = t => { const l = t.toLowerCase().replace(/\.$/, ''); const th = DOW_ALT.find(([n]) => n === t); if (th) return th[1];
+    if (DOW_SHORT[l] != null) return DOW_SHORT[l]; return EN_DOW.indexOf(l.slice(0, 3)); };
+
+  // ชื่อเล่นวิชา → ชื่อเต็ม (ภาษาอังกฤษจับเฉพาะทั้งคำ)
+  const ALIAS = { 'คณิต':'คณิตศาสตร์', 'วิทย์':'วิทยาศาสตร์', 'ชีวะ':'ชีววิทยา', 'คอม':'คอมพิวเตอร์', 'อิ้ง':'ภาษาอังกฤษ', 'อังกฤษ':'ภาษาอังกฤษ',
+                  'ไทย':'ภาษาไทย', 'จีน':'ภาษาจีน', 'ญี่ปุ่น':'ภาษาญี่ปุ่น', 'สังคม':'สังคมศึกษา', 'ประวัติ':'ประวัติศาสตร์', 'พละ':'พลศึกษา',
+                  'สุขะ':'สุขศึกษา', 'ภูมิศาสตร์':'ภูมิศาสตร์', 'เศรษฐศาสตร์':'เศรษฐศาสตร์',
+                  'math':'คณิตศาสตร์', 'maths':'คณิตศาสตร์', 'sci':'วิทยาศาสตร์', 'science':'วิทยาศาสตร์', 'phy':'ฟิสิกส์', 'physics':'ฟิสิกส์',
+                  'chem':'เคมี', 'chemistry':'เคมี', 'bio':'ชีววิทยา', 'biology':'ชีววิทยา', 'eng':'ภาษาอังกฤษ', 'english':'ภาษาอังกฤษ',
+                  'thai':'ภาษาไทย', 'social':'สังคมศึกษา', 'history':'ประวัติศาสตร์', 'com':'คอมพิวเตอร์', 'computer':'คอมพิวเตอร์',
+                  'cs':'คอมพิวเตอร์', 'art':'ศิลปะ', 'music':'ดนตรี', 'pe':'พลศึกษา', 'chinese':'ภาษาจีน', 'japanese':'ภาษาญี่ปุ่น' };
+  const COMMON = ['คณิตศาสตร์','วิทยาศาสตร์','ฟิสิกส์','เคมี','ชีววิทยา','ภาษาไทย','ภาษาอังกฤษ','ภาษาจีน','ภาษาญี่ปุ่น','ภาษาฝรั่งเศส','สังคมศึกษา',
+                  'ประวัติศาสตร์','ภูมิศาสตร์','คอมพิวเตอร์','ศิลปะ','ดนตรี','พลศึกษา','สุขศึกษา','การงานอาชีพ','เศรษฐศาสตร์'];
+  const isLatin = s => /^[a-z0-9 .]+$/i.test(s);
+  function findNeedle(low, n){
+    if (isLatin(n)) { const m = new RegExp(`(^|[^a-z])${escRe(n)}(?![a-z])`, 'i').exec(low); return m ? m.index + m[1].length : -1; }
+    return low.indexOf(n);
+  }
+  // "วันภาษาไทย", "วันวิทยาศาสตร์" = ชื่องาน ไม่ใช่วิชา → ปิดทั้งวลีก่อนค้นหา (ความยาวเท่าเดิม)
+  const DAY_OF_SUBJECT = new RegExp('วัน(' + COMMON.map(escRe).join('|') + ')', 'g');
+  function findSubject(text, subjects, taught = {}){
+    const low = String(text || '').toLowerCase().replace(DAY_OF_SUBJECT, m => '#'.repeat(m.length)), cands = [];
+    const add = (needle, name, pri = 0) => { if (needle && needle.length >= 2) cands.push([needle, name, pri]); };
+    const own = full => subjects.find(s => s === full || s.startsWith(full) || (s.length >= 3 && full.startsWith(s))) || full;
+    Object.entries(taught).forEach(([w, name]) => add(w, name, 2));   // คำที่ผู้ใช้สอน ('' = ไม่ใช่ชื่อวิชา)
+    subjects.forEach(s => { add(s, s, 1); add(s.split(/\s+/)[0], s, 1); add(s.replace(/^ภาษา/, ''), s, 1); add(s.replace(/(ศาสตร์|ศึกษา)$/, ''), s, 1); });
+    Object.entries(ALIAS).forEach(([a, full]) => add(a, own(full)));
+    COMMON.forEach(s => add(s, own(s)));
+    let best = null;
+    for (const [n, name, pri] of cands) {
+      const i = findNeedle(low, n.toLowerCase());
+      if (i < 0) continue;
+      if (!best || n.length > best.n.length || (n.length === best.n.length && pri > best.pri)) best = { n: String(text).substr(i, n.length), name, i, pri };
+    }
+    return best && best.name === '' ? null : best;
+  }
+  // เดาคำย่อที่ผู้ใช้ใช้เรียกวิชา เช่น "ส่งรายงานชีวะ" + ชีววิทยา → "ชีวะ"
+  function guessAlias(text, name){
+    const t = String(text || ''); if (!name) return '';
+    for (let len = Math.min(name.length, 8); len >= 2; len--) {
+      const i = t.indexOf(name.slice(0, len));
+      if (i >= 0) { let j = i + len; while (j < t.length && /[ะ-ฺ็-๎]/.test(t[j])) j++; return t.slice(i, j); }
+    }
+    const m = t.match(/[a-z]{2,12}/i);
+    return m && !/^(hw|homework|quiz|exam|test|due|tomorrow|today|next|pm|am|in|at|on|the|and|report|essay)$/i.test(m[0]) ? m[0] : '';
+  }
+
+  const sod = d => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const monday = d => addDays(sod(d), -((d.getDay() + 6) % 7));
+  const at = (d, [h, m]) => { const x = new Date(d); x.setHours(h, m, 0, 0); return x; };
+  const pad = n => String(n).padStart(2, '0');
+  const hhmm = ([h, m]) => `${pad(h)}:${pad(m)}`;
+  const toHM = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ''); return m ? [+m[1], +m[2]] : null; };
+  const lastDay = (y, m) => new Date(y, m + 1, 0).getDate();
+  const qnorm = t => String(t || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const MK = '\u0001';
+  const POLITE = new RegExp('(?:(?:นะ)?(?:ค่ะ|คะ|ครับ|จ้า)|\\s(?:นะ|น้า|จ้ะ))$');
+  const EDGE_ANY = new RegExp('\\s*(?:ภายใน|ก่อน|ตอน|เวลา|ช่วง)$');
+  const EDGE_SP = new RegExp('\\s(?:ส่ง|วัน|ใน|ที่|และ|กับ|ถึง|due|by|on|at)$', 'i');
+  const LEAD = new RegExp('^(?:ตอน|เวลา|และ|กับ|ช่วง)\\s+');
+  const PUNCT = /^[\s,.\-·:;]+|[\s,.\-·:;]+$/g;
+  const clean = t => { t = String(t).replace(/\u0001/g, ' ').replace(/\s+/g, ' ').replace(PUNCT, '').trim(); let prev;
+    do { prev = t; t = t.replace(POLITE, '').replace(EDGE_ANY, '').replace(EDGE_SP, '').replace(LEAD, '').replace(PUNCT, '').trim(); } while (t !== prev);
+    return t; };
+  const H = (c, t) => ({ c, t });
+
+  function parse(input, opt = {}){
+    const now = opt.now ? new Date(opt.now) : new Date();
+    const today = sod(now);
+    const learn = opt.learn || {};
+    const classes = opt.classes || [];
+    const subjects = [...new Set([...(opt.subjects || []), ...classes.map(c => c.subject)].filter(Boolean))];
+    // แปลงแบบ 1:1 (ตำแหน่งตัวอักษรไม่เลื่อน) → spans ชี้กลับไปที่ข้อความเดิมได้
+    let s = String(input || '').replace(/[๐-๙]/g, d => String('๐๑๒๓๔๕๖๗๘๙'.indexOf(d)))
+      .replace(/[\t  -​　]/g, ' ').replace(/[–—−]/g, '-').replace(/：/g, ':');
+    const spans = [];
+    let date = null, time = null, end = null, period = null, wd = null, repeat = null, days = null;
+    let relTime = false, nextClass = false, afterSchool = false, allDayWord = false;
+    const hints = [];
+    const take = (re, type, fn) => {
+      const g = new RegExp(re.source, re.flags.replace('g', '') + 'g');
+      for (const m of s.matchAll(g)) {
+        if (!m[0].trim()) continue;
+        if (fn(m) === false) continue;
+        let a = m.index, b = m.index + m[0].length;
+        while (a < b && /[\s\u0001]/.test(s[a])) a++; while (b > a && /[\s\u0001]/.test(s[b - 1])) b--;
+        spans.push({ s: a, e: b, type });
+        s = s.slice(0, m.index) + MK.repeat(m[0].length) + s.slice(m.index + m[0].length);
+        return true;
+      }
+      return false;
+    };
+    const before = (i, n = 14) => s.slice(Math.max(0, i - n), i).replace(/\u0001/g, ' ');
+    const setPer = p => { if (p && !period) period = PERIOD[String(p).toLowerCase()]; };
+    const mkDate = (d, mo, y) => {
+      let yy = y == null || y === '' ? null : +y;
+      if (yy != null) { if (yy < 100) yy = (2500 + yy - 543 < today.getFullYear() - 1) ? 2000 + yy : 2500 + yy; if (yy > 2400) yy -= 543; }
+      if (mo < 0 || mo > 11 || d < 1) return null;
+      let x = new Date(yy ?? today.getFullYear(), mo, d);
+      if (x.getMonth() !== mo) return null;
+      if (yy == null && x < today) x = new Date(today.getFullYear() + 1, mo, d);
+      return x;
+    };
+    const monthDay = (offset, day) => { const y = today.getFullYear(), m = today.getMonth() + offset; const dd = day === 'last' ? lastDay(y, m) : Math.min(day, lastDay(y, m)); return new Date(y, m, dd); };
+    const classy = opt.force === 'classes' || /^\s*(?:เรียน|คาบ)(?!หน้า|ถัดไป|ต่อไป)/.test(s) || /(^|\s)class(es)?(\s|$)/i.test(s);
+
+    /* ---- ลิงก์ / ออนไลน์ (ก่อน เพื่อไม่ให้ตัวเลขในลิงก์กลายเป็นวันเวลา) ---- */
+    let link = '', online = false;
+    take(/(https?:\/\/\S+|(?:meet\.google\.com|zoom\.us|teams\.microsoft\.com)\/\S*)/i, 'link', m => { link = m[1]; online = true; });
+    take(/ออนไลน์|(^|\s)online(\s|$)/i, 'link', () => { online = true; });
+
+    /* ---- ทำซ้ำ ---- */
+    take(/ทุก\s*วัน\s*(?:ธรรมดา|ทำการ|ทำงาน)|(^|\s)(?:every\s+)?weekdays?(\s|$)/i, 'repeat', () => { repeat = 'weekly'; days = [1,2,3,4,5]; });
+    if (!repeat) take(/ทุก\s*(?:สุดสัปดาห์|วันหยุด)|(^|\s)(?:every\s+)?weekends?(\s|$)/i, 'repeat', () => { repeat = 'weekly'; days = [6,0]; });
+    if (!repeat) take(new RegExp(`ทุก\\s*(?:วัน)?\\s*${DOW_RE}((?:\\s*(?:,|และ|กับ|-)?\\s*(?:วัน)?${DOW_RE})*)`), 'repeat', m => {
+      repeat = 'weekly'; days = [...new Set((m[0].match(new RegExp(DOW_RE, 'g')) || []).map(dowOf))]; });
+    if (!repeat) take(new RegExp(`(?:^|\\s)every\\s+${EN_DOW_RE}((?:\\s*(?:,|and|&)?\\s*${EN_DOW_RE})*)`, 'i'), 'repeat', m => {
+      repeat = 'weekly'; days = [...new Set((m[0].match(new RegExp(EN_DOW_RE, 'gi')) || []).map(dowOf))]; });
+    if (!repeat) take(/ทุกวัน|(^|\s)(?:every\s*day|daily)(\s|$)/i, 'repeat', () => { repeat = 'weekly'; days = [0,1,2,3,4,5,6]; });
+    if (!repeat) take(/ทุกเดือน|(^|\s)(?:every\s+month|monthly)(\s|$)/i, 'repeat', () => { repeat = 'monthly'; });
+    take(/ทุกปี|(^|\s)(?:every\s+year|yearly)(\s|$)/i, 'repeat', () => {});
+
+    /* ---- วันเรียน (เฉพาะคาบเรียน): "จันทร์ พุธ", "จ. พ.", "จันทร์-ศุกร์" ---- */
+    if (classy && !days) {
+      const D = `(?:วัน)?(${DOW_ALT.map(([n]) => n).join('|')}|(?:อา|พฤ|จ|อ|พ|ศ|ส)\\.)`;
+      take(new RegExp(`${D}\\s*(?:-|ถึง)\\s*${D}`), 'days', m => {
+        const a = dowOf(m[1]), b = dowOf(m[2]); if (a < 0 || b < 0) return false;
+        days = []; for (let d = a; ; d = (d + 1) % 7) { days.push(d); if (d === b || days.length > 7) break; } });
+      if (!days) { const found = [];
+        while (take(new RegExp(`(?:วัน)?${DOW_RE}|${DOW_SHORT_RE}`), 'days', m => { found.push(dowOf(m[1] || m[2])); }));
+        if (found.length) days = [...new Set(found)]; }
+    }
+
+    /* ---- วัน ---- */
+    const setDate = d => { date = d; };
+    take(new RegExp(`(?:ตอน)?${PER}นี้`), 'date', m => { setDate(today); setPer(m[1]); });
+    if (!date) take(/(^|\s)(tonight)(\s|$)/i, 'date', () => { setDate(today); setPer('tonight'); });
+    if (!date) take(/(^|\s)this\s+(morning|afternoon|evening)(\s|$)/i, 'date', m => { setDate(today); setPer(m[2]); });
+    const REL_DAY = w => w === 'วันนี้' ? 0 : w === 'พรุ่งนี้' ? 1 : 2;
+    if (!date) take(new RegExp(`(^|\\s)${PER}\\s*(วันนี้|พรุ่งนี้|มะรืน(?:นี้)?)${PER_AFTER}`), 'date', m => { setDate(addDays(today, REL_DAY(m[3]))); setPer(m[2]); setPer(m[4]); });
+    if (!date) take(new RegExp(`(วันนี้|พรุ่งนี้|มะรืน(?:นี้)?)${PER_AFTER}`), 'date', m => { setDate(addDays(today, REL_DAY(m[1]))); setPer(m[2]); });
+    if (!date) take(new RegExp(`(^|\\s)(today|tomorrow|tmrw|tmr|tomorow|tommorow)${EN_PER}(?=\\s|$|[,.])`, 'i'), 'date', m => {
+      setDate(addDays(today, /^tod/i.test(m[2]) ? 0 : 1)); setPer(m[3]); });
+    // อีก 2 ชม. / อีกครึ่งชั่วโมง / อีก 3 วัน / in 2 hours
+    if (!date) take(new RegExp(`(?:อีก|ภายใน|ใน)\\s*(ครึ่ง|${NUM3})\\s*(ชั่วโมง|ชม\\.?|นาที|วัน|สัปดาห์|อาทิตย์|เดือน)(?:\\s*(${NUM3})\\s*(นาที))?`), 'date', m => {
+      const n = m[1] === 'ครึ่ง' ? 0.5 : num(m[1]), u = m[2];
+      if (n == null) return false;
+      if (/^(ชั่วโมง|ชม)/.test(u) || u === 'นาที') {
+        const mins = (u === 'นาที' ? n : n * 60) + (m[4] ? num(m[3]) : 0);
+        const t = new Date(now.getTime() + mins * 60000); setDate(sod(t)); time = [t.getHours(), t.getMinutes()]; relTime = true;
+      } else if (u === 'เดือน') setDate(monthDay(n, today.getDate()));
+      else setDate(addDays(today, u === 'วัน' ? n : 7 * n)); });
+    if (!date) take(/(^|\s)in\s+(\d{1,3}|an?|half\s+an?)\s*(hours?|hrs?|minutes?|mins?|days?|weeks?)(?=\s|$|[,.])/i, 'date', m => {
+      const n = /^half/i.test(m[2]) ? 0.5 : /^an?$/i.test(m[2]) ? 1 : +m[2], u = m[3].toLowerCase();
+      if (/^(h)/.test(u) || /^min/.test(u)) { const t = new Date(now.getTime() + (/^min/.test(u) ? n : n * 60) * 60000); setDate(sod(t)); time = [t.getHours(), t.getMinutes()]; relTime = true; }
+      else setDate(addDays(today, /^d/.test(u) ? n : 7 * n)); });
+    // 10 ต.ค. / 10 ตุลา 69 / 10 เดือนตุลาคม 2569
+    if (!date) take(new RegExp(`(?:วันที่\\s*)?(\\d{1,2})\\s*(?:เดือน\\s*)?${MON_RE}\\s*(\\d{4}|\\d{2}(?!\\d|\\s*(?:[:.]\\d|โมง|ทุ่ม|น\\.|นาที)))?`), 'date', m => {
+      const d = mkDate(+m[1], monIdx(m[2]), m[3]); if (!d) return false; setDate(d); });
+    if (!date) take(new RegExp(`(^|[^a-z0-9])(\\d{1,2})(?:st|nd|rd|th)?\\s+${EN_MON_RE}(?:\\s+(\\d{4}))?(?![a-z])`, 'i'), 'date', m => {
+      const d = mkDate(+m[2], enMonIdx(m[3]), m[4]); if (!d) return false; setDate(d); });
+    if (!date) take(new RegExp(`(^|[^a-z])${EN_MON_RE}\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?(?!\\d)`, 'i'), 'date', m => {
+      const d = mkDate(+m[3], enMonIdx(m[2]), m[4]); if (!d) return false; setDate(d); });
+    if (!date) take(/(\d{4})-(\d{1,2})-(\d{1,2})/, 'date', m => { const d = mkDate(+m[3], +m[2] - 1, m[1]); if (!d) return false; setDate(d); });
+    // 15/10 หรือ 20/11/2569 — แต่ไม่ใช่ "ม.5/1", "ห้อง 5/1"
+    if (!date) take(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/, 'date', m => {
+      if (/((^|\s)(ม|ป)\.?|ห้อง|ชั้น|ปวช\.?|ปวส\.?|class|room)\s*$/i.test(before(m.index, 8))) return false;
+      const d = mkDate(+m[1], +m[2] - 1, m[3]); if (!d) return false; setDate(d); });
+    if (!date) take(/วันที่\s*(\d{1,2})\s*(?:ของ)?\s*เดือน\s*หน้า/, 'date', m => { const n = +m[1]; if (n < 1 || n > 31) return false; setDate(monthDay(1, n)); });
+    if (!date) take(/(?:สิ้น|ปลาย)\s*เดือน\s*(นี้|หน้า)?|(^|\s)end\s+of\s+(?:the\s+)?(next\s+)?month(\s|$)/i, 'date', m => { setDate(monthDay(m[1] === 'หน้า' || m[3] ? 1 : 0, 'last')); });
+    if (!date) take(/ต้น\s*เดือน\s*(นี้|หน้า)?/, 'date', m => { setDate(m[1] === 'นี้' ? monthDay(0, 1) : (m[1] === 'หน้า' || today.getDate() > 1) ? monthDay(1, 1) : today); });
+    if (!date) take(/กลาง\s*เดือน\s*(นี้|หน้า)?/, 'date', m => { let d = monthDay(m[1] === 'หน้า' ? 1 : 0, 15); if (d < today) d = monthDay(1, 15); setDate(d); });
+    if (!date) take(/เดือน\s*หน้า|(^|\s)next\s+month(\s|$)/i, 'date', () => { setDate(monthDay(1, today.getDate())); hints.push(H('month', `เดือนหน้า ใช้วันที่ ${today.getDate()}`)); });
+    if (!date) take(/(สิ้น|สุด)\s*สัปดาห์\s*(นี้|หน้า)?|เสาร์\s*อาทิตย์\s*(นี้|หน้า)?|(^|\s)(?:this\s+)?weekend(\s|$)|(^|\s)end\s+of\s+(?:the\s+)?week(\s|$)/i, 'date', m => {
+      const sun = m[1] === 'สิ้น' || /end/i.test(m[0]); const nxt = m[2] === 'หน้า' || m[3] === 'หน้า';
+      setDate(addDays(monday(today), (sun ? 6 : 5) + (nxt ? 7 : 0))); });
+    if (!date) take(/(วัน)?(สัปดาห์|อาทิตย์)\s*หน้า|(^|\s)next\s+week(\s|$)/i, 'date', m => { if (m[1] && m[2] === 'อาทิตย์') return false; setDate(addDays(today, 7)); });
+    if (!date && !(classy && days)) {
+      take(new RegExp(`(?:วัน)?${DOW_RE}(\\s*(?:หน้า|นี้))?${PER_AFTER}`), 'date', m => { wd = { dow: dowOf(m[1]), next: /หน้า/.test(m[2] || '') }; setPer(m[3]); })
+      || take(new RegExp(`(^|[^a-z])(next\\s+|this\\s+)?${EN_DOW_RE}${EN_PER}(?![a-z])`, 'i'), 'date', m => { wd = { dow: dowOf(m[3]), next: /next/i.test(m[2] || '') }; setPer(m[4]); });
+    }
+    if (!date && !wd) take(/วันที่\s*(\d{1,2})(?!\s*[\/\d])/, 'date', m => {
+      const n = +m[1]; let d = new Date(today.getFullYear(), today.getMonth(), n);
+      if (n < 1 || d.getDate() !== n) return false; if (d < today) d = monthDay(1, n); setDate(d); });
+    if (!date) take(/คาบ\s*(?:หน้า|ถัดไป|ต่อไป)|ครั้ง\s*หน้า|(^|\s)next\s+class(\s|$)/i, 'date', () => { nextClass = true; });
+    // มีวันที่แล้ว ชื่อวันที่พิมพ์ซ้ำ ("วันศุกร์ที่ 9 ต.ค.", "Fri Oct 9") ไม่ต้องไปอยู่ในชื่อ
+    if (date && !(classy && days)) {
+      take(new RegExp(`(?:วัน)?${DOW_RE}\\s*(?:ที่)?`), 'date', () => {})
+      || take(new RegExp(`(^|[^a-z])${EN_DOW_RE}(?![a-z])`, 'i'), 'date', () => {});
+    }
+
+    /* ---- เวลา ---- */
+    const hm = (h, mi = 0) => { time = [h, mi]; };
+    const plainHour = (n, p) => p === 'เช้า' ? n : p === 'เย็น' ? (n < 12 ? n + 12 : n) : (n <= 6 ? n + 12 : n);
+    const dotOk = (m, sep) => sep === ':' || !/(แบบฝึกหัด|ข้อ|บทที่|บท|หน้า|ex\.?|exercise|ตอนที่|ชุดที่|ชุด|เล่ม|ม\.|version|v)\s*$/i.test(before(m.index));
+    const ampm = (h, ap) => { if (!ap) return h; ap = ap.toLowerCase(); if (ap[0] === 'p' && h < 12) return h + 12; if (ap[0] === 'a' && h === 12) return 0; return h; };
+    if (!time) {
+      // ช่วงเวลา: 16:00-18:00 / 8:30-10 / 4-6 โมงเย็น / บ่าย 2 ถึง 4 / 3-5pm
+      take(/(\d{1,2})([:.])(\d{2})\s*(?:น\.)?\s*(?:-|ถึง|to|~)\s*(\d{1,2})(?:[:.](\d{2}))?(?!\d)\s*(?:น\.)?/i, 'time', m => {
+        const a = +m[1], am = +m[3]; let b = +m[4]; const bm = m[5] ? +m[5] : 0;
+        if (a > 23 || am > 59 || b > 23 || bm > 59 || !dotOk(m, m[2])) return false;
+        if (b * 60 + bm <= a * 60 + am && b + 12 <= 23) b += 12;
+        if (b * 60 + bm <= a * 60 + am) return false;
+        hm(a, am); end = [b, bm]; })
+      || take(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:-|to)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)(?![a-z])/i, 'time', m => {
+        let b = ampm(+m[4], m[6]); let a = ampm(+m[1], m[3] || m[6]);
+        if (!m[3] && a > b) a = ampm(+m[1], 'am');
+        if (a > 23 || b > 23 || a * 60 >= b * 60 + (+m[5] || 0)) return false;
+        hm(a, +m[2] || 0); end = [b, +m[5] || 0]; })
+      || take(new RegExp(`บ่าย\\s*${NUM}\\s*(?:โมง)?\\s*(?:-|ถึง)\\s*(?:บ่าย\\s*)?${NUM}\\s*(?:โมง)?(?:\\s*เย็น)?`), 'time', m => {
+        const a = num(m[1]), b = num(m[2]); if (!a || !b || a > 6 || b > 11 || b <= a) return false; hm(12 + a); end = [12 + b, 0]; })
+      || take(new RegExp(`${NUM}\\s*(?:โมง)?\\s*(?:-|ถึง)\\s*${NUM}\\s*โมง\\s*(เช้า|เย็น)?`), 'time', m => {
+        const a = num(m[1]), b = num(m[2]); if (!a || !b || a > 12 || b > 12) return false;
+        const A = plainHour(a, m[3]), B = plainHour(b, m[3]); if (B <= A) return false; hm(A); end = [B, 0]; });
+    }
+    if (!time) take(/(\d{1,2})([:.])(\d{2})(?:\s*(?:น\.|นาฬิกา))?(?:\s*(am|pm|a\.m\.|p\.m\.))?/i, 'time', m => {
+      const h = ampm(+m[1], m[4]), mi = +m[3]; if (h > 23 || mi > 59 || !dotOk(m, m[2])) return false; hm(h, mi); });
+    if (!time) take(/(^|[^\d:])(\d{1,2})\s*(am|pm|a\.m\.|p\.m\.)(?![a-z])/i, 'time', m => { const h = ampm(+m[2], m[3]); if (+m[2] > 12) return false; hm(h, 0); });
+    if (!time) take(/(^|\s)(noon)(\s|$)/i, 'time', () => hm(12, 0));
+    if (!time) take(/(^|\s)(midnight)(\s|$)/i, 'time', () => hm(23, 59));
+    if (!time) take(new RegExp(`บ่าย\\s*(?:${NUM}\\s*(?:โมง)?|โมง)\\s*(ครึ่ง)?`), 'time', m => { const n = m[1] ? num(m[1]) : 1; if (n < 1 || n > 6) return false; hm(12 + n, m[2] ? 30 : 0); });
+    if (!time) take(new RegExp(`${NUM}\\s*ทุ่ม\\s*(ครึ่ง)?`), 'time', m => { const n = num(m[1]); if (n < 1 || n > 6) return false; if (n === 6) hm(23, 59); else hm(18 + n, m[2] ? 30 : 0); });
+    if (!time) take(/ทุ่ม\s*(?:นึง|หนึ่ง)?\s*(ครึ่ง)|ทุ่ม\s*(?:นึง|หนึ่ง)/, 'time', m => hm(19, m[1] ? 30 : 0));
+    if (!time) take(new RegExp(`ตี\\s*${NUM}\\s*(ครึ่ง)?`), 'time', m => { const n = num(m[1]); if (n < 1 || n > 5) return false; hm(n, m[2] ? 30 : 0); });
+    if (!time) take(new RegExp(`${NUM}\\s*โมง\\s*(เช้า|เย็น|ตรง)?\\s*(?:(ครึ่ง)|(\\d{1,2})\\s*นาที|(\\d{2})(?!\\d))?`), 'time', m => {
+      const n = num(m[1]); if (n < 1 || n > 12) return false;
+      const mi = m[3] ? 30 : m[4] ? +m[4] : m[5] ? +m[5] : 0; if (mi > 59) return false;
+      hm(plainHour(n, m[2]), mi); });
+    if (!time) take(/(\d{1,2})\s*(?:นาฬิกา|น\.)/, 'time', m => { const h = +m[1]; if (h > 23) return false; hm(h, 0); });
+    if (!time) take(/เที่ยง\s*ครึ่ง/, 'time', () => hm(12, 30));
+    if (!time) take(/เที่ยงคืน/, 'time', () => hm(23, 59));
+    if (!time) take(/เที่ยง(?:วัน|ตรง)?/, 'time', () => hm(12, 0));
+    if (!time) take(/หลัง\s*เลิก\s*เรียน|(^|\s)after\s+school(\s|$)/i, 'time', () => { afterSchool = true; });
+    if (!time && !period) take(new RegExp(`ตอน${PER}`), 'time', m => setPer(m[1]));
+    if (!time && !period) take(/(^|\s)in\s+the\s+(morning|afternoon|evening)(\s|$)/i, 'time', m => setPer(m[2]));
+    take(/ทั้งวัน|(^|\s)all\s*day(\s|$)/i, 'time', () => { allDayWord = true; });
+
+    /* ---- แยกส่วนข้อความ ---- */
+    const segsRaw = s.split(/\u0001+/).map(x => x.replace(/\s+/g, ' ').trim());
+    const firstIdx = segsRaw.findIndex(Boolean);
+    const headRaw = firstIdx >= 0 ? segsRaw[firstIdx] : '';
+    const tailRaw = firstIdx >= 0 ? segsRaw.slice(firstIdx + 1).filter(Boolean).join(' ') : '';
+    const detect = segsRaw.filter(Boolean).join(' ');
+    const body = segsRaw.map(clean).filter(Boolean).join(' ');
+    const key = qnorm(clean(headRaw) || body).slice(0, 40);
+
+    /* ---- วิชา ---- */
+    let subj = findSubject(detect, subjects, learn.aliases || {});
+    if (!subj && opt.defaultSubject) subj = { n: '', name: opt.defaultSubject, i: -1, fromHeader: true };
+    const spanOf = (txt, type) => { if (!txt) return; const i = s.toLowerCase().indexOf(String(txt).toLowerCase()); if (i >= 0) spans.push({ s: i, e: i + txt.length, type }); };
+    if (subj && subj.n) spanOf(subj.n, 'subject');
+
+    /* ---- ประเภท ---- */
+    const has = re => re.test(detect);
+    let autoKind;
+    if (classy && (days || wd)) autoKind = 'classes';
+    else if (has(/(^|\s)สอบ/) || has(/(^|[^a-z])(exam|test|quiz|midterm|final)s?(?![a-z])/i)) autoKind = 'exams';
+    else if (has(/^(นัด|ประชุม)/) || has(/(หาหมอ|หมอฟัน|ติว|ประชุม|ซ้อม|สัมภาษณ์|เจอกัน)/) || has(/(^|[^a-z])(meeting|meet|appointment|appt)(?![a-z])/i)) autoKind = 'appts';
+    else if ((has(/(วันเกิด|ครบรอบ|วันแม่|วันพ่อ|วันครู)/) || has(/(^|[^a-z])(birthday|anniversary)(?![a-z])/i)) && (date || wd)) autoKind = 'occasions';
+    else if (repeat) autoKind = 'routines';
+    else if (has(/^(ส่ง|ทำการบ้าน)/) || (has(/(^|\s)ส่ง/) && !has(/ส่ง(ของ|พัสดุ|ไปรษณีย์|เงิน)/)) ||
+             has(/(การบ้าน|รายงาน|แบบฝึกหัด|ใบงาน|ชิ้นงาน|โครงงาน|เรียงความ|งานกลุ่ม)/) || has(/(^|[^a-z])(hw|homework|assignment|report|essay|worksheet|due)(?![a-z])/i)) autoKind = 'homework';
+    else if (opt.defaultKind) autoKind = opt.defaultKind;
+    else if (has(/^(อ่าน|ทบทวน|ซื้อ|จ่าย|โทร|ล้าง|ซัก|เก็บ|ตื่น|ออกกำลัง|วิ่ง)/) || has(/^(read|buy|pay|call|clean|wash)(?![a-z])/i)) autoKind = 'routines';
+    else if (subj) autoKind = 'homework';
+    else autoKind = 'routines';
+    // คำที่ผู้ใช้เคยแก้ประเภท: "ขึ้นต้นด้วย…" (ยาวสุดชนะ)
+    let learnedKind = null;
+    Object.entries(learn.kinds || {}).forEach(([k, v]) => { if (k && (key.startsWith(k) || qnorm(body).startsWith(k)) && (!learnedKind || k.length > learnedKind[0].length)) learnedKind = [k, v]; });
+    const kind = opt.force || (learnedKind ? learnedKind[1] : autoKind);
+
+    const out = { kind, autoKind, learnedKind: !opt.force && !!learnedKind, key, hints, online, link, spans,
+                  title: '', subject: '', subjectNeedle: subj && subj.n ? subj.n : '', place: '', room: '', repeat: 'once', days: null, dom: null };
+    const ROOM_RE = /(?:^|\s)((?:ห้อง|อาคาร|ตึก|lab|room)\s*\S.*)$/i;
+    if (kind === 'homework') {
+      let t = body.replace(/^ส่ง\s*/, '');
+      if (subj && subj.n) t = clean(t.replace(subj.n, ' '));
+      out.subject = subj ? subj.name : '';
+      out.title = /^(hw|homework|การบ้าน)?$/i.test(t) ? 'การบ้าน' : t;
+    } else if (kind === 'appts') {
+      let t = clean(headRaw).replace(/^นัด\s*/, ''), place = '';
+      const pm = t.match(/(?:^|\s)(?:ที่|@)\s*(?!\d)(.+)$/);
+      if (pm) { place = pm[1]; t = t.slice(0, pm.index); }
+      if (!place && headRaw && tailRaw) place = clean(tailRaw.replace(/^(?:ที่|@|at)\s*/i, ''));
+      else if (tailRaw) t = t + ' ' + clean(tailRaw);
+      if (!clean(headRaw) && tailRaw) { t = clean(tailRaw).replace(/^นัด\s*/, ''); place = ''; }   // "พรุ่งนี้บ่ายสาม นัดครู…"
+      out.title = clean(t) || 'นัด';
+      out.place = clean(place);
+      spanOf(out.place, 'place');
+    } else if (kind === 'exams') {
+      let t = body.replace(/(^|\s)สอบ(?!ย่อย|กลางภาค|ปลายภาค|เก็บคะแนน|ปฏิบัติ)\s*/, '$1');
+      const rm = t.match(ROOM_RE);
+      if (rm) { out.room = rm[1].trim(); t = t.slice(0, rm.index); }
+      if (subj && subj.n && t.includes(subj.n)) t = t.replace(subj.n, subj.name);
+      out.title = clean(t) || (subj && subj.fromHeader ? subj.name : 'สอบ');
+      out.subject = out.title;
+      spanOf(out.room, 'room');
+    } else if (kind === 'classes') {
+      let t = body.replace(/^(?:เรียน|คาบ(?:เรียน)?|class(?:es)?)\s*/i, '');
+      const rm = t.match(ROOM_RE);
+      if (rm) { out.room = rm[1].trim(); t = t.slice(0, rm.index); }
+      t = clean(t);
+      if (!out.room && tailRaw && headRaw) { const tr = clean(tailRaw); if (tr && !t.endsWith(tr)) { out.room = tr; t = clean(t.replace(tr, '')); } }
+      out.title = subj && subj.n && t.toLowerCase() === subj.n.toLowerCase() ? subj.name : (t || (subj ? subj.name : 'คาบเรียน'));
+      out.subject = out.title;
+      spanOf(out.room, 'room');
+    } else if (kind === 'occasions') {
+      out.title = body || 'วันสำคัญ';
+      out.repeat = repeat === 'monthly' ? 'monthly' : 'yearly';
+    } else {
+      out.title = body || 'สิ่งที่ต้องทำ';
+      if (repeat) out.repeat = repeat;
+    }
+
+    /* ---- ใส่วันเวลาให้ครบ ---- */
+    const DEF = { homework:[23,59], appts:[9,0], exams:[9,0] };
+    const learnedDef = learn.defaults || {};
+    if (learnedDef[kind] && toHM(learnedDef[kind]) && DEF[kind]) DEF[kind] = toHM(learnedDef[kind]);
+    const timed = !!DEF[kind];
+    // ส่งคาบหน้า → หาคาบวิชานั้นครั้งถัดไปจากตารางเรียน
+    if (nextClass) {
+      const cs = subj && subj.name ? classes.filter(c => c.subject === subj.name || (subj.n && c.subject.includes(subj.n))) : [];
+      let best = null;
+      for (const c of cs) { const st = toHM(c.start); if (!st) continue;
+        for (let k = 0; k <= 7; k++) { const d = addDays(today, k); if (d.getDay() !== c.day) continue; const dt = at(d, st); if (dt > now && (!best || dt < best.dt)) best = { dt, c }; } }
+      if (best) { date = sod(best.dt); if (!time) time = toHM(best.c.start); out.fromClass = best.c.subject; }
+      else hints.push(H('noClass', subj ? `ไม่เจอคาบ${subj.name}ในตารางเรียน` : 'ไม่รู้ว่าคาบวิชาอะไร'));
+    }
+    let tm = time || period;
+    const useT0 = tm || (timed ? DEF[kind] : null);
+    if (!date && wd) {
+      if (wd.next) date = addDays(monday(today), 7 + (wd.dow + 6) % 7);
+      else { date = addDays(today, (wd.dow - today.getDay() + 7) % 7); if (useT0 ? at(date, useT0) <= now : date < today) date = addDays(date, 7); }
+    }
+    // หลังเลิกเรียน → เวลาเลิกคาบสุดท้ายของวันนั้น
+    if (afterSchool && !time) {
+      const d = date || today, ends = classes.filter(c => c.day === d.getDay()).map(c => toHM(c.end)).filter(Boolean).sort((a, b) => a[0] * 60 + a[1] - b[0] * 60 - b[1]);
+      if (ends.length) time = ends[ends.length - 1]; else { time = [16, 0]; hints.push(H('afterSchool', 'ไม่มีคาบเรียนวันนั้น ใช้ 16:00')); }
+      if (!date) date = today;
+      tm = time;
+    }
+    let dateDefaulted = false, timeDefaulted = false;
+    if (kind === 'classes') {
+      out.days = days && days.length ? days : wd ? [wd.dow] : date ? [date.getDay()] : null;
+      if (!out.days) { out.days = [today.getDay()]; hints.push(H('noDate', 'ไม่ได้ระบุวันเรียน ใช้วันนี้')); dateDefaulted = true; }
+      if (!time) { time = [8, 30]; end = [9, 30]; hints.push(H('noTime', 'ไม่ได้ระบุเวลาเรียน ใช้ 08:30–09:30')); timeDefaulted = true; }
+      else if (!end) { end = [Math.min(23, time[0] + 1), time[1]]; hints.push(H('noEnd', 'ไม่ได้ระบุเวลาเลิก ใช้ 1 ชั่วโมง')); }
+      tm = time; date = date || today;
+    } else if (kind === 'routines' && out.repeat !== 'once') {
+      if (out.repeat === 'weekly') out.days = days;
+      if (out.repeat === 'monthly') out.dom = (date || today).getDate();
+      date = date || today;
+    } else if (!date) {
+      if (tm) { date = today; if (at(today, tm) <= now) date = addDays(today, 1); }
+      else if (timed) { date = addDays(today, 1); hints.push(H('noDate', 'ไม่ได้ระบุวัน ใช้พรุ่งนี้')); dateDefaulted = true; }
+      else date = today;
+    }
+    if (timed && !tm) { timeDefaulted = true; hints.push(H('noTime', `ไม่ได้ระบุเวลา ใช้ ${hhmm(DEF[kind])}${learnedDef[kind] ? ' (ตามที่คุณตั้งไว้)' : ''}`)); }
+    if (allDayWord && kind === 'routines') tm = null;
+    const useT = kind === 'occasions' ? null : (tm || (timed ? DEF[kind] : null));
+    out.when = useT ? at(date, useT) : sod(date);
+    out.timeStr = useT ? hhmm(useT) : '';
+    out.endStr = end && (kind === 'appts' || kind === 'classes') ? hhmm(end) : '';
+    out.allDay = !out.timeStr;
+    out.timeDefaulted = timeDefaulted; out.dateDefaulted = dateDefaulted; out.relTime = relTime;
+    if (out.repeat === 'once' && kind !== 'occasions' && kind !== 'classes') {
+      if (out.timeStr ? out.when < now : sod(out.when) < today) hints.push(H('past', out.timeStr ? 'เวลานี้ผ่านไปแล้ว' : 'วันนี้ผ่านไปแล้ว'));
+    }
+    spans.sort((a, b) => a.s - b.s);
+    return out;
+  }
+
+  /* ---- หลายบรรทัด: แยกทีละบรรทัด ข้ามบรรทัดหัวข้อ ---- */
+  const LIST_MARK = /^\s*(?:[-–•*·▪►➤→✓✔☐□▢✅⭐]+|\(?\d{1,2}[.)](?!\d)|\(?[๐-๙]{1,2}[.)])\s*/;
+  const HEADER_KIND = [[/(การบ้าน|งานที่ต้องส่ง|homework|(^|\s)hw(\s|$))/i, 'homework'], [/(สอบ|exam)/i, 'exams'], [/(นัด|meeting)/i, 'appts'],
+                       [/(สิ่งที่ต้องทำ|to-?do)/i, 'routines'], [/ตารางเรียน/, 'classes']];
+  function parseMany(text, opt = {}){
+    const raw = String(text || '').replace(/\r/g, '');
+    const lines = []; let pos = 0;
+    raw.split('\n').forEach(l => { if (l.trim()) lines.push({ line: l, off: pos }); pos += l.length + 1; });
+    if (lines.length <= 1) return lines.map(x => ({ header: false, text: x.line, off: x.off, res: parse(x.line, opt), ctxKind: null, ctxSubject: null }));
+    const marked = lines.map(x => LIST_MARK.test(x.line));
+    const subjects = [...new Set([...(opt.subjects || []), ...(opt.classes || []).map(c => c.subject)].filter(Boolean))];
+    let ctxKind = null, ctxSubject = null;
+    return lines.map((x, i) => {
+      const m = x.line.match(LIST_MARK);
+      const body = m ? x.line.slice(m[0].length) : x.line;
+      const off = x.off + (m ? m[0].length : 0);
+      const t = body.trim();
+      if (!/[ก-๙a-z0-9]/i.test(t)) return { header: true, text: t, off };   // บรรทัดอีโมจิ/เส้นคั่น
+      if (!m) {
+        const hk = (HEADER_KIND.find(([re]) => re.test(t)) || [])[1] || null;
+        const sj = findSubject(t, subjects, (opt.learn || {}).aliases || {});
+        const subjOnly = sj && !clean(t.replace(sj.n, ' ').replace(/วิชา/g, ' ').replace(/[:：]/g, ' ')) ? sj.name : null;
+        // หัวข้อที่มีวันในอนาคต (เช่น "การบ้านคณิต ส่งพรุ่งนี้") = รายการจริง ไม่ใช่หัวข้อ
+        const pr = parse(t, opt), nowD = opt.now ? new Date(opt.now) : new Date();
+        const futureDate = pr.spans.some(sp => sp.type === 'date') && sod(pr.when) > sod(nowD);
+        if (/[:：]\s*$/.test(t) || (marked[i + 1] && (hk || subjOnly) && !futureDate)) {
+          if (hk) ctxKind = hk;
+          ctxSubject = subjOnly || null;
+          return { header: true, text: t, off };
+        }
+      }
+      return { header: false, text: body, off, ctxKind, ctxSubject, res: parse(body, { ...opt, defaultKind: ctxKind, defaultSubject: ctxSubject }) };
+    });
+  }
+  return { parse, parseMany, findSubject, guessAlias };
+})();
+
+/* ===================== เพิ่มเร็วด้วยประโยคเดียว: หน้าจอ ===================== */
+// คำที่แอปจำไว้จากการแก้ของผู้ใช้ — เก็บในเครื่องนี้ (localStorage) ไม่ซิงค์
+const QL_KEY = 'planner.quickLearn', QL_MAX = 200;
+function qlLoad(){
+  try { const d = JSON.parse(localStorage.getItem(QL_KEY)) || {}; return { kinds: d.kinds || {}, aliases: d.aliases || {}, defaults: d.defaults || {} }; }
+  catch { return { kinds:{}, aliases:{}, defaults:{} }; }
+}
+let quickLearn = qlLoad();
+function qlSave(){ try { localStorage.setItem(QL_KEY, JSON.stringify(quickLearn)); } catch {} }
+function qlPut(bucket, k, v){ const b = quickLearn[bucket]; delete b[k]; b[k] = v; const ks = Object.keys(b); if (ks.length > QL_MAX) delete b[ks[0]]; }
+const qlCount = () => Object.keys(quickLearn.kinds).length + Object.keys(quickLearn.aliases).length + Object.keys(quickLearn.defaults).length;
+
+const QK_KIND = { homework:['การบ้าน','hw','var(--c-hw)'], appts:['นัด','appt','var(--c-appt)'], exams:['สอบ','exam','var(--exam)'],
+                  routines:['สิ่งที่ต้องทำ','todo','var(--routine)'], occasions:['วันสำคัญ','occ','var(--routine)'], classes:['คาบเรียน','class','var(--primary)'] };
+const QUICK_ICON = '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>';
+const qCtx = () => ({ classes: Store.all('classes'), learn: quickLearn });
+const qNewState = () => ({ text:'', ov:{}, open:null, field:null, expand:null });   // open = ช่องแก้ที่เปิด, expand = แถวที่กางในโหมดหลายรายการ
+const quickState = qNewState();   // ช่องบนหน้าวันนี้ — เก็บไว้กันหายตอนหน้าเรนเดอร์ใหม่ (ทุกนาที / ข้อมูลซิงค์เข้า)
+
+function qClassColor(subject){
+  const cs = Store.all('classes'), same = cs.find(c => c.subject === subject && c.color);
+  if (same) return same.color;
+  const used = new Set(cs.map(c => c.color));
+  return COLOR_OPTS.find(c => !used.has(c)) || COLOR_OPTS[cs.length % COLOR_OPTS.length];
+}
+const qColor = p => p.kind === 'classes' ? qClassColor(p.title) : QK_KIND[p.kind][2];
+// ใส่สิ่งที่ผู้ใช้แก้บนการ์ดทับผลที่แยกได้
+function qApply(res, ov){
+  const p = { ...res, days: res.days ? [...res.days] : null, hints: res.hints.slice() };
+  if (!ov) return p;
+  ['title','subject','place','room'].forEach(k => { if (ov[k] != null) p[k] = ov[k]; });
+  // สอนคำย่อวิชา → เอาคำนั้นออกจากชื่อ ("รายงานบายโอ" + บายโอ = ชีววิทยา → "รายงาน") ให้ตรงกับที่จะอ่านได้ครั้งหน้า
+  const la = ov.learnAlias || {};
+  const word = String(la.word != null ? la.word : (ov.subject ? QuickParse.guessAlias(res.title, ov.subject) : '')).trim();
+  if (ov.subject && ov.title == null && p.kind === 'homework' && (la.on != null ? la.on : !!word) && word.length >= 2 && p.title.includes(word)) {
+    const t = p.title.replace(word, ' ').replace(/\s+/g, ' ').trim(); if (t) p.title = t;
+  }
+  if (ov.days) p.days = ORDER.filter(d => ov.days.includes(d));
+  if (ov.dom) p.dom = ov.dom;
+  if (ov.date != null || ov.time != null) {
+    const d = ov.date || ymd(p.when), t = ov.time != null ? ov.time : p.timeStr;
+    p.timeStr = t; p.allDay = !t;
+    p.when = new Date(`${d}T${t || '00:00'}`);
+    if (ov.date) p.hints = p.hints.filter(h => !['noDate','past','month','noClass'].includes(h.c));
+    if (ov.time != null) p.hints = p.hints.filter(h => !['noTime','past','afterSchool'].includes(h.c));
+  }
+  if (ov.end != null) { p.endStr = ov.end; p.hints = p.hints.filter(h => h.c !== 'noEnd'); }
+  if (ov.days) p.hints = p.hints.filter(h => h.c !== 'noDate');
+  return p;
+}
+function qItems(st){
+  const ctx = qCtx(), seen = {};
+  return QuickParse.parseMany(st.text, ctx).map(it => {
+    const k0 = it.text.trim(); seen[k0] = (seen[k0] || 0) + 1;
+    const key = k0 + '#' + seen[k0];
+    if (it.header) return { ...it, key };
+    const ov = st.ov[key] || null;
+    const res = ov && ov.kind ? QuickParse.parse(it.text, { ...ctx, force: ov.kind, defaultKind: it.ctxKind, defaultSubject: it.ctxSubject }) : it.res;
+    return { ...it, key, ov, res, p: qApply(res, ov) };
+  });
+}
+function quickToItems(p){
+  const iso = p.when.toISOString();
+  if (p.kind === 'classes') {
+    const color = qClassColor(p.title);
+    return (p.days && p.days.length ? p.days : [p.when.getDay()]).map(day => ({ coll:'classes',
+      item:{ subject:p.title, start:p.timeStr || '08:30', end:p.endStr || '09:30', room:p.room || '', color, online:!!p.online, link:p.link || '', day } }));
+  }
+  if (p.kind === 'homework') return [{ coll:'homework', item:{ title:p.title, subject:p.subject || '', note:'', dueAt:iso, done:false } }];
+  if (p.kind === 'appts') return [{ coll:'appts', item:{ title:p.title, place:p.place || '', note:'', online:!!p.online, link:p.link || '', at:iso, end:p.endStr || '' } }];
+  if (p.kind === 'exams') return [{ coll:'exams', item:{ subject:p.title, room:p.room || '', note:'', at:iso } }];
+  if (p.kind === 'occasions') return [{ coll:'occasions', item:{ title:p.title, date:ymd(p.when), repeat:p.repeat === 'monthly' ? 'monthly' : 'yearly' } }];
+  const base = { title:p.title, time:p.timeStr, allDay:!p.timeStr, countdown:false, checklist:[] };
+  if (p.repeat === 'weekly') return [{ coll:'routines', item:{ ...base, repeat:'weekly', days:p.days } }];
+  if (p.repeat === 'monthly') return [{ coll:'routines', item:{ ...base, repeat:'monthly', dom:p.dom } }];
+  return [{ coll:'routines', item:{ ...base, repeat:'once', date:ymd(p.when), done:false } }];
+}
+const qDaysText = days => days.length === 7 ? 'ทุกวัน' : 'ทุก ' + ORDER.filter(d => days.includes(d)).map(d => TH_DAY_S[d]).join(' ');
+function qDateText(p){
+  const n = dDays(p.when), rel = n === 0 ? 'วันนี้' : n === 1 ? 'พรุ่งนี้' : n === 2 ? 'มะรืน' : '';
+  const y = p.when.getFullYear() !== new Date().getFullYear() ? ' ' + (p.when.getFullYear() + 543) : '';
+  return (rel ? rel + ' · ' : '') + `${TH_DAY_S[p.when.getDay()]} ${p.when.getDate()} ${TH_MON[p.when.getMonth()]}${y}`;
+}
+const qTimeText = p => p.timeStr ? p.timeStr + (p.endStr ? '–' + p.endStr : '') : '';
+function quickWhenText(p){
+  if (p.kind === 'classes' || (p.kind === 'routines' && p.repeat === 'weekly')) return `${qDaysText(p.days || [])} ${qTimeText(p) || 'ทั้งวัน'}`.trim();
+  if (p.kind === 'routines' && p.repeat === 'monthly') return `ทุกเดือน วันที่ ${p.dom}` + (p.timeStr ? ' ' + p.timeStr : '');
+  if (p.kind === 'occasions') return qDateText(p) + (p.repeat === 'monthly' ? ' · ทุกเดือน' : ' · ทุกปี');
+  return qDateText(p) + ' ' + (qTimeText(p) || 'ทั้งวัน');
+}
+// ปุ่มข้อมูลบนการ์ด (แตะเพื่อแก้): [ช่อง, ข้อความ, ว่าง?]
+function qChips(p){
+  const c = [], add = (f, label, empty) => c.push([f, label || empty, !label]);
+  if (p.kind === 'homework') add('subject', p.subject, '+ วิชา');
+  if (p.kind === 'classes' || (p.kind === 'routines' && p.repeat === 'weekly')) add('days', p.days && p.days.length ? qDaysText(p.days) : '', '+ วัน');
+  else if (p.kind === 'routines' && p.repeat === 'monthly') add('dom', `ทุกเดือน วันที่ ${p.dom}`);
+  else add('date', qDateText(p) + (p.kind === 'occasions' ? (p.repeat === 'monthly' ? ' · ทุกเดือน' : ' · ทุกปี') : ''));
+  if (p.kind !== 'occasions') add('time', qTimeText(p), p.kind === 'routines' ? 'ทั้งวัน' : '+ เวลา');
+  if (p.kind === 'appts') add('place', p.place && '📍 ' + p.place, '+ สถานที่');
+  if (p.kind === 'exams' || p.kind === 'classes') add('room', p.room && '📍 ' + p.room, '+ ห้อง');
+  if (p.online) c.push(['', 'ออนไลน์', false]);
+  return c;
+}
+function qHighlight(text, spans){
+  let out = '', i = 0;
+  spans.slice().sort((a, b) => a.s - b.s).forEach(x => { if (x.s < i || x.e <= x.s) return;
+    out += esc(text.slice(i, x.s)) + `<mark class="h-${x.type}">${esc(text.slice(x.s, x.e))}</mark>`; i = x.e; });
+  return out + esc(text.slice(i));
+}
+// ข้อความบอกว่าจะจำอะไร (ตอนกดเพิ่ม)
+function qLearnNote(x){
+  const ov = x.ov || {}, res = x.res, notes = [];
+  if (ov.kind && res.key && res.key.length >= 2) {
+    if (ov.kind !== res.autoKind) notes.push(`จะจำไว้ว่าประโยคที่ขึ้นต้นด้วย “${res.key}” เป็น${QK_KIND[ov.kind][0]}`);
+    else if (quickLearn.kinds[res.key]) notes.push(`จะเลิกจำ “${res.key}”`);
+  }
+  if (res.timeDefaulted && ov.time && QK_KIND[x.p.kind] && ['homework','appts','exams'].includes(x.p.kind)) notes.push(`จะใช้ ${ov.time} เป็นเวลาเริ่มต้นของ${QK_KIND[x.p.kind][0]}`);
+  return notes.join(' · ');
+}
+function qLearnFrom(x){
+  const ov = x.ov || {}, res = x.res; let n = 0;
+  if (ov.kind && res.key && res.key.length >= 2) {
+    if (ov.kind !== res.autoKind) { qlPut('kinds', res.key, ov.kind); n++; }
+    else if (quickLearn.kinds[res.key]) { delete quickLearn.kinds[res.key]; n++; }
+  }
+  if (res.timeDefaulted && ov.time && ['homework','appts','exams'].includes(x.p.kind)) { qlPut('defaults', x.p.kind, ov.time); n++; }
+  if (ov.subject != null && ov.subject !== res.subject) {
+    if (ov.subject) {
+      const la = ov.learnAlias || {}, word = String(la.word != null ? la.word : QuickParse.guessAlias(x.text, ov.subject)).trim();
+      if ((la.on != null ? la.on : !!word) && word.length >= 2) { qlPut('aliases', word, ov.subject); n++; }
+    } else if (ov.ignoreNeedle && res.subjectNeedle) { qlPut('aliases', res.subjectNeedle, ''); n++; }
+  }
+  return n;
+}
+function qLearnRowHTML(uid, x){
+  const ov = x.ov || {}, res = x.res;
+  if (ov.subject == null || ov.subject === res.subject) return '';
+  if (ov.subject) {
+    const la = ov.learnAlias || {}, word = la.word != null ? la.word : QuickParse.guessAlias(x.text, ov.subject), on = la.on != null ? la.on : !!word;
+    return `<label class="q-learn"><input type="checkbox" id="qe-${uid}-laon" data-f="la-on"${on ? ' checked' : ''}> จำคำว่า
+      <input class="inp" id="qe-${uid}-law" data-f="la-word" value="${attr(word)}" placeholder="คำย่อ"> = ${esc(ov.subject)}</label>`;
+  }
+  if (res.subjectNeedle) return `<label class="q-learn"><input type="checkbox" id="qe-${uid}-ig" data-f="ignore"${ov.ignoreNeedle ? ' checked' : ''}> ไม่ต้องจับคำว่า “${esc(res.subjectNeedle)}” เป็นวิชาอีก</label>`;
+  return '';
+}
+function qEditorHTML(uid, x){
+  const p = x.p, k = p.kind, id = f => `qe-${uid}-${f}`;
+  const titleLabel = k === 'exams' ? 'วิชาที่สอบ' : k === 'classes' ? 'วิชา' : 'ชื่อ';
+  const fld2 = (f, label, input, wide) => `<label class="q-f${wide ? ' q-f-wide' : ''}"><span>${label}</span>${input}</label>`;
+  let h = '<div class="q-ed">';
+  h += fld2('title', titleLabel, `<input class="inp" id="${id('title')}" data-f="title" value="${attr(p.title)}">`, true);
+  if (k === 'homework') h += fld2('subject', 'วิชา', `<input class="inp" id="${id('subject')}" data-f="subject" list="qsubj-${uid}" value="${attr(p.subject)}" placeholder="ไม่ระบุ">`, true) + qLearnRowHTML(uid, x);
+  if (k === 'classes' || (k === 'routines' && p.repeat === 'weekly'))
+    h += `<div class="q-f q-f-wide"><span>วัน</span><div class="daypick q-days">${ORDER.map(d => `<button type="button" data-day="${d}" class="${(p.days || []).includes(d) ? 'on' : ''}">${TH_DAY_S[d]}</button>`).join('')}</div></div>`;
+  else if (k === 'routines' && p.repeat === 'monthly') h += fld2('dom', 'ทุกวันที่', `<input class="inp" type="number" min="1" max="31" id="${id('dom')}" data-f="dom" value="${p.dom}">`);
+  else h += fld2('date', 'วันที่', `<input class="inp" type="date" id="${id('date')}" data-f="date" value="${ymd(p.when)}">`);
+  if (k !== 'occasions') h += fld2('time', k === 'classes' ? 'เริ่ม' : k === 'routines' ? 'เวลา (เว้นว่าง = ทั้งวัน)' : 'เวลา', `<input class="inp" type="time" id="${id('time')}" data-f="time" value="${p.timeStr}">`);
+  if (k === 'appts' || k === 'classes') h += fld2('end', k === 'classes' ? 'เลิก' : 'ถึง (ถ้ามี)', `<input class="inp" type="time" id="${id('end')}" data-f="end" value="${p.endStr || ''}">`);
+  if (k === 'appts') h += fld2('place', 'สถานที่', `<input class="inp" id="${id('place')}" data-f="place" value="${attr(p.place)}" placeholder="ไม่ระบุ">`, true);
+  if (k === 'exams' || k === 'classes') h += fld2('room', 'ห้อง', `<input class="inp" id="${id('room')}" data-f="room" value="${attr(p.room)}" placeholder="ไม่ระบุ">`, true);
+  h += '<div class="q-ed-foot"><button type="button" class="q-ed-done">เสร็จ</button></div></div>';
+  return h;
+}
+function qItemHTML(uid, x, st){
+  const p = x.p, [label, icon] = QK_KIND[p.kind];
+  const tag = p.learnedKind && !(x.ov && x.ov.kind) ? '<span class="q-tag">ตามที่คุณเคยเลือก</span>' : '';
+  let h = `<div class="q-read"><span class="q-read-lb">อ่านได้ว่า</span>${qHighlight(x.text, x.res.spans)}</div>`;
+  h += `<div class="q-card"><span class="kind-tile" style="--c:${qColor(p)}">${svgI(KIND_ICON[icon])}</span><div class="q-main">
+      <div class="q-kind">${label}${tag}</div>
+      <button type="button" class="q-title" data-chip="title" title="แตะเพื่อแก้ชื่อ">${esc(p.title)}</button>
+      <div class="q-chips">${qChips(p).map(([f, lb, emp]) => f
+        ? `<button type="button" class="q-chip${emp ? ' empty' : ''}${st.open === x.key && st.field === f ? ' on' : ''}" data-chip="${f}">${esc(lb)}</button>`
+        : `<span class="q-chip static">${esc(lb)}</span>`).join('')}</div>
+      ${p.hints.length ? `<div class="q-hint">${p.hints.map(h => esc(h.t)).join(' · ')}</div>` : ''}</div>
+      <button type="button" class="q-form" title="เปิดฟอร์มเต็ม">ฟอร์ม</button></div>`;
+  if (st.open === x.key) h += qEditorHTML(uid, x);
+  h += `<div class="q-kinds" role="group" aria-label="เปลี่ยนประเภท">${Object.entries(QK_KIND).map(([k, [l]]) =>
+         `<button type="button" data-kind="${k}" class="${k === p.kind ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  const note = qLearnNote(x); if (note) h += `<div class="q-learn-note">${esc(note)}</div>`;
+  return h;
+}
+function qKeepFocus(root){ const a = document.activeElement; if (!a || !root || !root.contains(a) || !a.id) return null;
+  let s = null, e = null; try { s = a.selectionStart; e = a.selectionEnd; } catch {} return { id:a.id, s, e }; }
+function qRestoreFocus(f){ if (!f) return; const e = document.getElementById(f.id); if (!e) return; e.focus({ preventScroll:true });
+  try { if (f.s != null) e.setSelectionRange(f.s, f.e); } catch {} }
+function fireUndo(title, body, onUndo){
+  const t = el('div','toast');
+  t.innerHTML = `<span class="dot" style="background:var(--primary)"></span><div class="t-txt"><div style="font-weight:600">${esc(title)}</div><div style="opacity:.85;font-size:.82rem">${esc(body)}</div></div>`;
+  const b = el('button','toast-act','เลิกทำ'); b.onclick = () => { onUndo(); t.remove(); };
+  t.appendChild(b); $('#toastWrap').appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .4s'; setTimeout(() => t.remove(), 400); }, 7000);
+}
+
+function quickBar(opts = {}){
+  const st = opts.state || qNewState(), uid = opts.id || 'quickIn';
+  const w = el('div','quick'); w.dataset.qid = uid;
+  w.innerHTML = `<div class="q-row"><span class="q-ic">${svgI(QUICK_ICON)}</span>
+      <textarea id="${uid}" class="q-in" rows="1" enterkeyhint="done" autocomplete="off" spellcheck="false" aria-label="เพิ่มเร็วด้วยประโยคเดียว"
+        placeholder="เช่น ส่งรายงานเคมี พรุ่งนี้ 5 โมง"></textarea>
+      ${opts.kbd ? '<kbd class="q-kbd" title="กด / เพื่อพิมพ์">/</kbd>' : ''}
+      <button type="button" class="q-help" aria-label="วิธีพิมพ์และคำที่จำไว้">?</button>
+      <button type="button" class="q-add" disabled>เพิ่ม</button></div>
+    <div class="q-prev"></div><datalist id="qsubj-${uid}"></datalist>`;
+  const inp = w.querySelector('.q-in'), add = w.querySelector('.q-add'), prev = w.querySelector('.q-prev');
+  w.querySelector(`#qsubj-${uid}`).innerHTML = [...new Set(Store.all('classes').map(c => c.subject))].map(s => `<option value="${attr(s)}">`).join('');
+  inp.value = st.text;
+  let items = [];
+  const grow = () => { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 150) + 'px'; };
+  const live = () => items.filter(x => !x.header && !(x.ov && x.ov.off));
+  const ovOf = key => (st.ov[key] = st.ov[key] || {});
+  const itemOf = key => items.find(x => x.key === key && !x.header);
+  const keyOf = t => { const c = t.closest('[data-key]'); return c ? c.dataset.key : null; };
+  function render(){
+    const f = qKeepFocus(w), list = items.filter(x => !x.header), n = live().length;
+    add.disabled = !n; add.textContent = n > 1 ? `เพิ่ม ${n}` : 'เพิ่ม';
+    w.classList.toggle('open', !!st.text.trim());
+    if (!list.length) { prev.innerHTML = ''; qRestoreFocus(f); return; }
+    let h = '';
+    if (items.length === 1) h = `<div class="q-single" data-key="${attr(list[0].key)}">${qItemHTML(uid, list[0], st)}</div>`;
+    else {
+      const skipped = items.length - list.length;
+      h += `<div class="q-mhead">เจอ <b>${list.length}</b> รายการ${skipped ? ` · ข้าม ${skipped} บรรทัดที่เป็นหัวข้อ` : ''}</div><div class="q-list">`;
+      items.forEach(x => {
+        if (x.header) { h += `<div class="q-hdr"><span>หัวข้อ</span>${esc(x.text)}</div>`; return; }
+        const on = !(x.ov && x.ov.off), open = st.expand === x.key, [label, icon] = QK_KIND[x.p.kind];
+        const warn = x.p.hints.filter(h => !['noTime','noEnd'].includes(h.c));   // จุดส้ม = มีอะไรควรดู (ไม่นับเวลาเริ่มต้นปกติ)
+        h += `<div class="q-it${on ? '' : ' off'}${open ? ' open' : ''}" data-key="${attr(x.key)}"><div class="q-it-row">
+          <button type="button" class="q-tick${on ? ' on' : ''}" data-act="tick" aria-label="${on ? 'ไม่เพิ่มรายการนี้' : 'เพิ่มรายการนี้'}">${ICON.tick}</button>
+          <span class="kind-tile sm" style="--c:${qColor(x.p)}">${svgI(KIND_ICON[icon])}</span>
+          <button type="button" class="q-it-main" data-act="open"><b>${esc(x.p.title)}</b>
+            <span>${label} · ${esc(quickWhenText(x.p))}${x.p.kind === 'homework' && x.p.subject ? ' · ' + esc(x.p.subject) : ''}</span></button>
+          ${warn.length ? `<span class="q-dot" title="${attr(warn.map(h => h.t).join(' · '))}"></span>` : ''}
+          <button type="button" class="q-chev" data-act="open" aria-label="${open ? 'ย่อ' : 'แก้รายการนี้'}">${open ? '⌃' : '⌄'}</button></div>
+          ${open ? `<div class="q-it-body">${qItemHTML(uid, x, st)}</div>` : ''}</div>`;
+      });
+      h += '</div>';
+    }
+    h += `<div class="q-foot">${n > 1 ? `Enter หรือปุ่มเพิ่ม = เพิ่มทั้ง ${n} รายการ · แตะรายการเพื่อแก้` : 'Enter เพื่อเพิ่ม · แตะวัน เวลา หรือวิชาบนการ์ดเพื่อแก้'}</div>`;
+    prev.innerHTML = h;
+    qRestoreFocus(f);
+  }
+  function update(){
+    st.text = inp.value;
+    items = st.text.trim() ? qItems(st) : [];
+    const keys = new Set(items.map(x => x.key));
+    Object.keys(st.ov).forEach(k => { if (!keys.has(k)) delete st.ov[k]; });   // บรรทัดที่แก้ข้อความ = ล้างสิ่งที่เคยแก้บนการ์ด
+    if (st.open && !keys.has(st.open)) { st.open = null; st.field = null; }
+    if (st.expand && !keys.has(st.expand)) st.expand = null;
+    render();
+  }
+  function focusField(){ if (!st.field) return; const e = document.getElementById(`qe-${uid}-${st.field}`); if (e) { e.focus(); try { e.select(); } catch {} } }
+  function commit(){
+    const list = live(); if (!list.length) return;
+    const hadFocus = document.activeElement === inp;
+    const plan = list.map(x => ({ x, adds: quickToItems(x.p) }));
+    let learned = 0; plan.forEach(({ x }) => { learned += qLearnFrom(x); });
+    if (learned) qlSave();
+    Object.assign(st, qNewState()); inp.value = ''; grow(); items = []; render();   // ล้างก่อนเพิ่ม: หน้าจะเรนเดอร์ใหม่ทันทีที่เพิ่ม
+    const added = [];
+    plan.forEach(({ adds }) => adds.forEach(({ coll, item }) => added.push([coll, Store.add(coll, item)])));
+    const one = plan.length === 1 ? plan[0].x.p : null;
+    fireUndo(one ? `เพิ่ม${QK_KIND[one.kind][0]}แล้ว` : `เพิ่ม ${plan.length} รายการแล้ว`,
+      (one ? `${one.title} · ${quickWhenText(one)}` : plan.map(({ x }) => x.p.title).join(', ')) + (learned ? ' · จำคำใหม่ไว้แล้ว' : ''),
+      () => added.forEach(([c, id]) => Store.remove(c, id)));
+    if (opts.onDone) { opts.onDone(); return; }
+    // พร้อมพิมพ์รายการต่อไป (มือถือ: เฉพาะตอนกด Enter จากช่องพิมพ์ — ไม่เด้งคีย์บอร์ดขึ้นมาเองเมื่อกดปุ่ม)
+    const ni = document.getElementById(uid);
+    if (ni && (hadFocus || (window.matchMedia && matchMedia('(hover: hover)').matches))) ni.focus({ preventScroll: true });
+  }
+  prev.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const key = keyOf(b), x = key && itemOf(key); if (!x) return;
+    const act = b.dataset.act;
+    if (act === 'tick') { const o = ovOf(key); o.off = !o.off; update(); return; }
+    if (act === 'open') { st.expand = st.expand === key ? null : key; if (st.open !== st.expand) { st.open = null; st.field = null; } render(); return; }
+    if (b.dataset.kind) { const o = ovOf(key); o.kind = b.dataset.kind; ['subject','place','room','end','days','dom'].forEach(k => delete o[k]); update(); return; }
+    if (b.dataset.chip != null) { st.open = key; if (items.length > 1) st.expand = key; st.field = b.dataset.chip === 'days' ? null : b.dataset.chip; render(); focusField(); return; }
+    if (b.dataset.day != null) { const o = ovOf(key), d = +b.dataset.day, cur = o.days || x.p.days || [];
+      o.days = cur.includes(d) ? cur.filter(v => v !== d) : [...cur, d]; if (!o.days.length) o.days = cur; update(); return; }
+    if (b.classList.contains('q-ed-done')) { st.open = null; st.field = null; render(); inp.focus(); return; }
+    if (b.classList.contains('q-form')) {
+      const it = quickToItems(x.p)[0], coll = it.coll, item = { ...it.item };
+      if (coll === 'classes') item.days = x.p.days || [x.p.when.getDay()];
+      Object.assign(st, qNewState()); inp.value = ''; grow(); items = []; render();
+      openSheet(coll, item); return;
+    }
+  });
+  const onField = e => {
+    const f = e.target.dataset.f; if (!f) return;
+    const key = keyOf(e.target), x = key && itemOf(key); if (!x) return;
+    const o = ovOf(key), v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    if (f === 'la-on') o.learnAlias = { ...(o.learnAlias || {}), on: v };
+    else if (f === 'la-word') o.learnAlias = { ...(o.learnAlias || {}), word: v };
+    else if (f === 'ignore') o.ignoreNeedle = v;
+    else if (f === 'dom') o.dom = Math.min(31, Math.max(1, +v || 1));
+    else if (f === 'subject') { o.subject = v.trim(); delete o.learnAlias; delete o.ignoreNeedle; }
+    else if (f === 'date') { if (v) o.date = v; else delete o.date; }
+    else o[f] = v;
+    update();
+  };
+  prev.addEventListener('input', e => { if (e.target.tagName === 'INPUT' && !['date','time','number','checkbox'].includes(e.target.type)) onField(e); });
+  prev.addEventListener('change', e => { if (['date','time','number','checkbox'].includes(e.target.type)) onField(e); });
+  prev.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.closest('.q-ed') && !e.isComposing) { e.preventDefault(); st.open = null; st.field = null; render(); inp.focus(); }
+  });
+  inp.addEventListener('input', () => { grow(); update(); });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); commit(); }
+    else if (e.key === 'Escape' && inp.value) { e.stopPropagation(); inp.value = ''; grow(); update(); }
+  });
+  add.onclick = commit;
+  w.querySelector('.q-help').onclick = openQuickHelp;
+  update();
+  requestAnimationFrame(grow);
+  return w;
+}
+
+/* ---------- วิธีพิมพ์ + คำที่แอปจำไว้ ---------- */
+const QUICK_EXAMPLES = [
+  ['การบ้าน', ['ส่งรายงานเคมี พรุ่งนี้ 5 โมง', 'ส่งใบงานคณิต คาบหน้า', 'การบ้านอังกฤษ ข้อ 1-10 ภายในศุกร์']],
+  ['นัด / สอบ', ['นัดติวฟิสิกส์ 16:00-18:00 ห้องสมุด', 'สอบกลางภาค คณิต วันที่ 5 เดือนหน้า 9 โมง']],
+  ['คาบเรียน', ['เรียนคณิต จันทร์ พุธ 8:30-10:00 ห้อง 301']],
+  ['สิ่งที่ต้องทำ', ['อ่านหนังสือ ทุกวันธรรมดา 2 ทุ่ม', 'จ่ายค่าหอ สิ้นเดือน', 'โทรหาแม่ อีกครึ่งชั่วโมง']],
+  ['วางหลายบรรทัด', ['การบ้าน ม.5/1\n1. คณิต แบบฝึกหัด 2.3 ส่งศุกร์\n2. อังกฤษ เรียงความ 200 คำ ส่งจันทร์\n3. เคมี รายงานบทที่ 3 ส่ง 7 ต.ค.']],
+];
+function openQuickHelp(){
+  const L = quickLearn;
+  const rows = [
+    ...Object.entries(L.kinds).map(([k, v]) => ['kinds', k, `ขึ้นต้นด้วย “${k}” → ${QK_KIND[v] ? QK_KIND[v][0] : v}`]),
+    ...Object.entries(L.aliases).map(([k, v]) => ['aliases', k, v ? `“${k}” = วิชา${v}` : `“${k}” ไม่ใช่ชื่อวิชา`]),
+    ...Object.entries(L.defaults).map(([k, v]) => ['defaults', k, `เวลาเริ่มต้นของ${QK_KIND[k] ? QK_KIND[k][0] : k} = ${v}`]),
+  ];
+  let h = `<h2>เพิ่มเร็วด้วยประโยคเดียว</h2>
+    <p class="sync-note">พิมพ์ประโยคเดียว แอปแยกชื่อ วิชา วัน และเวลาให้เอง แตะข้อมูลบนการ์ดเพื่อแก้ก่อนเพิ่ม วางข้อความหลายบรรทัดได้ (เช่น การบ้านจากไลน์กลุ่ม) แต่ละบรรทัดกลายเป็น 1 รายการ</p>`;
+  QUICK_EXAMPLES.forEach(([g, list]) => {
+    h += `<div class="eyebrow">${g}</div><div class="q-exs">${list.map(t => `<button type="button" class="q-ex" data-ex="${attr(t)}">${esc(t).replace(/\n/g, '<br>')}</button>`).join('')}</div>`;
+  });
+  h += `<div class="eyebrow">คำที่แอปจำไว้ <span class="count">${rows.length}</span></div>`;
+  if (!rows.length) h += `<p class="sync-note">ยังไม่มี ถ้าคุณเปลี่ยนประเภท วิชา หรือเวลาเริ่มต้นบนการ์ด แอปจะจำไว้ใช้ครั้งหน้า</p>`;
+  else h += `<div class="q-learned">${rows.map(([b, k, t]) => `<div class="q-lr"><span>${esc(t)}</span><button type="button" class="icon-btn q-lr-del" data-b="${b}" data-k="${attr(k)}" aria-label="ลืมคำนี้">${ICON.del}</button></div>`).join('')}</div>
+            <button type="button" class="del-btn" id="qlClear">ลืมทั้งหมด</button>`;
+  h += '<p class="fld-hint">คำที่จำไว้เก็บในเครื่องนี้เท่านั้น ไม่ซิงค์ข้ามเครื่อง</p>';
+  showRawSheet(h);
+  const body = $('#sheetBody');
+  body.querySelectorAll('.q-ex').forEach(b => b.onclick = () => {
+    closeSheet(); Object.assign(quickState, qNewState(), { text: b.dataset.ex });
+    if (curTab !== 'today') switchTab('today'); else renderToday();
+    const q = $('#quickIn'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  });
+  body.querySelectorAll('.q-lr-del').forEach(b => b.onclick = () => { delete quickLearn[b.dataset.b][b.dataset.k]; qlSave(); openQuickHelp(); });
+  const clr = $('#qlClear'); if (clr) clr.onclick = () => askConfirm('ลืมคำที่แอปจำไว้ทั้งหมด?', 'ลืมทั้งหมด', () => { quickLearn = { kinds:{}, aliases:{}, defaults:{} }; qlSave(); openQuickHelp(); });
+}
+
 /* ===================== แท็บ ===================== */
 const TABS = [
   { id:'today', label:'วันนี้',   icon:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>' },
@@ -1817,6 +2711,7 @@ function renderSheet(item) {
   let inner = `<h2>${editing?'แก้ไข':'เพิ่ม'}${({classes:'คาบเรียน',routines:'กิจวัตร',homework:'การบ้าน',appts:'นัดหมาย',exams:'วันสอบ',projects:'โปรเจกต์',occasions:'วันสำคัญ',notes:'โน้ต'})[coll]}</h2>`;
 
   if (!editing && coll !== 'projects' && coll !== 'notes') {
+    inner += `<div id="sheetQuick"></div><div class="q-or">หรือกรอกเอง</div>`;
     inner += `<div class="seg seg-wrap" id="typeSeg">
       <button data-c="classes">เรียน</button><button data-c="routines">กิจวัตร</button>
       <button data-c="homework">การบ้าน</button><button data-c="appts">นัด</button><button data-c="exams">สอบ</button><button data-c="occasions">วันสำคัญ</button></div>`;
@@ -1871,6 +2766,7 @@ function renderSheet(item) {
   } else if (coll === 'appts') {
     inner += fld('ชื่อนัด', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น หาหมอฟัน / ติวกลุ่ม">`);
     inner += `<div class="two">${fld('วันที่', `<input class="inp" type="date" id="f_date" value="${dpart(item?.at)}">`)}${fld('เวลา', `<input class="inp" type="time" id="f_time" value="${tpart(item?.at,'09:00')}">`)}</div>`;
+    inner += fld('ถึง (ถ้ามี)', `<input class="inp" type="time" id="f_end" value="${attr(item?.end || '')}">`);
     inner += fld('สถานที่ (ถ้ามี)', `<input class="inp" id="f_place" value="${attr(item?.place)}" placeholder="เช่น คลินิก / ห้องสมุด">`);
     inner += onlineFields('นัดออนไลน์', item?.link);
     inner += fld('โน้ต (ถ้ามี)', `<textarea class="inp" id="f_note" placeholder="รายละเอียดเพิ่มเติม">${esc(item?.note)}</textarea>`);
@@ -1897,6 +2793,7 @@ function renderSheet(item) {
     inner += `<button class="save" id="calBtn" style="background:var(--routine);margin-top:10px">📅 เพิ่มลงปฏิทิน (ไว้เตือน)</button>`;
   if (editing) inner += `<button class="del-btn" id="delBtn">ลบรายการนี้</button>`;
   body.innerHTML = inner;
+  { const sq = $('#sheetQuick'); if (sq) sq.appendChild(quickBar({ id:'quickSheet', onDone: closeSheet })); }
 
   if (!editing) document.querySelectorAll('#typeSeg button').forEach(b => {
     b.classList.toggle('on', b.dataset.c === coll);
@@ -2339,7 +3236,7 @@ function save() {
   } else if (c === 'appts') {
     if (!v('#f_title')) return warn('ใส่ชื่อนัดก่อนนะ');
     const o = { title:v('#f_title'), place:v('#f_place'), note:v('#f_note'), online:sheetState.online, link:v('#f_link'),
-                at:new Date(`${$('#f_date').value}T${$('#f_time').value}`).toISOString() };
+                at:new Date(`${$('#f_date').value}T${$('#f_time').value}`).toISOString(), end: $('#f_end') ? $('#f_end').value : '' };
     id ? Store.update(c, id, o) : Store.add(c, o);
   } else if (c === 'exams') {
     if (!v('#f_subject')) return warn('ใส่วิชาที่สอบก่อนนะ');
@@ -2411,7 +3308,8 @@ function itemToEvent(type, it){
     return { uid:it.id+'@planner', start:s, end:new Date(s.getTime()+2*3600000),
       summary:'📝 สอบ: '+(it.subject||''), desc:it.note||'', location:it.room||'', alarms:['-P3D','-P1D','-PT1H'] }; }
   const s=new Date(it.at); // appts
-  return { uid:it.id+'@planner', start:s, end:new Date(s.getTime()+3600000),
+  const eAt = new Date(s); if (it.end) { const [eh, em] = it.end.split(':').map(Number); eAt.setHours(eh, em, 0, 0); }
+  return { uid:it.id+'@planner', start:s, end: eAt > s ? eAt : new Date(s.getTime()+3600000),
     summary:'📌 '+(it.title||''), desc:it.note||'', location:it.online?'ออนไลน์':'', alarms:['-P1D','-PT1H'] };
 }
 function exportItemICS(type, it){
@@ -2591,6 +3489,13 @@ document.addEventListener('click', e => {
   const card = e.target.closest('.card'); if (!card) return;
   if (e.target.closest('button, a, input, textarea, select, .ck-item')) return;
   const ed = card.querySelector(':scope > .row-actions .icon-btn'); if (ed) ed.click();
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  if ($('#sheet').classList.contains('show')) return;
+  e.preventDefault(); if (curTab !== 'today') switchTab('today');
+  const q = $('#quickIn'); if (q) q.focus();
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#sheet').classList.contains('show') && !$('#dialog').classList.contains('show')) closeSheet(); });
 $('#bellBtn').onclick = openNotifSheet;

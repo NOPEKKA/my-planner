@@ -477,17 +477,15 @@
   .weekT, .weekV { display: grid; position: relative; height: 100%; }
   .wkgrid .blk { --c: var(--primary); position: absolute; border-radius: 8px; padding: 3px 6px; overflow: hidden; cursor: pointer;
                  font-size: .66rem; line-height: 1.2; display: flex; flex-direction: column; justify-content: center; color: var(--ink);
-                 background: color-mix(in srgb, var(--c) 17%, var(--card)); box-shadow: inset 3px 0 0 var(--c); }
+                 background: color-mix(in srgb, var(--c) 17%, var(--card)); }
   .wkgrid .blk:hover { background: color-mix(in srgb, var(--c) 26%, var(--card)); }
   .wkgrid .blk b { font-weight: 600; color: color-mix(in srgb, var(--c) 62%, var(--ink)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .wkgrid .blk small { color: var(--ink-soft); font-size: .6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* คงสีวิชาเดิมไว้ แล้วใส่กรอบชมพูหนา 3px + เงาชมพู + แถบสีวิชาด้านซ้าย */
-  .wkgrid .blk.has-exam { box-shadow: inset 0 0 0 3px var(--exam), inset 8px 0 0 var(--c), 0 3px 10px color-mix(in srgb, var(--exam) 38%, transparent); z-index: 2; }
+  .wkgrid .blk.has-exam { box-shadow: inset 0 0 0 3px var(--exam), 0 3px 10px color-mix(in srgb, var(--exam) 38%, transparent); z-index: 2; }
   .wkgrid .blk.is-exam { background: color-mix(in srgb, var(--exam) 16%, var(--card));
                          box-shadow: inset 0 0 0 3px var(--exam), 0 3px 10px color-mix(in srgb, var(--exam) 38%, transparent); z-index: 2; }
   .wkgrid .blk.is-exam b { color: var(--exam); }
-  .wkgrid .blk.has-exam { padding-left: 11px; }
-  .wkgrid .blk.is-exam { padding-left: 8px; }
   .wkgrid .blk .exam-tag { background: linear-gradient(135deg, var(--exam-a), var(--exam-b)); color: var(--on-exam); font-size: .58rem; font-weight: 700;
                            padding: 1px 6px; border-radius: 5px; align-self: flex-start; margin-top: 2px; white-space: nowrap; }
   .weekT .th { position: relative; }
@@ -1122,7 +1120,7 @@ function classExams(c, date){
 }
 function nextDateOfDow(dow){ const d = startOfDay(new Date()); d.setDate(d.getDate() + ((dow - d.getDay() + 7) % 7)); return d; }
 function classCard(c, compact, state, date) {
-  const exs = classExams(c, date || nextDateOfDow(c.day));
+  const exs = date === null ? [] : classExams(c, date || nextDateOfDow(c.day));   // date === null → หน้าตารางเรียน: ไม่มาร์กสอบ
   const card = el('div','card class-card' + (state ? ' ' + state : '') + (exs.length ? ' has-exam' : ''));
   card.style.setProperty('--c', c.color || 'var(--primary)');
   card.appendChild(el('div','tcol', `<b>${c.start}</b><span>${c.end}</span>`));
@@ -1422,7 +1420,7 @@ function renderClassList() {
   const box = $('#classListBox'); if (!box) return; box.innerHTML = '';
   const list = Store.all('classes').filter(c=>c.day===selDay).sort((a,b)=>a.start.localeCompare(b.start));
   if (!list.length) { box.appendChild(empty('📚', `ยังไม่มีคาบเรียนวัน${TH_DAY[selDay]} — กดปุ่ม + เพื่อเพิ่ม`)); return; }
-  list.forEach(c => box.appendChild(classCard(c, false)));
+  list.forEach(c => box.appendChild(classCard(c, false, '', null)));
 }
 function mondayOf(d){ const x = startOfDay(d); x.setDate(x.getDate() - ((x.getDay()+6)%7)); return x; }
 function endOfWeek(d, offsetWeeks=0){ const s = mondayOf(d); s.setDate(s.getDate() + 6 + offsetWeeks*7); s.setHours(23,59,0,0); return s; }
@@ -1451,7 +1449,7 @@ function weekItemsFor(date, types){
     return { s, e:s+1.5, title:'📝 '+esc(e.subject), sub:fmtTime(d), color:'var(--exam)', data:['exams',e] }; }) : [];
 
   // คาบที่มีสอบ (เวลาชนหรือวิชาเดียวกัน) → มาร์กคาบเรียน · บล็อกสอบที่เวลาชนคาบ → ซ่อน (ไม่ให้ทับซ้ำ)
-  classes.forEach(c => { const exs = classExams(c.data[1], date); if (exs.length) { c.exam = true; c.examData = ['exams', exs[0]]; c.examTime = fmtTime(new Date(exs[0].at)); } });
+  if (wantExams) classes.forEach(c => { const exs = classExams(c.data[1], date); if (exs.length) { c.exam = true; c.examData = ['exams', exs[0]]; c.examTime = fmtTime(new Date(exs[0].at)); } });
   if (classes.length && exams.length) exams = exams.filter(ex => !classes.some(c => ex.s < c.e && ex.e > c.s));
   if (!wantExams) exams = [];
   return [...classes, ...routines, ...appts, ...exams];

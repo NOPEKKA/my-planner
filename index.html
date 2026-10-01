@@ -18,7 +18,7 @@
     --soon: #DB8C0C; --soon-ink: #935A03; --amber-soft: #FBEFD5;
     --over: #D5434B; --over-soft: #FBE4E5;
     --routine: #7366DA; --routine-soft: #ECEAFB;
-    --exam: #D9436F; --exam-soft: #FBE3EA;
+    --exam: #D9436F; --exam-soft: #FBE3EA; --exam-a: #CF3569; --exam-b: #A8285A; --on-exam: #FFFFFF;
     --c-hw: #1D9961; --c-appt: #DB8C0C; --c-todo: #66737E;
     --online: #3461D4; --online-soft: #E3EBFB;
     --danger: #D5434B;
@@ -38,7 +38,7 @@
     --soon: #F0AE3C; --soon-ink: #F2B54D; --amber-soft: #382B12;
     --over: #F07980; --over-soft: #3A1D20;
     --routine: #A89BF4; --routine-soft: #282548;
-    --exam: #F37D9D; --exam-soft: #3C1F2A;
+    --exam: #F37D9D; --exam-soft: #3C1F2A; --exam-a: #B92F5E; --exam-b: #8A2150; --on-exam: #FFFFFF;
     --c-hw: #4CC88D; --c-appt: #F0AE3C; --c-todo: #93A0AA;
     --online: #8EAFF5; --online-soft: #1D2944;
     --danger: #F07980;
@@ -56,7 +56,7 @@
     --soon: #F0AE3C; --soon-ink: #F2B54D; --amber-soft: #382B12;
     --over: #F07980; --over-soft: #3A1D20;
     --routine: #A89BF4; --routine-soft: #282548;
-    --exam: #F37D9D; --exam-soft: #3C1F2A;
+    --exam: #F37D9D; --exam-soft: #3C1F2A; --exam-a: #B92F5E; --exam-b: #8A2150; --on-exam: #FFFFFF;
     --c-hw: #4CC88D; --c-appt: #F0AE3C; --c-todo: #93A0AA;
     --online: #8EAFF5; --online-soft: #1D2944;
     --danger: #F07980;
@@ -450,16 +450,23 @@
   .fld-hint { font-size: .78rem; color: var(--ink-soft); margin: 6px 2px 0; line-height: 1.5; }
 
   /* วันสอบ */
-  .exam-hero { display: flex; gap: 16px; align-items: center; background: var(--exam-soft); border-radius: var(--radius);
-               padding: 14px 18px; margin-bottom: 10px; cursor: pointer; }
-  .exam-hero .eh-days { flex: none; min-width: 58px; text-align: center; color: var(--exam); font-family: var(--display); line-height: 1; }
-  .exam-hero .eh-days b { display: block; font-size: 2.3rem; font-weight: 500; font-variant-numeric: tabular-nums; }
-  .exam-hero .eh-days.word b { font-size: 1.25rem; }
-  .exam-hero .eh-days span { font-family: var(--font); font-size: .78rem; font-weight: 600; }
-  .exam-hero .eh-body { min-width: 0; padding-left: 16px; border-left: 1.5px solid color-mix(in srgb, var(--exam) 30%, transparent); }
-  .exam-hero .lbl { font-size: .75rem; font-weight: 600; color: var(--exam); }
-  .exam-hero .sub { font-size: 1.08rem; font-weight: 600; margin-top: 1px; overflow-wrap: anywhere; }
-  .exam-hero .cd { font-size: .84rem; color: var(--ink-soft); margin-top: 2px; }
+  .exam-hero { display: flex; gap: 16px; align-items: center; border-radius: var(--radius); padding: 16px 18px; margin-bottom: 10px; cursor: pointer;
+               background: linear-gradient(135deg, var(--exam-a), var(--exam-b)); color: var(--on-exam);
+               box-shadow: 0 10px 26px color-mix(in srgb, var(--exam-a) 32%, transparent); }
+  .exam-hero .eh-days { flex: none; min-width: 64px; text-align: center; font-family: var(--display); line-height: 1; }
+  .exam-hero .eh-days b { display: block; font-size: 2.6rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .exam-hero .eh-days.word b { font-size: 1.35rem; }
+  .exam-hero .eh-days span { font-family: var(--font); font-size: .8rem; font-weight: 600; opacity: .9; }
+  .exam-hero .eh-body { min-width: 0; padding-left: 16px; border-left: 1.5px solid rgba(255,255,255,.35); }
+  .exam-hero .lbl { font-size: .76rem; font-weight: 600; letter-spacing: .02em; opacity: .92; display: flex; align-items: center; gap: 7px; }
+  .exam-hero .sub { font-family: var(--display); font-weight: 500; font-size: 1.3rem; line-height: 1.3; margin-top: 2px; overflow-wrap: anywhere; }
+  .exam-hero .cd { font-size: .86rem; margin-top: 3px; opacity: .92; }
+  .exam-hero .eh-live { width: 8px; height: 8px; border-radius: 50%; background: var(--on-exam); flex: none; animation: ehPulse 1.8s ease-out infinite; }
+  @keyframes ehPulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.7); } 100% { box-shadow: 0 0 0 9px rgba(255,255,255,0); } }
+  .exam-hero.past { background: var(--exam-soft); color: var(--ink); box-shadow: none; }
+  .exam-hero.past .eh-days, .exam-hero.past .lbl { color: var(--exam); }
+  .exam-hero.past .eh-body { border-left-color: color-mix(in srgb, var(--exam) 30%, transparent); }
+  .exam-hero.past .cd { color: var(--ink-soft); }
 
   /* ตารางทั้งสัปดาห์ (กริด) */
   .view-seg { display: flex; gap: 4px; background: var(--field); padding: 4px; border-radius: 14px; margin: 0 0 14px; }
@@ -474,9 +481,15 @@
   .wkgrid .blk:hover { background: color-mix(in srgb, var(--c) 26%, var(--card)); }
   .wkgrid .blk b { font-weight: 600; color: color-mix(in srgb, var(--c) 62%, var(--ink)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .wkgrid .blk small { color: var(--ink-soft); font-size: .6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .wkgrid .blk.has-exam { box-shadow: inset 3px 0 0 var(--c), inset 0 0 0 2px var(--exam); }
-  .wkgrid .blk .exam-tag { background: var(--exam); color: var(--on-primary); font-size: .54rem; font-weight: 700;
-                           padding: 0 4px; border-radius: 4px; align-self: flex-start; margin-top: 1px; }
+  /* คงสีวิชาเดิมไว้ แล้วใส่กรอบชมพูหนา 3px + เงาชมพู + แถบสีวิชาด้านซ้าย */
+  .wkgrid .blk.has-exam { box-shadow: inset 0 0 0 3px var(--exam), inset 8px 0 0 var(--c), 0 3px 10px color-mix(in srgb, var(--exam) 38%, transparent); z-index: 2; }
+  .wkgrid .blk.is-exam { background: color-mix(in srgb, var(--exam) 16%, var(--card));
+                         box-shadow: inset 0 0 0 3px var(--exam), 0 3px 10px color-mix(in srgb, var(--exam) 38%, transparent); z-index: 2; }
+  .wkgrid .blk.is-exam b { color: var(--exam); }
+  .wkgrid .blk.has-exam { padding-left: 11px; }
+  .wkgrid .blk.is-exam { padding-left: 8px; }
+  .wkgrid .blk .exam-tag { background: linear-gradient(135deg, var(--exam-a), var(--exam-b)); color: var(--on-exam); font-size: .58rem; font-weight: 700;
+                           padding: 1px 6px; border-radius: 5px; align-self: flex-start; margin-top: 2px; white-space: nowrap; }
   .weekT .th { position: relative; }
   .weekT .th span:last-child:not(:first-child) { transform: translateX(-100%); }
   .weekT .th span { position: absolute; transform: translateX(-50%); top: 3px; font-size: .62rem; color: var(--ink-faint); white-space: nowrap; }
@@ -614,6 +627,35 @@
   .dlg-cancel { background: var(--field); color: var(--ink); }
   .dlg-ok { background: var(--over); color: var(--on-primary); }
 
+  /* ---------- สอบ: เด่นขึ้น (การ์ดวันนี้, คาบที่มีสอบ, ปฏิทิน, สัปดาห์) ---------- */
+  .pill.exam-solid { background: linear-gradient(135deg, var(--exam-a), var(--exam-b)); color: var(--on-exam); cursor: pointer; }
+  .card.class-card.has-exam { background: color-mix(in srgb, var(--exam) 10%, var(--card)); box-shadow: inset 0 0 0 2px var(--exam), var(--shadow); }
+  .card.class-card.has-exam .title { color: var(--ink); }
+  .card.exam-card { background: color-mix(in srgb, var(--exam) 8%, var(--card)); box-shadow: inset 3px 0 0 var(--exam), var(--shadow); }
+  .card.exam-card .title { font-size: 1.05rem; }
+  .stat.exam { background: var(--exam-soft); }
+  .stat.exam b { color: var(--exam); }
+  .ag-row.exam { background: color-mix(in srgb, var(--exam) 9%, var(--card)); border-color: color-mix(in srgb, var(--exam) 35%, transparent);
+                 box-shadow: inset 3px 0 0 var(--exam); }
+  .ag-row.exam .ag-c { color: var(--exam); }
+  .cal-cell.has-exam { background: var(--exam-soft); }
+  .cal-cell.has-exam .dn { color: var(--exam); font-weight: 700; }
+  .cal-cell.sel.has-exam .dn { color: var(--invert-fg); }
+  .cal-dots i.ex { width: 12px; border-radius: 3px; }
+  .cal-chips { display: none; }
+
+  /* ---------- โปรเจกต์: แยก ไอเดีย / กำลังทำ / เสร็จแล้ว (มือถือ = แถบสลับ, คอม = 3 คอลัมน์) ---------- */
+  .proj-seg { margin: 0 0 12px; }
+  .proj-seg button .n { font-size: .72rem; font-weight: 500; opacity: .7; margin-left: 5px; font-variant-numeric: tabular-nums; }
+  .proj-col { display: none; }
+  .proj-col.on { display: block; }
+  .proj-col-head { display: none; align-items: center; gap: 8px; margin: 2px 4px 10px; font-weight: 600; font-size: .95rem; }
+  .proj-col-head i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .proj-col-head .count { background: var(--card); color: var(--ink-soft); font-size: .72rem; font-weight: 600; padding: 1px 8px;
+                          border-radius: 20px; font-variant-numeric: tabular-nums; }
+  .proj-col-empty { font-size: .84rem; color: var(--ink-faint); text-align: center; padding: 18px 8px 10px; }
+  .proj-add { margin-top: 2px; }
+
   .today-grid { display: block; }
 
   /* ---------- คอม: เมนูด้านข้าง + เนื้อหากว้าง ---------- */
@@ -635,14 +677,42 @@
     header.top h1 { font-size: 2.1rem; }
     .add-btn { display: inline-flex; }
     main { padding: 6px 36px 40px; }
-    #view-today, #view-hw, #view-appt { max-width: 760px; }   /* วันนี้ = คอลัมน์เดียวเหมือนเดิม */
-    .cal-layout { display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); column-gap: 32px; align-items: start; }
+    /* ความกว้างตามหน้า: วันนี้/การบ้าน/นัด = คอลัมน์เดียวอยู่กลางจอ (หัวข้อด้วย) · ปฏิทิน/สัปดาห์ = กว้าง */
+    .app[data-w="narrow"] { max-width: 832px; }
+    .app[data-w="wide"] { max-width: 1480px; }
+    /* ปฏิทินใหญ่: ตารางเดือนกินพื้นที่ส่วนใหญ่ ช่องวันสูงพอดีจอ โชว์ชื่อรายการในช่อง */
+    .cal-layout { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr); column-gap: 28px; align-items: start; }
     .cal-left { position: sticky; top: 104px; }
+    .cal-head .mo { font-size: 1.55rem; }
+    .cal-grid { gap: 4px; padding: 12px; }
+    .cal-dow { font-size: .78rem; padding-bottom: 6px; }
+    .cal-cell { aspect-ratio: auto; min-height: clamp(78px, calc((100dvh - 300px) / 6), 150px); align-items: stretch; padding: 6px; gap: 4px;
+                border: 1px solid var(--line); }
+    .cal-cell:hover { border-color: var(--line-strong); }
+    .cal-cell:hover .dn { background: none; }
+    .cal-cell .dn { width: 28px; height: 28px; font-size: .9rem; align-self: flex-start; }
+    .cal-cell.sel { border-color: var(--ink-soft); box-shadow: inset 0 0 0 1px var(--ink-soft); }
+    .cal-cell.dim { opacity: .5; }
+    .cal-cell.has-exam { border-color: color-mix(in srgb, var(--exam) 45%, transparent); }
+    .cal-dots { display: none; }
+    .cal-chips { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .cc { display: block; font-size: .68rem; line-height: 1.4; padding: 1px 6px; border-radius: 6px; font-weight: 600;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cc.ex { background: linear-gradient(135deg, var(--exam-a), var(--exam-b)); color: var(--on-exam); }
+    .cc.hw { background: color-mix(in srgb, var(--c-hw) 15%, var(--card)); color: color-mix(in srgb, var(--c-hw) 75%, var(--ink)); }
+    .cc.ap { background: var(--amber-soft); color: var(--soon-ink); }
+    .cc.oc { background: var(--routine-soft); color: var(--routine); }
+    .cc.rt { background: var(--field); color: var(--ink-soft); }
+    .cc.done { text-decoration: line-through; opacity: .6; }
+    .cc.more { background: none; color: var(--ink-soft); padding-left: 2px; }
+    .proj-seg { display: none; }
+    .proj-board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+    .proj-col { display: block; background: color-mix(in srgb, var(--field) 50%, var(--paper)); border-radius: 18px; padding: 12px 10px; min-height: 180px; }
+    .proj-col-head { display: flex; }
     .cal-right > .cal-day-head:first-child { margin-top: 6px; }
-    #noteList, #projList { columns: 2; column-gap: 14px; }
-    #noteList > *, #projList > * { break-inside: avoid; }
-    #noteList > .search-count, #noteList > .empty, #noteList > .nf-empty,
-    #projList > .eyebrow, #projList > .search-count, #projList > .empty { column-span: all; }
+    #noteList { columns: 2; column-gap: 14px; }
+    #noteList > * { break-inside: avoid; }
+    #noteList > .search-count, #noteList > .empty, #noteList > .nf-empty { column-span: all; }
     .week-wrap { margin: 0; padding: 0; }
     .sheet { left: 50%; right: auto; top: 50%; bottom: auto; width: min(580px, calc(100vw - 48px)); margin: 0; border-radius: 24px;
              max-height: 86dvh; transform: translate(-50%, -47%) scale(.98); opacity: 0; pointer-events: none;
@@ -650,6 +720,7 @@
     .sheet.show { transform: translate(-50%, -50%); opacity: 1; pointer-events: auto; }
     .grab { visibility: hidden; margin: 4px auto 10px; }
   }
+  @media (min-width: 900px) and (max-height: 899px) { .cal-left { position: static; } }
 </style>
 <script>try{const t=localStorage.getItem('planner.theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 </head>
@@ -923,7 +994,7 @@ function nowCard(classes, now, s){
   x += `<div class="stats">
       <button type="button" class="stat" data-go="todo"><b>${s.openToday}</b><span>ต้องทำวันนี้</span></button>
       <button type="button" class="stat${s.overdueN ? ' alert' : ''}" data-go="hw"><b>${s.overdueN}</b><span>เลยกำหนด</span></button>
-      <button type="button" class="stat" data-go="cal"><b>${s.exams7}</b><span>สอบใน 7 วัน</span></button></div>`;
+      <button type="button" class="stat${s.exams7 ? ' exam' : ''}" data-go="cal"><b>${s.exams7}</b><span>สอบใน 7 วัน</span></button></div>`;
   card.innerHTML = x;
   card.querySelectorAll('.stat').forEach(b => b.onclick = () => {
     if (b.dataset.go === 'todo') { const t = $('#todayTodo'); if (t) t.scrollIntoView({ behavior:'smooth', block:'start' }); }
@@ -1037,12 +1108,31 @@ function eyebrow(text, count) {
 }
 
 /* ---------- การ์ดแต่ละชนิด ---------- */
-function classCard(c, compact, state) {
-  const card = el('div','card class-card' + (state ? ' ' + state : ''));
+// สอบของคาบนี้ในวันนั้น: เวลาชนกัน หรือชื่อวิชาตรงกัน (รหัสวิชาแบบ BBA21467 ก็นับ)
+function classExams(c, date){
+  const code = x => ((x || '').match(/[a-z]{2,4}\s?\d{3,6}/i) || [''])[0].replace(/\s/g, '').toLowerCase();
+  const cs = toH(c.start), ce = toH(c.end), cn = (c.subject || '').toLowerCase().trim();
+  return Store.all('exams').filter(e => {
+    const d = new Date(e.at); if (!sameYMD(d, date)) return false;
+    const s = d.getHours() + d.getMinutes() / 60, en = (e.subject || '').toLowerCase().trim();
+    const overlap = s < ce && s + 1.5 > cs;
+    const same = cn && en && en !== 'สอบ' && (en.includes(cn) || cn.includes(en) || (code(en) && code(en) === code(cn)));
+    return overlap || same;
+  }).sort((a, b) => new Date(a.at) - new Date(b.at));
+}
+function nextDateOfDow(dow){ const d = startOfDay(new Date()); d.setDate(d.getDate() + ((dow - d.getDay() + 7) % 7)); return d; }
+function classCard(c, compact, state, date) {
+  const exs = classExams(c, date || nextDateOfDow(c.day));
+  const card = el('div','card class-card' + (state ? ' ' + state : '') + (exs.length ? ' has-exam' : ''));
   card.style.setProperty('--c', c.color || 'var(--primary)');
   card.appendChild(el('div','tcol', `<b>${c.start}</b><span>${c.end}</span>`));
   const b = el('div','body');
   const t = el('div','title', esc(c.subject));
+  if (exs.length) {
+    const ep = el('span','pill exam-solid', `📝 สอบ ${fmtTime(new Date(exs[0].at))}`); ep.title = 'ดูรายละเอียดสอบ';
+    ep.onclick = e => { e.stopPropagation(); openSheet('exams', exs[0]); };
+    t.appendChild(ep);
+  }
   if (state === 'now') t.appendChild(el('span','pill now','กำลังเรียน'));
   if (c.online) t.appendChild(el('span','pill online','ออนไลน์'));
   b.appendChild(t);
@@ -1134,7 +1224,7 @@ function agendaItems(){
   Store.all('appts').forEach(a=>{ const d=new Date(a.at); if(dDays(d)<0) return;
     out.push({ when:d, color:'var(--c-appt)', title:a.title, sub:'นัด · '+fmtDate(d)+' '+fmtTime(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('appts',a) }); });
   Store.all('exams').forEach(e=>{ const d=new Date(e.at); if(dDays(d)<0) return;
-    out.push({ when:d, color:'var(--exam)', title:e.subject, sub:'สอบ · '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('exams',e) }); });
+    out.push({ when:d, kind:'exam', color:'var(--exam)', title:e.subject, sub:'สอบ · '+fmtDate(d)+' '+fmtTime(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('exams',e) }); });
   Store.all('occasions').forEach(o=>{ const d=nextOccur(o);
     out.push({ when:d, color:'var(--routine)', title:o.title, sub:(o.repeat==='monthly'?'ทุกเดือน':'ทุกปี')+' · '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('occasions',o) }); });
   Store.all('routines').filter(r=>!r.done).forEach(r=>{
@@ -1148,7 +1238,7 @@ function agendaItems(){
   return out.sort((a,b)=> a.when - b.when);
 }
 function agendaRow(it){
-  const row = el('div','ag-row');
+  const row = el('div','ag-row' + (it.kind === 'exam' ? ' exam' : ''));
   row.innerHTML = `<span class="ag-dot" style="background:${it.color}"></span><div class="ag-mid"><div class="ag-t">${esc(it.title)}</div><div class="ag-s">${it.sub}</div></div><span class="ag-c${it.soon?' soon':''}">${it.count}</span>`;
   if (it.tap) row.onclick = it.tap;
   return row;
@@ -1272,18 +1362,19 @@ function esc(s){ return (s||'').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;'
 function examHero(e){
   const d = new Date(e.at), cd = countdown(e.at), n = dDays(d), past = cd.ms < 0;
   const word = past ? 'จบแล้ว' : n <= 0 ? 'วันนี้' : n === 1 ? 'พรุ่งนี้' : '';
-  const w = el('div','exam-hero');
+  const lbl = past ? 'สอบไปแล้ว' : n <= 0 ? 'สอบวันนี้' : n === 1 ? 'สอบพรุ่งนี้' : 'สอบที่ใกล้ถึง';
+  const w = el('div','exam-hero' + (past ? ' past' : ''));
   w.innerHTML = `<div class="eh-days${word ? ' word' : ''}"><b>${word || n}</b>${word ? '' : '<span>วัน</span>'}</div>
-    <div class="eh-body"><div class="lbl">${past ? 'สอบไปแล้ว' : 'สอบที่ใกล้ถึง'}</div>
+    <div class="eh-body"><div class="lbl">${!past && n <= 0 ? '<span class="eh-live"></span>' : ''}${lbl}</div>
       <div class="sub">${esc(e.subject)}</div>
       <div class="cd">${fmtDate(d)} ${fmtTime(d)} · ${cd.txt}${e.room ? ' · ' + esc(e.room) : ''}</div></div>`;
   w.onclick = () => openSheet('exams', e);
   return w;
 }
 function examCard(e){
-  const card = el('div','card'); card.append(accent('var(--exam)', 'exam'));
+  const card = el('div','card exam-card'); card.append(accent('var(--exam)', 'exam'));
   const b = el('div','body'); const t = el('div','title', esc(e.subject));
-  t.appendChild(el('span','pill exam','สอบ')); b.appendChild(t);
+  t.appendChild(el('span','pill exam-solid','สอบ')); b.appendChild(t);
   const d = new Date(e.at); const m = el('div','meta');
   m.innerHTML = `<span><b>${fmtDate(d)} ${fmtTime(d)}</b></span>` + (e.room?`<span>📍 ${esc(e.room)}</span>`:'') + (e.note?`<span>📝 ${esc(e.note)}</span>`:'');
   b.appendChild(m); card.appendChild(b);
@@ -1354,18 +1445,15 @@ function weekItemsFor(date, types){
   const appts = types.includes('appts') ? Store.all('appts').filter(a=>sameYMD(new Date(a.at),date)).map(a => {
     const d=new Date(a.at), s=d.getHours()+d.getMinutes()/60;
     return { s, e:(a.end && toH(a.end) > s ? toH(a.end) : s+1), title:'📌 '+esc(a.title), sub:fmtTime(d)+(a.end ? '–'+esc(a.end) : ''), color:'var(--soon)', data:['appts',a] }; }) : [];
-  let exams = types.includes('exams') ? Store.all('exams').filter(e=>sameYMD(new Date(e.at),date)).map(e => {
+  const wantExams = types.includes('exams');
+  let exams = (wantExams || types.includes('classes')) ? Store.all('exams').filter(e=>sameYMD(new Date(e.at),date)).map(e => {
     const d=new Date(e.at), s=d.getHours()+d.getMinutes()/60;
     return { s, e:s+1.5, title:'📝 '+esc(e.subject), sub:fmtTime(d), color:'var(--exam)', data:['exams',e] }; }) : [];
 
-  // ถ้าสอบชนเวลากับคาบเรียน → มาร์กคาบเรียนว่ามีสอบ แล้วซ่อนบล็อกสอบ (ไม่ให้ทับซ้ำ)
-  if (classes.length && exams.length) {
-    exams = exams.filter(ex => {
-      const hit = classes.filter(c => ex.s < c.e && ex.e > c.s);
-      if (hit.length) { hit.forEach(c => { c.exam = true; c.examData = ex.data; }); return false; }
-      return true;
-    });
-  }
+  // คาบที่มีสอบ (เวลาชนหรือวิชาเดียวกัน) → มาร์กคาบเรียน · บล็อกสอบที่เวลาชนคาบ → ซ่อน (ไม่ให้ทับซ้ำ)
+  classes.forEach(c => { const exs = classExams(c.data[1], date); if (exs.length) { c.exam = true; c.examData = ['exams', exs[0]]; c.examTime = fmtTime(new Date(exs[0].at)); } });
+  if (classes.length && exams.length) exams = exams.filter(ex => !classes.some(c => ex.s < c.e && ex.e > c.s));
+  if (!wantExams) exams = [];
   return [...classes, ...routines, ...appts, ...exams];
 }
 const WK_LEG = { classes:['var(--primary)','เรียน'], routines:['var(--routine)','กิจวัตร'], appts:['var(--soon)','นัด'], exams:['var(--exam)','สอบ'] };
@@ -1415,11 +1503,12 @@ function buildWeekGrid(types, extraChrome, showLegend, rerender) {
   const today = new Date();
   let any=false;
 
-  const blockHTML = (it) => `<b>${it.title}</b><small>${it.sub}</small>` + (it.exam ? `<span class="exam-tag">📝 มีสอบ</span>` : '');
+  const blockHTML = (it) => `<b>${it.title}</b><small>${it.sub}</small>` + (it.exam ? `<span class="exam-tag">📝 สอบ ${it.examTime || ''}</span>` : '');
   const wireBlock = (blk, it) => {
     blk.style.setProperty('--c', it.color);
     blk.innerHTML = blockHTML(it);
     if (it.done) blk.style.opacity = '.5';
+    if (it.data[0] === 'exams') blk.classList.add('is-exam');
     if (it.exam) { blk.classList.add('has-exam'); blk.onclick=()=>openSheet('exams', it.examData[1]); }
     else blk.onclick=()=>openSheet(it.data[0], it.data[1]);
   };
@@ -1568,38 +1657,59 @@ let projQuery = '';
 function renderProj() {
   const box = $('#projContent'); const focus = keepFocus('projSearch'); box.innerHTML = '';
   const all = Store.all('projects');
-  if (!all.length) { box.appendChild(empty('🚀','ยังไม่มีโปรเจกต์ — กดปุ่ม + จดไอเดียที่อยากทำ เช่น ทำแอป แต่งเพลง')); return; }
-  box.appendChild(searchBar('projSearch', 'ค้นหาโปรเจกต์ / บันทึกไอเดีย', projQuery, q => { projQuery = q; renderProjList(); }));
+  if (all.length) box.appendChild(searchBar('projSearch', 'ค้นหาโปรเจกต์ / บันทึกไอเดีย', projQuery, q => { projQuery = q; renderProjList(); }));
   const list = el('div'); list.id = 'projList'; box.appendChild(list);
   renderProjList();
   restoreFocus('projSearch', focus);
 }
+// กลุ่มโปรเจกต์: มือถือ = แถบสลับทีละกลุ่ม · คอม = 3 คอลัมน์เรียงกัน
+const PGROUPS = [['idea','ไอเดีย','var(--routine)','ยังไม่มีไอเดีย','+ เพิ่มไอเดีย'], ['doing','กำลังทำ','var(--soon)','ยังไม่มีงานที่กำลังทำ','+ เพิ่มงานที่กำลังทำ'],
+                 ['done','เสร็จแล้ว','var(--primary)','ยังไม่มีงานที่เสร็จ','+ เพิ่มงานที่เสร็จแล้ว']];
+let projCol = (() => { try { return localStorage.getItem('planner.projCol') || 'doing'; } catch { return 'doing'; } })();
+const projGroupOf = p => PSTAT[p.status] ? p.status : 'idea';
 function renderProjList() {
   const box = $('#projList'); if (!box) return; box.innerHTML = '';
   const all = Store.all('projects');
-  const order = { doing:0, idea:1, done:2 };
-  const sorted = all.slice().sort((a,b)=> (order[a.status]??1)-(order[b.status]??1));
-  const active = sorted.filter(p=>p.status!=='done').sort((a,b)=> (a.order??1e9)-(b.order??1e9) || (order[a.status]??1)-(order[b.status]??1));
-  const done = sorted.filter(p=>p.status==='done');
+  const byOrder = (a, b) => (a.order ?? 1e9) - (b.order ?? 1e9);
   const q = projQuery.trim();
-  if (q) {   // ค้นหา: ไม่ให้เลื่อนลำดับระหว่างกรอง (กันลำดับเพี้ยน)
-    const hits = [...active, ...done].filter(p => matchQ(q, p.title, p.note, (PSTAT[p.status]||PSTAT.idea)[1], (p.ideas||[]).map(x=>x.text)));
+  if (q) {   // ค้นหา: รวมทุกกลุ่ม ไม่ให้เลื่อนลำดับระหว่างกรอง
+    const gi = s => PGROUPS.findIndex(g => g[0] === s);
+    const hits = all.slice().sort((a, b) => gi(projGroupOf(a)) - gi(projGroupOf(b)) || byOrder(a, b))
+      .filter(p => matchQ(q, p.title, p.note, (PSTAT[p.status]||PSTAT.idea)[1], (p.ideas||[]).map(x=>x.text)));
     box.appendChild(el('div','search-count', hits.length ? `พบ ${hits.length} โปรเจกต์` : ''));
     if (!hits.length) box.appendChild(empty('🔍', `ไม่พบโปรเจกต์หรือบันทึกที่มีคำว่า “${esc(q)}”`));
     hits.forEach(p => box.appendChild(projCard(p, q)));
     return;
   }
-  if (active.length){ box.appendChild(eyebrow('กำลังทำ / ไอเดีย', active.length)); active.forEach(p=>box.appendChild(reorderWrap(projCard(p), 'projects', active, p.id))); }
-  if (done.length){ box.appendChild(eyebrow('เสร็จแล้ว', done.length)); done.forEach(p=>box.appendChild(projCard(p))); }
+  if (!PGROUPS.some(g => g[0] === projCol)) projCol = 'doing';
+  const seg = el('div','view-seg proj-seg');
+  PGROUPS.forEach(([s, label]) => {
+    const b = el('button', s === projCol ? 'on' : '', `${label}<span class="n">${all.filter(p => projGroupOf(p) === s).length}</span>`);
+    b.onclick = () => { projCol = s; try { localStorage.setItem('planner.projCol', s); } catch {} renderProjList(); };
+    seg.appendChild(b);
+  });
+  box.appendChild(seg);
+  const board = el('div','proj-board');
+  PGROUPS.forEach(([s, label, color, emptyTxt, addTxt]) => {
+    const list = all.filter(p => projGroupOf(p) === s).sort(byOrder);
+    const col = el('div','proj-col' + (s === projCol ? ' on' : '')); col.dataset.s = s;
+    col.appendChild(el('div','proj-col-head', `<i style="background:${color}"></i>${label}<span class="count">${list.length}</span>`));
+    if (!list.length) col.appendChild(el('div','proj-col-empty', emptyTxt));
+    list.forEach(p => col.appendChild(reorderWrap(projCard(p, '', true), 'projects', list, p.id)));
+    const add = el('button','ck-add proj-add', addTxt); add.onclick = () => openSheet('projects', { status: s });
+    col.appendChild(add);
+    board.appendChild(col);
+  });
+  box.appendChild(board);
 }
-function projCard(p, q) {
+function projCard(p, q, inBoard) {
   const card = el('div','proj-card');
   const [k,l] = PSTAT[p.status] || PSTAT.idea;
   const ideas = p.ideas || [];
   const head = el('div','ph');
   const pt = el('div','pt', esc(p.title)); if (p.color) pt.style.color = p.color;
   head.appendChild(pt);
-  head.appendChild(el('span','pstat '+k, l));
+  if (!inBoard) head.appendChild(el('span','pstat '+k, l));   // ในคอลัมน์รู้สถานะอยู่แล้ว
   card.appendChild(head);
   if (p.note) card.appendChild(el('div','pnote', esc(p.note)));
   if (ideas.length){
@@ -1623,8 +1733,10 @@ function renderProjectSheet(p, editIdx) {
   const [k,l] = PSTAT[p.status] || PSTAT.idea;
   const noteArr = p.ideas || [];
   const ideas = noteArr.slice().reverse();
-  let h = `<h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap${p.color?';color:'+p.color:''}">${esc(p.title)} <span class="pstat ${k}">${l}</span></h2>`;
+  let h = `<h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap${p.color?';color:'+p.color:''}">${esc(p.title)}</h2>`;
   if (p.note) h += `<p class="sync-note">${esc(p.note)}</p>`;
+  h += `<div class="seg" id="projStatusSeg" role="group" aria-label="สถานะ">${PGROUPS.map(([s]) =>
+         `<button type="button" data-s="${s}" class="${projGroupOf(p) === s ? 'on' : ''}">${PSTAT[s][1]}</button>`).join('')}</div>`;
 
   h += `<div class="idea-add"><textarea id="ideaInput" placeholder="สะสมไอเดีย / จดเพิ่ม / วางลิงก์ได้..." rows="2" maxlength="1000"></textarea><button id="ideaAdd">+ เพิ่มบันทึก</button></div>`;
   h += `<div id="ideaList">`;
@@ -1642,10 +1754,15 @@ function renderProjectSheet(p, editIdx) {
     }
   });
   h += `</div>`;
-  h += `<button class="save" id="projEdit" style="background:var(--ink-soft)">แก้ไขชื่อ/สถานะ</button>`;
+  h += `<button class="save" id="projEdit" style="background:var(--ink-soft)">แก้ไขชื่อ / รายละเอียด</button>`;
   h += `<button class="del-btn" id="projDel">ลบโปรเจกต์นี้</button>`;
   showRawSheet(h);
 
+  $('#projStatusSeg').querySelectorAll('button').forEach(b => b.onclick = () => {
+    if (b.dataset.s === projGroupOf(p)) return;
+    Store.update('projects', id, { status: b.dataset.s });
+    renderProjectSheet({ ...p, status: b.dataset.s }, editIdx);
+  });
   const addIdea = () => {
     const t = $('#ideaInput').value.trim(); if (!t) return;
     const ideasNew = [...noteArr, { at:new Date().toISOString(), text:t }];
@@ -1727,12 +1844,19 @@ function renderCal(){
     const cell = el('div','cal-cell' + (inMonth?'':' dim') + (sameYMD(d,today)?' today':'') + (sameYMD(d,selDate)?' sel':''));
     cell.appendChild(el('div','dn', String(d.getDate())));
     const {hw, ap, ex} = itemsOn(d);
-    const occHere = Store.all('occasions').some(o=>occursOn(o, d));
-    const dayTask = Store.all('routines').some(r => {
+    if (ex.length) cell.classList.add('has-exam');
+    const occList = Store.all('occasions').filter(o=>occursOn(o, d)), occHere = occList.length > 0;
+    const dayTasks = Store.all('routines').filter(r => {
       if (r.countdown) return false;
       if (r.repeat==='monthly') return domOn(r.dom, d);
       return r.date && !r.done && sameYMD(new Date(r.date+'T00:00:00'), d);
-    });
+    }), dayTask = dayTasks.length > 0;
+    // ชื่อรายการในช่อง (โชว์บนคอม): สอบก่อน แล้วการบ้าน นัด วันสำคัญ สิ่งที่ต้องทำ
+    const byAt = (a, b) => new Date(a.at || a.dueAt) - new Date(b.at || b.dueAt);
+    const chips = [ ...ex.slice().sort(byAt).map(e => ['ex', 'สอบ ' + e.subject]),
+      ...hw.slice().sort(byAt).map(x => ['hw' + (x.done ? ' done' : ''), x.title]),
+      ...ap.slice().sort(byAt).map(a => ['ap', fmtTime(new Date(a.at)) + ' ' + a.title]),
+      ...occList.map(o => ['oc', o.title]), ...dayTasks.map(r => ['rt', r.title]) ];
     const weekTask = Store.all('routines').some(r => r.countdown && !r.done && r.date && sameWeek(d, new Date(r.date+'T00:00:00')));
     if (hw.length || ap.length || ex.length || occHere || dayTask || weekTask){
       const dots = el('div','cal-dots');
@@ -1743,6 +1867,12 @@ function renderCal(){
       if (dayTask) dots.appendChild(el('i','rt'));
       if (weekTask) dots.appendChild(el('i','rtw'));
       cell.appendChild(dots);
+    }
+    if (chips.length) {
+      const cc = el('div','cal-chips'), MAXC = 3, shown = chips.length > MAXC ? MAXC - 1 : MAXC;
+      chips.slice(0, shown).forEach(([k, t]) => { const s = el('span', 'cc ' + k, esc(t)); s.title = t; cc.appendChild(s); });
+      if (chips.length > shown) cc.appendChild(el('span','cc more', `+ อีก ${chips.length - shown}`));
+      cell.appendChild(cc);
     }
     const dd = new Date(d);
     cell.onclick = ()=>{ calSel = startOfDay(dd).toISOString(); calM = dd.getMonth(); calY = dd.getFullYear(); renderCal(); };
@@ -1769,7 +1899,7 @@ function renderCal(){
     box.appendChild(empty('🗓️','วันนี้ยังว่าง — กดปุ่มด้านบนเพื่อเพิ่ม'));
   } else {
     if (ex.length){ box.appendChild(eyebrow('สอบ', ex.length)); ex.sort((a,b)=>new Date(a.at)-new Date(b.at)).forEach(e=>box.appendChild(examCard(e))); }
-    if (classes.length){ box.appendChild(eyebrow('คาบเรียน', classes.length)); classes.forEach(c=>box.appendChild(classCard(c, true))); }
+    if (classes.length){ box.appendChild(eyebrow('คาบเรียน', classes.length)); classes.forEach(c=>box.appendChild(classCard(c, true, '', sd))); }
     const weekTs = rts.filter(r=>r.countdown), dayTs = rts.filter(r=>!r.countdown);
     if (weekTs.length){ box.appendChild(eyebrow('สิ่งที่ต้องทำภายในสัปดาห์นี้', weekTs.length)); weekTs.forEach(r=>box.appendChild(todoCard(r))); }
     if (dayTs.length){ box.appendChild(eyebrow('สิ่งที่ต้องทำ', dayTs.length)); dayTs.forEach(r=>box.appendChild(todoCard(r))); }
@@ -2631,9 +2761,12 @@ function openMoreSheet(){
   }).join('') + '</div>');
   $('#sheetBody').querySelectorAll('.more-row').forEach(b => b.onclick = () => { closeSheet(); switchTab(b.dataset.tab); });
 }
+const VIEW_W = { today:'narrow', hw:'narrow', appt:'narrow', cal:'wide', week:'wide' };
+function applyViewWidth(id){ const a = document.querySelector('.app'); if (a) a.dataset.w = VIEW_W[id] || ''; }
 function switchTab(id) {
   if (id === 'note' && curTab === 'note' && noteOpen) { noteOpen = null; noteQuery = ''; }
   curTab = id;
+  applyViewWidth(id);
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   $('#view-'+id).classList.add('active');
   syncTabs();
@@ -2651,7 +2784,7 @@ function openSheet(coll, item) {
   // coll = ชนิดที่จะเพิ่ม/แก้; item = ข้อมูลเดิม (ถ้าแก้)
   sheetState = { coll, id: item?.id || null, color: item?.color ?? (coll==='classes' ? COLOR_OPTS[0] : ''),
                  days: item?.days ? [...item.days] : [1,2,3,4,5], online: item?.online || false,
-                 status: item?.status || 'idea',
+                 status: item?.status || (coll === 'projects' && curTab === 'proj' && window.matchMedia && matchMedia('(max-width: 899px)').matches ? projCol : 'idea'),
                  repeat: item?.repeat || (item?.date ? 'once' : 'weekly'), done: item?.done || false,
                  timeMode: item?.countdown ? 'week' : (item?.allDay ? 'allday' : 'time'),
                  weekWhich: (item?.countdown && item?.date && new Date(item.date+'T23:59:00') > endOfWeek(new Date(),0)) ? 'next' : 'this',
@@ -3481,6 +3614,7 @@ if (window.matchMedia) try { matchMedia('(prefers-color-scheme: dark)').addEvent
 $('#todayLabel').textContent = fmtDate(new Date());
 $('#sideDate').textContent = `${TH_DAY[new Date().getDay()]} ${new Date().getDate()} ${TH_MON_FULL[new Date().getMonth()]} ${new Date().getFullYear()+543}`;
 buildTabs();
+applyViewWidth(curTab);
 const quickAdd = () => openSheet(curTab==='class'?'classes':curTab==='hw'?'homework':curTab==='proj'?'projects':curTab==='note'?'notes':(curTab==='appt'||curTab==='cal'||curTab==='week')?'appts':'homework', null);
 $('#fab').onclick = quickAdd;
 $('#addBtn').onclick = quickAdd;

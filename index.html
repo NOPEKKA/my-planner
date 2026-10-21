@@ -699,6 +699,7 @@
     .cc.ex { background: linear-gradient(135deg, var(--exam-a), var(--exam-b)); color: var(--on-exam); }
     .cc.hw { background: color-mix(in srgb, var(--c-hw) 15%, var(--card)); color: color-mix(in srgb, var(--c-hw) 75%, var(--ink)); }
     .cc.ap { background: var(--amber-soft); color: var(--soon-ink); }
+    .cc.ap.trip { background: var(--soon); color: #2A1A00; }
     .cc.oc { background: var(--routine-soft); color: var(--routine); }
     .cc.rt { background: var(--field); color: var(--ink-soft); }
     .cc.done { text-decoration: line-through; opacity: .6; }
@@ -1033,7 +1034,8 @@ function renderTodayInner() {
   const H = 3600000, nowMs = now.getTime();
   const dueSoon = [];
   Store.all('homework').filter(h=>!h.done).forEach(h => dueSoon.push({ id:h.id, ms:new Date(h.dueAt)-nowMs, card:()=>hwCard(h) }));
-  Store.all('appts').forEach(a => { const ms = new Date(a.at)-nowMs; if (ms > -12*H) dueSoon.push({ id:a.id, ms, card:()=>apptCard(a) }); });
+  Store.all('appts').forEach(a => { let ms = new Date(a.at)-nowMs; if (ms < 0 && isTrip(a) && nowMs <= apptLastMs(a)) ms = 0;   // ทริปที่กำลังไป = อยู่ในวันนี้ตลอด
+    if (ms > -12*H) dueSoon.push({ id:a.id, ms, card:()=>apptCard(a) }); });
   dueSoon.sort((x,y)=> x.ms - y.ms);
   const soonToday = dueSoon.filter(x => x.ms <= 24*H);
   const soonTmr = dueSoon.filter(x => x.ms > 24*H && x.ms <= 48*H);
@@ -1219,8 +1221,13 @@ function agendaItems(){
   const out = [];
   Store.all('homework').filter(h=>!h.done).forEach(h=>{ const d=new Date(h.dueAt);
     out.push({ when:d, color:'var(--c-hw)', title:h.title, sub:'การบ้าน · ส่ง '+fmtDate(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('homework',h) }); });
-  Store.all('appts').forEach(a=>{ const d=new Date(a.at); if(dDays(d)<0) return;
-    out.push({ when:d, color:'var(--c-appt)', title:a.title, sub:'นัด · '+fmtDate(d)+' '+fmtTime(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('appts',a) }); });
+  Store.all('appts').forEach(a=>{ const d=new Date(a.at), trip=isTrip(a);
+    if (trip && dDays(d)<0 && Date.now()<=apptLastMs(a)) {   // ทริปที่กำลังไป
+      const t = tripDayNo(a, new Date());
+      out.push({ when:startOfDay(new Date()), color:'var(--c-appt)', title:'✈️ '+a.title, sub:'ทริป · '+tripRange(a), count:`วันที่ ${t.n}/${t.total}`, soon:true, tap:()=>openSheet('appts',a) });
+      return; }
+    if(dDays(d)<0) return;
+    out.push({ when:d, color:'var(--c-appt)', title:(trip?'✈️ ':'')+a.title, sub:trip ? 'ทริป · '+tripRange(a) : 'นัด · '+fmtDate(d)+' '+fmtTime(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('appts',a) }); });
   Store.all('exams').forEach(e=>{ const d=new Date(e.at); if(dDays(d)<0) return;
     out.push({ when:d, kind:'exam', color:'var(--exam)', title:e.subject, sub:'สอบ · '+fmtDate(d)+' '+fmtTime(d), count:dCount(d), soon:dDays(d)<=7, tap:()=>openSheet('exams',e) }); });
   Store.all('occasions').forEach(o=>{ const d=nextOccur(o);
@@ -1333,20 +1340,35 @@ function moveHw(id, dir){
   list.forEach((h,idx)=>{ if (h.order !== idx) Store.update('homework', h.id, { order: idx }); });
 }
 
+/* ---------- นัดหลายวัน (ทริป): appt.endDate = วันสุดท้าย ---------- */
+function apptEndDay(a){ if (!a.endDate) return null; const s = startOfDay(new Date(a.at)), e = new Date(a.endDate + 'T00:00:00'); return e > s ? e : null; }
+function isTrip(a){ return !!apptEndDay(a); }
+function apptOn(a, date){ const s = startOfDay(new Date(a.at)), e = apptEndDay(a) || s, d = startOfDay(date); return d >= s && d <= e; }
+function apptLastMs(a){ const e = apptEndDay(a); return e ? e.getTime() + 86400000 - 1 : new Date(a.at).getTime(); }
+function tripDayNo(a, date){ const s = startOfDay(new Date(a.at)), e = apptEndDay(a); return { n: Math.round((startOfDay(date) - s) / 86400000) + 1, total: Math.round((e - s) / 86400000) + 1 }; }
+function tripRange(a){ return fmtDate(new Date(a.at)) + ' – ' + fmtDate(apptEndDay(a)); }
+function tripStatus(a){
+  const now = Date.now();
+  if (now < new Date(a.at).getTime()) return countdown(a.at);
+  if (now <= apptLastMs(a)) { const t = tripDayNo(a, new Date()); return { cls: 'pill soon', txt: `กำลังไป · วันที่ ${t.n}/${t.total}` }; }
+  return { cls: 'pill over', txt: 'จบแล้ว' };
+}
 function apptCard(a) {
   const card = el('div','card');
   card.append(accent('var(--c-appt)', 'appt'));
   const b = el('div','body');
-  const t = el('div','title', esc(a.title));
+  const trip = isTrip(a);
+  const t = el('div','title', (trip ? '✈️ ' : '') + esc(a.title));
   if (a.online) t.appendChild(el('span','pill online','ออนไลน์'));
   b.appendChild(t);
   const d = new Date(a.at);
   const m = el('div','meta');
-  m.innerHTML = `<span><b>${fmtDate(d)} ${fmtTime(d)}${a.end ? '–' + esc(a.end) : ''}</b></span>` +
+  m.innerHTML = (trip ? `<span><b>${tripRange(a)} · ${tripDayNo(a, apptEndDay(a)).total} วัน</b></span>`
+                      : `<span><b>${fmtDate(d)} ${fmtTime(d)}${a.end ? '–' + esc(a.end) : ''}</b></span>`) +
                 (a.online ? onlineMeta(a, 'เข้าห้อง') : (a.place ? `<span>📍 ${esc(a.place)}</span>` : '')) +
                 (a.note ? `<span>📝 ${esc(a.note)}</span>` : '');
   b.appendChild(m); card.appendChild(b);
-  const cd = countdown(a.at); t.appendChild(el('span', cd.cls, cd.txt));
+  const cd = trip ? tripStatus(a) : countdown(a.at); t.appendChild(el('span', cd.cls, cd.txt));
   card.appendChild(actions('appts', a));
   return card;
 }
@@ -1440,8 +1462,10 @@ function weekItemsFor(date, types){
       return (r.days||[]).includes(dow);
     }).map(r => {
     const s = toH(r.time); return { s, e:s+0.75, title:'🔁 '+esc(r.title), sub:r.time, color:'var(--routine)', data:['routines',r], done:!!r.done }; }) : [];
-  const appts = types.includes('appts') ? Store.all('appts').filter(a=>sameYMD(new Date(a.at),date)).map(a => {
+  const appts = types.includes('appts') ? Store.all('appts').filter(a=>apptOn(a, date)).map(a => {
     const d=new Date(a.at), s=d.getHours()+d.getMinutes()/60;
+    if (isTrip(a)) { const t = tripDayNo(a, date);
+      return { s, e:s+1, title:'✈️ '+esc(a.title), sub:`วันที่ ${t.n}/${t.total}`, color:'var(--soon)', data:['appts',a] }; }
     return { s, e:(a.end && toH(a.end) > s ? toH(a.end) : s+1), title:'📌 '+esc(a.title), sub:fmtTime(d)+(a.end ? '–'+esc(a.end) : ''), color:'var(--soon)', data:['appts',a] }; }) : [];
   const wantExams = types.includes('exams');
   let exams = (wantExams || types.includes('classes')) ? Store.all('exams').filter(e=>sameYMD(new Date(e.at),date)).map(e => {
@@ -1641,7 +1665,7 @@ function renderAppt() {
   const box = $('#apptContent'); box.innerHTML = '';
   const now = Date.now();
   const list = Store.all('appts').sort((a,b)=>new Date(a.at)-new Date(b.at));
-  const upcoming = list.filter(a=>new Date(a.at)>=now), past = list.filter(a=>new Date(a.at)<now).reverse();
+  const upcoming = list.filter(a=>apptLastMs(a)>=now), past = list.filter(a=>apptLastMs(a)<now).reverse();
   if (!list.length) { box.appendChild(empty('📌','ยังไม่มีนัด — กดปุ่ม + เพื่อเพิ่มนัดหมาย')); return; }
   box.appendChild(eyebrow('กำลังจะถึง', upcoming.length));
   if (!upcoming.length) box.appendChild(empty('✨','ไม่มีนัดที่กำลังจะถึง'));
@@ -1799,7 +1823,7 @@ const ARROW_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stro
 function sameYMD(a, b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
 function itemsOn(date){
   return { hw: Store.all('homework').filter(h => sameYMD(new Date(h.dueAt), date)),
-           ap: Store.all('appts').filter(a => sameYMD(new Date(a.at), date)),
+           ap: Store.all('appts').filter(a => apptOn(a, date)),
            ex: Store.all('exams').filter(e => sameYMD(new Date(e.at), date)) };
 }
 function dayISO(d, time){ const [hh,mm]=time.split(':'); const x=new Date(d); x.setHours(+hh,+mm,0,0); return x.toISOString(); }
@@ -1853,7 +1877,7 @@ function renderCal(){
     const byAt = (a, b) => new Date(a.at || a.dueAt) - new Date(b.at || b.dueAt);
     const chips = [ ...ex.slice().sort(byAt).map(e => ['ex', 'สอบ ' + e.subject]),
       ...hw.slice().sort(byAt).map(x => ['hw' + (x.done ? ' done' : ''), x.title]),
-      ...ap.slice().sort(byAt).map(a => ['ap', fmtTime(new Date(a.at)) + ' ' + a.title]),
+      ...ap.slice().sort(byAt).map(a => isTrip(a) ? ['ap trip', '✈ ' + a.title] : ['ap', fmtTime(new Date(a.at)) + ' ' + a.title]),
       ...occList.map(o => ['oc', o.title]), ...dayTasks.map(r => ['rt', r.title]) ];
     const weekTask = Store.all('routines').some(r => r.countdown && !r.done && r.date && sameWeek(d, new Date(r.date+'T00:00:00')));
     if (hw.length || ap.length || ex.length || occHere || dayTask || weekTask){
@@ -2788,6 +2812,7 @@ function openSheet(coll, item) {
                  weekWhich: (item?.countdown && item?.date && new Date(item.date+'T23:59:00') > endOfWeek(new Date(),0)) ? 'next' : 'this',
                  occRepeat: item?.repeat || 'yearly',
                  isFolder: !!item?.isFolder,
+                 multi: !!(item && coll === 'appts' && isTrip(item)),
                  parent: item?.id ? (item.parent || '') : (coll === 'notes' && curTab === 'note' && noteOpen ? noteOpen : ''),   // โน้ตใหม่ลงโฟลเดอร์ที่เปิดอยู่
                  topic: item?.id ? (item.topic || '') : (noteTopic !== 'all' && !noteOpen ? noteTopic : ''),
                  checklist: item?.checklist ? item.checklist.map(x=>({...x})) : [] };
@@ -2897,7 +2922,10 @@ function renderSheet(item) {
   } else if (coll === 'appts') {
     inner += fld('ชื่อนัด', `<input class="inp" id="f_title" value="${attr(item?.title)}" placeholder="เช่น หาหมอฟัน / ติวกลุ่ม">`);
     inner += `<div class="two">${fld('วันที่', `<input class="inp" type="date" id="f_date" value="${dpart(item?.at)}">`)}${fld('เวลา', `<input class="inp" type="time" id="f_time" value="${tpart(item?.at,'09:00')}">`)}</div>`;
-    inner += fld('ถึง (ถ้ามี)', `<input class="inp" type="time" id="f_end" value="${attr(item?.end || '')}">`);
+    inner += `<label class="fld toggle-row"><span>ไปหลายวัน (เที่ยวต่อเนื่อง / ทริป)</span>
+            <button type="button" id="f_multi" class="switch ${sheetState.multi?'on':''}" role="switch" aria-checked="${sheetState.multi}"><span class="knob"></span></button></label>
+          <div id="multiWrap" class="${sheetState.multi?'':'hidden'}">${fld('ถึงวันที่', `<input class="inp" type="date" id="f_enddate" value="${item?.endDate || dpart(item?.at)}" min="${dpart(item?.at)}">`)}</div>`;
+    inner += `<div id="endTimeWrap" class="${sheetState.multi?'hidden':''}">${fld('ถึง (ถ้ามี)', `<input class="inp" type="time" id="f_end" value="${attr(item?.end || '')}">`)}</div>`;
     inner += fld('สถานที่ (ถ้ามี)', `<input class="inp" id="f_place" value="${attr(item?.place)}" placeholder="เช่น คลินิก / ห้องสมุด">`);
     inner += onlineFields('นัดออนไลน์', item?.link);
     inner += fld('โน้ต (ถ้ามี)', `<textarea class="inp" id="f_note" placeholder="รายละเอียดเพิ่มเติม">${esc(item?.note)}</textarea>`);
@@ -2930,7 +2958,7 @@ function renderSheet(item) {
     b.classList.toggle('on', b.dataset.c === coll);
     b.onclick = () => { sheetState.coll = b.dataset.c; renderSheet(null); };
   });
-  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindStatusPick(); bindRepeat(); bindTimeMode(); bindChecklist(); bindSections(); bindOccRepeat(); bindFolderToggle();
+  bindDaypick(); bindSwatch(); bindOnlineToggle(); bindMultiDay(); bindStatusPick(); bindRepeat(); bindTimeMode(); bindChecklist(); bindSections(); bindOccRepeat(); bindFolderToggle();
   $('#saveBtn').onclick = save;
   { const cb = $('#calBtn'); if (cb) cb.onclick = () => exportItemICS(coll, item); }
   if (editing) $('#delBtn').onclick = () => askConfirm('ลบรายการนี้?', 'ลบ', () => { Store.remove(coll, sheetState.id); closeSheet(); });
@@ -2961,6 +2989,18 @@ function bindFolderToggle(){
     sw.classList.toggle('on', sheetState.isFolder);
     sw.setAttribute('aria-checked', sheetState.isFolder);
   };
+}
+function bindMultiDay(){
+  const sw = $('#f_multi'); if (!sw) return;
+  const d = $('#f_date'), e = $('#f_enddate');
+  const sync = () => { e.min = d.value; if (e.value < d.value) e.value = d.value; };
+  sw.onclick = () => {
+    sheetState.multi = !sheetState.multi;
+    sw.classList.toggle('on', sheetState.multi); sw.setAttribute('aria-checked', sheetState.multi);
+    $('#multiWrap').classList.toggle('hidden', !sheetState.multi); $('#endTimeWrap').classList.toggle('hidden', sheetState.multi);
+    if (sheetState.multi && e.value <= d.value) { const n = new Date(d.value + 'T00:00:00'); n.setDate(n.getDate() + 1); e.value = ymd(n); }
+  };
+  d.addEventListener('change', sync);
 }
 function bindOnlineToggle(){
   const sw = $('#f_online'); if(!sw) return;
@@ -3366,8 +3406,11 @@ function save() {
     id ? Store.update(c, id, o) : Store.add(c, {...o, done:false});
   } else if (c === 'appts') {
     if (!v('#f_title')) return warn('ใส่ชื่อนัดก่อนนะ');
+    const d1 = $('#f_date').value, d2 = sheetState.multi && $('#f_enddate') ? $('#f_enddate').value : '';
+    if (d2 && d2 < d1) return warn('วันสุดท้ายต้องไม่ก่อนวันเริ่มนะ');
+    const trip = !!d2 && d2 > d1;   // วันเริ่ม = วันสุดท้าย → นับเป็นนัดวันเดียว
     const o = { title:v('#f_title'), place:v('#f_place'), note:v('#f_note'), online:sheetState.online, link:v('#f_link'),
-                at:new Date(`${$('#f_date').value}T${$('#f_time').value}`).toISOString(), end: $('#f_end') ? $('#f_end').value : '' };
+                at:new Date(`${d1}T${$('#f_time').value}`).toISOString(), end: !trip && $('#f_end') ? $('#f_end').value : '', endDate: trip ? d2 : '' };
     id ? Store.update(c, id, o) : Store.add(c, o);
   } else if (c === 'exams') {
     if (!v('#f_subject')) return warn('ใส่วิชาที่สอบก่อนนะ');
@@ -3440,6 +3483,8 @@ function itemToEvent(type, it){
       summary:'📝 สอบ: '+(it.subject||''), desc:it.note||'', location:it.room||'', alarms:['-P3D','-P1D','-PT1H'] }; }
   const s=new Date(it.at); // appts
   const eAt = new Date(s); if (it.end) { const [eh, em] = it.end.split(':').map(Number); eAt.setHours(eh, em, 0, 0); }
+  if (isTrip(it)) { const ed = apptEndDay(it); ed.setHours(23, 59, 0, 0); return { uid:it.id+'@planner', start:s, end:ed,
+    summary:'✈️ '+(it.title||''), desc:it.note||'', location:it.place||(it.online?'ออนไลน์':''), alarms:['-P1D'] }; }
   return { uid:it.id+'@planner', start:s, end: eAt > s ? eAt : new Date(s.getTime()+3600000),
     summary:'📌 '+(it.title||''), desc:it.note||'', location:it.online?'ออนไลน์':'', alarms:['-P1D','-PT1H'] };
 }
@@ -3451,7 +3496,7 @@ function exportAllICS(){
   const cut = Date.now() - 86400000, evs = [];
   Store.all('homework').filter(h=>!h.done && new Date(h.dueAt)>cut).forEach(h=>evs.push(itemToEvent('homework',h)));
   Store.all('exams').filter(e=>new Date(e.at)>cut).forEach(e=>evs.push(itemToEvent('exams',e)));
-  Store.all('appts').filter(a=>new Date(a.at)>cut).forEach(a=>evs.push(itemToEvent('appts',a)));
+  Store.all('appts').filter(a=>apptLastMs(a)>cut).forEach(a=>evs.push(itemToEvent('appts',a)));
   if (!evs.length) return warn('ยังไม่มีการบ้าน/นัด/สอบที่จะส่งออก');
   downloadICS('my-planner.ics', buildICS(evs));
   fire(`ส่งออก ${evs.length} รายการแล้ว`, 'เปิดไฟล์ที่ดาวน์โหลด แล้วเพิ่มลงปฏิทินของเครื่อง');
